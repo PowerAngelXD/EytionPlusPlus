@@ -1,10 +1,10 @@
 #include "eplex.h"
 #include <map>
 std::string epplex::Token::format(){
-    return "<val: " + this->content + ", tp: " + this->type + ", ln: " + std::to_string(this->line) + ", col: " + std::to_string(this->column) + ">";
+    return "(val: " + this->content + ", type" + this->type + ", detail_type: " + this->detail_type + ", ln: " + std::to_string(this->line) + ", col: " + std::to_string(this->column) + ")";
 }
 std::string epplex::Token::simply_format(){
-    return "(val: " + this->content + ", tp: " + this->type + ")";
+    return "(val: " + this->content + ", tp: " + this->detail_type + ")";
 }
 
 epplex::Token epplex::Lexer::Num() {
@@ -19,7 +19,7 @@ epplex::Token epplex::Lexer::Num() {
         ch = get();
     }
     put(ch);
-    return {str, "__NUMBER__", line, column};
+    return {str, "__NUMBER__", "__LITERAL__", line, column};
 }
 
 epplex::Token epplex::Lexer::Hex() {
@@ -30,7 +30,7 @@ epplex::Token epplex::Lexer::Hex() {
         ch = get();
     }
     put(ch);
-    return {str, "__HEXNUMBER__", line, column};
+    return {str, "__HEXNUMBER__", "__LITERAL__", line, column};
 }
 
 epplex::Token epplex::Lexer::Oct() {
@@ -41,7 +41,7 @@ epplex::Token epplex::Lexer::Oct() {
         ch = get();
     }
     put(ch);
-    return {str, "__OCTNUMBER__", line, column};
+    return {str, "__OCTNUMBER__", "__LITERAL__", line, column};
 }
 
 epplex::Token epplex::Lexer::OctHex() {
@@ -50,7 +50,7 @@ epplex::Token epplex::Lexer::OctHex() {
         epplex::Token t = Hex();
         std::string content;
         content += ch;
-        return {content + t.content, t.type, line, column};
+        return {content + t.content, t.detail_type, "__LITERAL__", line, column};
     }
     else {
         put(ch);
@@ -114,21 +114,21 @@ epplex::Token epplex::Lexer::Sign() { //符号
             put(ch);
     }
 
-    if (str == "=") return {str, "__SYMBOL__", line, column};
-    else if (str == ">") return {str, "__SYMBOL__", line, column};
-    else if (str == "<") return {str, "__SYMBOL__", line, column};
-    else if (str == "!") return {str, "__SYMBOL__", line, column};
-    else if (str == "&") return {str, "__SYMBOL__", line, column};
-    else if (str == "|") return {str, "__SYMBOL__", line, column};
-    else if (str == "==") return {str, "__SYMBOL__", line, column};
-    else if (str == "=>") return {str, "__SYMBOL__", line, column};
-    else if (str == ">=") return {str, "__SYMBOL__", line, column};
-    else if (str == "<=") return {str, "__SYMBOL__", line, column};
-    else if (str == "!=") return {str, "__SYMBOL__", line, column};
-    else if (str == "&&") return {str, "__SYMBOL__", line, column};
-    else if (str == "||") return {str, "__SYMBOL__", line, column};
-    else if (str == ">>") return {str, "__SYMBOL__", line, column};
-    else if (str == "<<") return {str, "__SYMBOL__", line, column};
+    if (str == "=") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
+    else if (str == ">") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
+    else if (str == "<") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
+    else if (str == "!") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
+    else if (str == "&") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
+    else if (str == "|") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
+    else if (str == "==") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
+    else if (str == "=>") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
+    else if (str == ">=") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
+    else if (str == "<=") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
+    else if (str == "!=") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
+    else if (str == "&&") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
+    else if (str == "||") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
+    else if (str == ">>") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
+    else if (str == "<<") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
     return {};
 }
 
@@ -142,8 +142,8 @@ epplex::Token epplex::Lexer::Identifier() {
     put(ch);
     std::vector keymap = {"out", "var", "const"};
     for(auto iden : keymap)
-        if (str == iden) {return {str, "__KEYWORD__", line, column};}
-    return {str, "__IDENTIFIER__", line, column};
+        if (str == iden) {return {str, "__KEYWORD__", "__IDENTIFIER__", line, column};}
+    return {str, "__IDENTIFIER__", "__IDENTIFIER__", line, column};
 }
 
 epplex::Token epplex::Lexer::String(){
@@ -155,7 +155,7 @@ epplex::Token epplex::Lexer::String(){
             str += ch;
             ch = get();
         }
-        return {str, "__STRING__", line, column};
+        return {str, "__STRING__", "__LITERAL__",line, column};
     }
     else if(sign == '\''){
         while (ch != '\''){
@@ -163,17 +163,18 @@ epplex::Token epplex::Lexer::String(){
             ch = get();
         }
         if(str.size() > 1) throw epperr::Epperr("TypeError", "It is too long as a 'char' type of data", line, column);
-        return {str, "__CHAR__", line, column};
+        return {str, "__CHAR__", "__LITERAL__",line, column};
     }
     return {"__NULLTOKEN__", "__NULLTOKEN__", 0, 0};
 }
 
 epplex::Token epplex::Lexer::Start() {
     if (input.peek() == EOF) { //以eof开头, 单词为eof
-        return {"eof", "__EOF__", line, column};
+        return {"eof", "__EOF__", "__LEXER__",line, column};
     }
     char ch = get();
-    if (ch >= '0' && ch <= '9') { //以0-9开头，必定为10进制数
+    if (ch == '\n' || ch == '\r' || ch == ' ' || ch == '\t');
+    else if (std::isdigit(ch)) { //以0-9开头，必定为10进制数
         put(ch);
         return Num();
     }
@@ -186,7 +187,6 @@ epplex::Token epplex::Lexer::Start() {
         Comment();
         return {};
     }
-    else if (ch == '\n' || ch == '\r' || ch == ' ' || ch == '\t');
     else if (isalpha(ch) || ch == '_') { //以字母或_开头,标识符
         put(ch);
         return Identifier();
@@ -194,39 +194,39 @@ epplex::Token epplex::Lexer::Start() {
     else {
         switch (ch) {
         case '+':
-            return {"+", "__SYMBOL__", line, column};
+            return {"+", "__SYMBOL__", "__SYMBOL__", line, column};
         case '-':
-            return {"-", "__SYMBOL__", line, column};
+            return {"-", "__SYMBOL__", "__SYMBOL__", line, column};
         case '*':
-            return {"*", "__SYMBOL__", line, column};
+            return {"*", "__SYMBOL__", "__SYMBOL__", line, column};
         case '/':
-            return {"/", "__SYMBOL__", line, column};
+            return {"/", "__SYMBOL__", "__SYMBOL__", line, column};
         case '%':
-            return {"%", "__SYMBOL__", line, column};
+            return {"%", "__SYMBOL__", "__SYMBOL__", line, column};
         case '{':
-            return {"{", "__SYMBOL__", line, column};
+            return {"{", "__SYMBOL__", "__SYMBOL__", line, column};
         case '}':
-            return {"}", "__SYMBOL__", line, column};
+            return {"}", "__SYMBOL__", "__SYMBOL__", line, column};
         case '[':
-            return {"[", "__SYMBOL__", line, column};
+            return {"[", "__SYMBOL__", "__SYMBOL__", line, column};
         case ']':
-            return {"]", "__SYMBOL__", line, column};
+            return {"]", "__SYMBOL__", "__SYMBOL__", line, column};
         case '(':
-            return {"(", "__SYMBOL__", line, column};
+            return {"(", "__SYMBOL__", "__SYMBOL__", line, column};
         case ')':
-            return {")", "__SYMBOL__", line, column};
+            return {")", "__SYMBOL__", "__SYMBOL__", line, column};
         case '^':
-            return {"^", "__SYMBOL__", line, column};
+            return {"^", "__SYMBOL__", "__SYMBOL__", line, column};
         case '$':
-            return {"$", "__SYMBOL__", line, column};
+            return {"$", "__SYMBOL__", "__SYMBOL__", line, column};
         case ':':
-            return {":", "__SYMBOL__", line, column}; //符号
+            return {":", "__SYMBOL__", "__SYMBOL__", line, column}; //符号
         case ';':
-            return {";", "__SYMBOL__", line, column};
+            return {";", "__SYMBOL__", "__SYMBOL__", line, column};
         case ',':
-            return {",", "__SYMBOL__", line, column};
+            return {",", "__SYMBOL__", "__SYMBOL__", line, column};
         case '.':
-            return {".", "__SYMBOL__", line, column};
+            return {".", "__SYMBOL__", "__SYMBOL__", line, column};
         case '=':
         case '>':
         case '<':
@@ -237,7 +237,7 @@ epplex::Token epplex::Lexer::Start() {
             return Sign();
         }
     }
-    return {"__NULLTOLEN__", "__NULLTOKEN__", 0, 0};
+    return {"__NULLTOLEN__", "__NULLTOKEN__", "__NULLTOKEN__",0, 0};
 }
 
 epplex::Lexer::Lexer(std::istream& input) : input(input), line(1), column(0) {}
@@ -264,13 +264,13 @@ std::vector<epplex::Token> epplex::Lexer::getTokenGroup(){
         Token t = Start(); //Start of token
         if (t.type == "__EOF__" || input.eof())
             break;
-        if (t.type !="__NONE__")
+        if (t.type !="__NULLTOKEN__")
             tg.push_back(t);
     }
     for(auto tok : tg){
         if(tok.type == "__NULLTOKEN__");
         else rtg.push_back(tok);
     }
-    rtg.push_back({"__EOF__", "__EOF__", 0, 0});
+    rtg.push_back({"__EOF__", "__EOF__", "__LEXER__", 0, 0});
     return rtg;
 }

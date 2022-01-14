@@ -18,6 +18,7 @@ namespace epplex{
     struct Token {
         std::string content;
         std::string type;
+        std::string detail_type;
         int line=1;
         int column=0;
 
