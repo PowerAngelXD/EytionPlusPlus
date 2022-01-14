@@ -3,7 +3,7 @@
 void cenv::Calculation::push(cenv::calc_unit cu){
     if (env.size() <= env_top) {
         for (int i = env.size() ; i <= env_top ; i ++)
-            env.emplace_back("__NULL__", calc_unit("__NULL__", 0));
+            env.emplace_back("__NULL__", 0.0);
     }
     env[env_top ++] = cu;
 }
@@ -17,132 +17,41 @@ void cenv::Calculation::run(){
             push(ins[i].unit);
         }
         else if(ins[i].sym == "+") {
-            auto a = pop();
-            auto b = pop();
-            if(a.first == "__INT__") {
-                if(b.first == "__INT__") {
-                    auto _a = std::any_cast<int>(a.second);
-                    auto _b = std::any_cast<int>(b.second);
-                    push(calc_unit("__INT__", _a+_b));
-                }
-                else if(b.first == "__DECI__") {
-                    auto _a = std::any_cast<int>(a.second);
-                    auto _b = std::any_cast<double>(b.second);
-                    push(calc_unit("__DECI__", _a+_b));
-                }
-            }
-            else if(a.first == "__DECI__") {
-                if(b.first == "__INT__") {
-                    auto _a = std::any_cast<double>(a.second);
-                    auto _b = std::any_cast<int>(b.second);
-                    push(calc_unit("__DECI__", _a+_b));
-                }
-                else if(b.first == "__DECI__") {
-                    auto _a = std::any_cast<double>(a.second);
-                    auto _b = std::any_cast<double>(b.second);
-                    push(calc_unit("__DECI__", _a+_b));
-                }
+            auto right = pop();
+            auto left = pop();
+            if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__DECI__", left.second + right.second));
+            else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__INT__", left.second + right.second));
+            else if(left.first == "__STRING__" && right.first == "__STRING__") {
+                constpool.push_back(constpool[left.second] + constpool[right.second]);
+                push(cenv::calc_unit("__STRING__", constpool.size() - 1));
             }
             else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '+'", ins[i].line, ins[i].column);
         }
         else if(ins[i].sym == "-") {
-            auto a = pop();
-            auto b = pop();
-            if(a.first == "__INT__") {
-                if(b.first == "__INT__") {
-                    auto _a = std::any_cast<int>(a.second);
-                    auto _b = std::any_cast<int>(b.second);
-                    push(calc_unit("__INT__", _b-_a));
-                }
-                else if(b.first == "__DECI__") {
-                    auto _a = std::any_cast<int>(a.second);
-                    auto _b = std::any_cast<double>(b.second);
-                    push(calc_unit("__DECI__", _b-_a));
-                }
-            }
-            else if(a.first == "__DECI__") {
-                if(b.first == "__INT__") {
-                    auto _a = std::any_cast<double>(a.second);
-                    auto _b = std::any_cast<int>(b.second);
-                    push(calc_unit("__DECI__", _b-_a));
-                }
-                else if(b.first == "__DECI__") {
-                    auto _a = std::any_cast<double>(a.second);
-                    auto _b = std::any_cast<double>(b.second);
-                    push(calc_unit("__DECI__", _b-_a));
-                }
-            }
-            else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '+'", ins[i].line, ins[i].column);
+            auto right = pop();
+            auto left = pop();
+            if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__DECI__", left.second - right.second));
+            else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__INT__", left.second - right.second));
+            else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '-'", ins[i].line, ins[i].column);
         }
         else if(ins[i].sym == "*") {
-            auto a = pop();
-            auto b = pop();
-            if(a.first == "__INT__") {
-                if(b.first == "__INT__") {
-                    auto _a = std::any_cast<int>(a.second);
-                    auto _b = std::any_cast<int>(b.second);
-                    push(calc_unit("__INT__", _b*_a));
-                }
-                else if(b.first == "__DECI__") {
-                    auto _a = std::any_cast<int>(a.second);
-                    auto _b = std::any_cast<double>(b.second);
-                    push(calc_unit("__DECI__", _b*_a));
-                }
-            }
-            else if(a.first == "__DECI__") {
-                if(b.first == "__INT__") {
-                    auto _a = std::any_cast<double>(a.second);
-                    auto _b = std::any_cast<int>(b.second);
-                    push(calc_unit("__DECI__", _b*_a));
-                }
-                else if(b.first == "__DECI__") {
-                    auto _a = std::any_cast<double>(a.second);
-                    auto _b = std::any_cast<double>(b.second);
-                    push(calc_unit("__DECI__", _b*_a));
-                }
-            }
+            auto right = pop();
+            auto left = pop();
+            if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__DECI__", right.second * left.second));
+            else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__INT__", right.second * left.second));
             else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '*'", ins[i].line, ins[i].column);
         }
         else if(ins[i].sym == "/") {
-            auto a = pop();
-            auto b = pop();
-            if(a.first == "__INT__") {
-                if(b.first == "__INT__") {
-                    auto _a = std::any_cast<int>(a.second);
-                    auto _b = std::any_cast<int>(b.second);
-                    push(calc_unit("__INT__", _b/_a));
-                }
-                else if(b.first == "__DECI__") {
-                    auto _a = std::any_cast<int>(a.second);
-                    auto _b = std::any_cast<double>(b.second);
-                    push(calc_unit("__DECI__", _b/_a));
-                }
-            }
-            else if(a.first == "__DECI__") {
-                if(b.first == "__INT__") {
-                    auto _a = std::any_cast<double>(a.second);
-                    auto _b = std::any_cast<int>(b.second);
-                    push(calc_unit("__DECI__", _b/_a));
-                }
-                else if(b.first == "__DECI__") {
-                    auto _a = std::any_cast<double>(a.second);
-                    auto _b = std::any_cast<double>(b.second);
-                    push(calc_unit("__DECI__", _b/_a));
-                }
-            }
+            auto right = pop();
+            auto left = pop();
+            if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__DECI__", left.second /right.second));
+            else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__INT__", left.second /right.second));
             else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '/'", ins[i].line, ins[i].column);
         }
         else if(ins[i].sym == "%") {
-            auto a = pop();
-            auto b = pop();
-            if(a.first == "__INT__") {
-                if(b.first == "__INT__") {
-                    auto _a = std::any_cast<int>(a.second);
-                    auto _b = std::any_cast<int>(b.second);
-                    push(calc_unit("__INT__", _b%_a));
-                }
-                else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '%'", ins[i].line, ins[i].column);
-            }
+            auto right = pop();
+            auto left = pop();
+            if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__INT__", (int)left.second % (int)right.second));
             else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '%'", ins[i].line, ins[i].column);
         }
     }
