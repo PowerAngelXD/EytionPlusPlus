@@ -7,9 +7,11 @@
  * @copyright Copyright (c) 2022
  * 
  */
+#pragma once
 #include <iostream>
 #include <string>
 #include <vector>
+#include <stdio.h>
 #include "../lexer/eplex.h"
 #include "../eppack/error/epperr.h"
 
@@ -150,6 +152,35 @@ namespace east{
         std::string to_string();
         static bool is_it(astParser ap);
     };
+
+    class OutStmtNode{
+    public:
+        epplex::Token* mark;
+        ExprNode* content;
+        epplex::Token* end;
+        std::string tag = "__OTHER__";
+
+        std::string to_string();
+        static bool is_it(astParser ap);
+    };
+
+    class StmtNode{
+    public:
+        OutStmtNode* outstmt = nullptr;
+        std::string tag = "__OTHER__";
+
+        std::string to_string();
+        static bool is_it(astParser ap);
+    };
+
+    class StatNode{
+    public:
+        std::vector<StmtNode*> stmts;
+        std::string tag = "__OTHER__";
+
+        std::string to_string();
+        static bool is_it(astParser ap);
+    };
     
     /**
      * @brief Class used to generate AST
@@ -185,5 +216,9 @@ namespace east{
         MulExprNode* gen_mulExprNode();
         CmpExprNode* gen_cmpExprNode();
         BoolExprNode* gen_boolExprNode();
+
+        StmtNode* gen_stmtNode();
+        StatNode* gen_statNode();
+        OutStmtNode* gen_outStmtNode();
     };
 }

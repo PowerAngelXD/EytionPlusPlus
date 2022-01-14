@@ -1,11 +1,7 @@
 #include "east.h"
 
-#include <utility>
-
 //astParser
-east::astParser::astParser(std::vector<epplex::Token> tg_) : tg(tg_) {
-
-}
+east::astParser::astParser(std::vector<epplex::Token> tg_) : tg(tg_) {}
 
 epplex::Token* east::astParser::peek(int pos_){
     return new epplex::Token(this->tg[this->pos + pos_]);
@@ -16,16 +12,9 @@ epplex::Token* east::astParser::token(){
 }
 
 east::ExprNode* east::astParser::gen_exprNode(){
-    if(east::BoolExprNode::is_it(*this)){
-        east::ExprNode* node = new east::ExprNode;
-        node->boolexpr = gen_boolExprNode();
-        return node;
-    }
-    else{
-        east::ExprNode* node = new east::ExprNode;
-        node->addexpr = gen_addExprNode();
-        return node;
-    }
+    east::ExprNode* node = new east::ExprNode;
+    node->addexpr = gen_addExprNode();
+    return node;
 }
 east::AddOpNode* east::astParser::gen_addOpNode(){
     if(east::AddOpNode::is_it(*this)){
@@ -155,6 +144,41 @@ east::BoolExprNode* east::astParser::gen_boolExprNode(){
     }
     else throw epperr::Epperr("SyntaxError", "Unknown type of the expr!", tg[pos].line, tg[pos].column);
 }
+
+//stmt
+east::StatNode* east::astParser::gen_statNode(){
+    if(east::StatNode::is_it(*this)){
+        east::StatNode* node = new east::StatNode;
+        while(east::StmtNode::is_it(*this)){
+            node->stmts.emplace_back(gen_stmtNode());
+        }
+        return node;
+    }
+    else throw epperr::Epperr("SyntaxError", "Unknown type of the stat!", tg[pos].line, tg[pos].column);
+}
+east::StmtNode* east::astParser::gen_stmtNode(){
+    if(east::StmtNode::is_it(*this)){
+        east::StmtNode* node = new east::StmtNode;
+        if(east::OutStmtNode::is_it(*this)) node->outstmt = gen_outStmtNode();
+        return node;
+    }
+    else throw epperr::Epperr("SyntaxError", "Unknown type of the stmt!", tg[pos].line, tg[pos].column);
+}
+east::OutStmtNode* east::astParser::gen_outStmtNode(){
+    if(east::OutStmtNode::is_it(*this)){
+        east::OutStmtNode* node = new east::OutStmtNode;
+        node->mark = token();
+        if(east::ExprNode::is_it(*this)) node->content = gen_exprNode();
+        else throw epperr::Epperr("SyntaxError", "Requires an expression", tg[pos].line, tg[pos].column);
+
+        if(peek()->content == ";") node->end = token();
+        else throw epperr::Epperr("SyntaxError", "Expect ';'", tg[pos].line, tg[pos].column);
+
+        return node;
+    }
+    else throw epperr::Epperr("SyntaxError", "It is not a proper Out statement format", tg[pos].line, tg[pos].column);
+}
+
 //
 
 //identifier node
@@ -181,7 +205,7 @@ std::string east::IdentifierNode::getIdenType(){
     return this->type;
 }
 bool east::IdentifierNode::is_it(east::astParser ap){
-    return ap.peek()->type == "__IDENTIFIER__";
+    return ap.peek()->detail_type == "__IDENTIFIER__";
 }
 //
 
@@ -189,9 +213,7 @@ bool east::IdentifierNode::is_it(east::astParser ap){
 std::string east::ExprNode::to_string(){
     if(this->addexpr != nullptr) return this->addexpr->to_string();
     else if(this->boolexpr != nullptr) return this->boolexpr->to_string();
-    else printf("\nEytion++ encountered an exception while running:\n\
-                {BottomError} Unknown type of the expr!\n\
-                (in line: none; column: none)\n\n");
+    else throw epperr::Epperr("SyntaxError", "Unknown type of the expr!", 0, 0);
 }
 bool east::ExprNode::is_it(east::astParser ap){
     return east::AddExprNode::is_it(ap) || east::BoolExprNode::is_it(ap);
@@ -212,9 +234,10 @@ std::string east::PrimExprNode::to_string(){
         return "prim_expr(ADDEXPR): {" + this->addexpr->to_string() + "}";
     else if(boolexpr != nullptr)
         return "prim_expr(BOOLEXPR): {" + this->boolexpr->to_string() + "}";
+    else return "__NULL__";
 }
 bool east::PrimExprNode::is_it(east::astParser ap){
-    return ap.peek()->type == "__IDENTIFIER__" || ap.peek()->type == "__NUMBER__" || ap.peek()->type == "__STRING__"|| 
+    return ap.peek()->type == "__IDENTIFIER__" || ap.peek()->type == "__NUMBER__" || ap.peek()->type == "__STRING__"||
            ap.peek()->type == "__STRING__"|| ap.peek()->content == "(";
 }
 //
@@ -262,9 +285,9 @@ std::string east::CmpExprNode::to_string(){
 bool east::CmpExprNode::is_it(east::astParser ap){
     bool cond = east::PrimExprNode::is_it(ap);
     ap.pos++;
-    bool ret = cond && east::CmpOpNode::is_it(ap);
+    bool ret = east::CmpOpNode::is_it(ap);
     ap.pos--;
-    return ret;
+    return ret && cond;
 }
 //
 
@@ -313,5 +336,38 @@ std::string east::AddExprNode::to_string(){
 }
 bool east::AddExprNode::is_it(east::astParser ap){
     return east::PrimExprNode::is_it(ap);
+}
+//
+
+//stmt node
+std::string east::StmtNode::to_string(){
+    if(outstmt != nullptr) return "stmt_node: {" + this->outstmt->to_string() + "}";
+    else return "__NULL__";
+}
+bool east::StmtNode::is_it(east::astParser ap){
+    return east::OutStmtNode::is_it(ap);
+}
+//
+
+//stat node
+std::string east::StatNode::to_string(){
+    std::string ret = "stat_node: {[";
+    for(auto stmt : stmts){
+        ret += stmt->to_string() + ", ";
+    }
+    ret += "]}";
+    return ret;
+}
+bool east::StatNode::is_it(east::astParser ap){
+    return east::StmtNode::is_it(ap);
+}
+//
+
+//out stmt node
+std::string east::OutStmtNode::to_string(){
+    return "out_stmt: { " + this->mark->simply_format() + ", " + this->content->to_string() + ", " + this->end->simply_format();
+}
+bool east::OutStmtNode::is_it(east::astParser ap){
+    return ap.peek()->content == "out";
 }
 //
