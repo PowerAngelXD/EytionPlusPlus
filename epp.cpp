@@ -11,19 +11,52 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <cstring>
+#include <getopt.h>
 #include "lexer/eplex.h"
 #include "parser/parser.h"
 #include "eppack/error/epperr.h"
-
-int main(){
-    std::wcout<<L"Eytion++ ["<<__DATE__<<"]\nCopyright (c) PowerAngelXd\nNow version: 0.0.4"<<std::endl;
-    std::string cmd;
+parser::Parser p;
+inline void epp_cli(){
     int code = 10;
+    std::string cmd;
+    std::wcout<<L"Eytion++ ["<<__DATE__<<"]\nCopyright (c) PowerAngelXd\nNow version: 0.0.4"<<std::endl;
     while(true){
+        if(code == 0) break;
         try{
             std::cout<<">> ";
             std::getline(std::cin, cmd);
             if(cmd == "quit") code = 0;
+            else if(cmd.find("run") == 0){
+                std::string cut;
+                cut.assign(cmd.begin() + 4, cmd.end());
+                std::ifstream file(cut);
+                std::size_t index = cut.find(".epp", cut.size() - ((std::string)".epp").size()); // file suffix check
+                if(index == std::string::npos) throw "The file must be in \".epp\" format";
+                if(file.fail()) throw "The specified file could not be found";
+                else{
+                    epplex::Lexer lexer(file);
+                    //std::cout<<ss.str()<<std::endl;
+                    auto tokens = lexer.getTokenGroup();
+                    //for(auto token:tokens){std::cout<<token.format()<<std::endl;}
+                    east::astParser ast(tokens);
+                    east::StatNode* node = ast.gen_statNode();
+                    //std::cout<<node->to_string()<<std::endl;
+                    p.stat = *node;
+                    p.parse();
+                    std::cout<<std::endl;
+                    code = 1;
+                }
+            }
+            else if(cmd.find("view") == 0){
+                std::string cut;
+                cut.assign(cmd.begin() + 5, cmd.end());
+                std::ifstream file(cut);
+                std::istreambuf_iterator<char> begin(file);
+                std::istreambuf_iterator<char> end;
+                std::string str(begin, end);
+                std::cout<<std::endl<<"view file: "<<cut<<"\n"<<str<<std::endl;
+            }
             else {
                 std::stringstream ss(cmd);
                 epplex::Lexer lexer(ss);
@@ -33,19 +66,55 @@ int main(){
                 east::astParser ast(tokens);
                 east::StatNode* node = ast.gen_statNode();
                 //std::cout<<node->to_string()<<std::endl;
-                parser::Parser p(*node);
+                p.stat = *node;
                 p.parse();
                 std::cout<<std::endl;
                 code = 1;
             }
-            if(code == 0)break;
         }
         catch(char const* e){
-            std::cout<<"Eytion++ Error:\n"<<e<<std::endl;
+            std::cout<<"Eytion++ Error:  "<<e<<std::endl;
         }
         catch(epperr::Epperr eppe){
             std::cout<<eppe.what()<<std::endl;
         }
     }
+}
+
+int main(int argc, char *argv[]){
+    std::string cmd;
+    if(argc >= 2){
+        if(strcmp(argv[1], "-v")==0 || strcmp(argv[1], "-version")==0) std::cout<<"version => debug-0.0.4"<<std::endl;
+        else if(strcmp(argv[1], "-r")==0 || strcmp(argv[1], "-run")==0){
+            std::ifstream file(argv[2]);
+            std::size_t index = ((std::string)argv[2]).find(".epp", ((std::string)argv[2]).size() - ((std::string)".epp").size()); // file suffix check
+            if(index == std::string::npos) {std::cout<<"error:  The file must be in \".epp\" format"<<std::endl; goto end;}
+            if(file.fail()) {std::cout<<"error:  The specified file could not be found"<<std::endl; goto end;}
+            else{
+                epplex::Lexer lexer(file);
+                //std::cout<<ss.str()<<std::endl;
+                auto tokens = lexer.getTokenGroup();
+                //for(auto token:tokens){std::cout<<token.format()<<std::endl;}
+                east::astParser ast(tokens);
+                east::StatNode* node = ast.gen_statNode();
+                //std::cout<<node->to_string()<<std::endl;
+                p.stat = *node;
+                p.parse();
+                std::cout<<std::endl;
+            }
+        }
+        else if(strcmp(argv[1], "-cli") == 0) epp_cli();
+        else if(strcmp(argv[1], "-?")==0 || strcmp(argv[1], "-h")==0 || strcmp(argv[1], "-help")==0){
+            std::string help = "Eytion++ Options Helper"
+                               "Options:\n"
+                               "-v, -version          Output the version of Eytion++ on the screen\n"
+                               "-?, -h, -help         View Eytion++ options help\n"
+                               "-r, -run <file>       Run a file named 'file'\n"
+                               "-cli                  Run Eytion++ cli";
+            std::cout<<help<<std::endl;
+        }
+    }
+    else std::cout<<"parameter '"<<argv[1]<<"' that does not exist"<<std::endl;
+    end:
     return 0;
 }
