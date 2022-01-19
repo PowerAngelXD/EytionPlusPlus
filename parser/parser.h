@@ -18,11 +18,10 @@
 
 namespace parser{
     class Parser{
-        east::StatNode stat;
     public:
-        [[maybe_unused]] Parser(east::StatNode stat_);
+        east::StatNode stat;
+        scope::ScopeSet sset;
 
-        east::StatNode get();
         void parse();
     };
 }
