@@ -12,9 +12,21 @@ epplex::Token* east::astParser::token(){
 }
 
 east::ExprNode* east::astParser::gen_exprNode(){
-    east::ExprNode* node = new east::ExprNode;
-    node->addexpr = gen_addExprNode();
-    return node;
+    if(east::ListExprNode::is_it(*this)){
+        east::ExprNode* node = new east::ExprNode;
+        node->listexpr = gen_listExprNode();
+        return node;
+    }
+    else if(east::BoolExprNode::is_it(*this)){
+        east::ExprNode* node = new east::ExprNode;
+        node->boolexpr = gen_boolExprNode();
+        return node;
+    }
+    else{
+        east::ExprNode* node = new east::ExprNode;
+        node->addexpr = gen_addExprNode();
+        return node;
+    }
 }
 east::AddOpNode* east::astParser::gen_addOpNode(){
     if(east::AddOpNode::is_it(*this)){
@@ -55,15 +67,33 @@ east::PrimExprNode* east::astParser::gen_primExprNode(){
         else if(peek()->type == "__NUMBER__") node->number = token();
         else if(peek()->type == "__STRING__") node->str = token();
         else if(peek()->type == "__CHAR__") node->ch = token();
+        else if(peek()->content == "typeof") node->tpof = gen_tpofExprNode();
         else if(peek()->content == "(") {
             node->left = token();
             if(east::AddExprNode::is_it(*this)){
                 node->addexpr = gen_addExprNode();
             }
+            else if(east::BoolExprNode::is_it(*this)){
+                node->boolexpr = gen_boolExprNode();
+            }
             else throw epperr::Epperr("SyntaxErrror", "Unknown type of the expr!!", tg[pos].line, tg[pos].column);
             if(peek()->content == ")") node->right = token();
             else throw epperr::Epperr("SyntaxErrror", "Expect ')'!", tg[pos].line, tg[pos].column);
         }
+        return node;
+    }
+    else throw epperr::Epperr("SyntaxErrror", "Unknown type of the expr!", tg[pos].line, tg[pos].column);
+}
+east::TypeOfExprNode* east::astParser::gen_tpofExprNode(){
+    if(east::TypeOfExprNode::is_it(*this)){
+        east::TypeOfExprNode* node = new east::TypeOfExprNode;
+        node->mark = token();
+        if(peek()->content == "(") token();
+        else throw epperr::Epperr("SyntaxErrror", "Expect '('!", tg[pos].line, tg[pos].column);
+        if(east::ExprNode::is_it(*this)) node->expr = gen_exprNode();
+        else throw epperr::Epperr("SyntaxErrror", "Unknown type of the expr!", tg[pos].line, tg[pos].column);
+        if(peek()->content == ")") token();
+        else throw epperr::Epperr("SyntaxErrror", "Expect ')'!", tg[pos].line, tg[pos].column);
         return node;
     }
     else throw epperr::Epperr("SyntaxErrror", "Unknown type of the expr!", tg[pos].line, tg[pos].column);
@@ -134,6 +164,7 @@ east::CmpExprNode* east::astParser::gen_cmpExprNode(){
 east::BoolExprNode* east::astParser::gen_boolExprNode(){
     if(east::BoolExprNode::is_it(*this)){
         east::BoolExprNode* node = new east::BoolExprNode;
+        if(peek()->content == "!") node->notsign = token();
         node->cmps.push_back(gen_cmpExprNode());
         while(true){
             if(!east::BoolOpNode::is_it(*this)) break;
@@ -143,6 +174,22 @@ east::BoolExprNode* east::astParser::gen_boolExprNode(){
         return node;
     }
     else throw epperr::Epperr("SyntaxError", "Unknown type of the expr!", tg[pos].line, tg[pos].column);
+}
+east::ListExprNode* east::astParser::gen_listExprNode(){
+    if(east::ListExprNode::is_it(*this)){
+        east::ListExprNode* node = new east::ListExprNode;
+        node->left = token();
+        node->arrayelts.push_back(gen_exprNode());
+        while(true){
+            if(peek()->content != ",") break;
+            token();
+            node->arrayelts.push_back(gen_exprNode());
+        }//TODO:  list gen bug
+        if(peek()->content == "]") node->right = token();
+        else throw epperr::Epperr("SyntaxError", "Expect ']'!", tg[pos].line, tg[pos].column);
+        return node;
+    }
+    else throw epperr::Epperr("SyntaxError", "Expect '['!", tg[pos].line, tg[pos].column);
 }
 
 //stmt
@@ -154,12 +201,14 @@ east::StatNode* east::astParser::gen_statNode(){
         }
         return node;
     }
-    else throw epperr::Epperr("SyntaxError", "Unknown type of the stat!", tg[pos].line, tg[pos].column);
+    else throw epperr::Epperr("SyntaxError", "Unknown type of the stmt!", tg[pos].line, tg[pos].column);
 }
 east::StmtNode* east::astParser::gen_stmtNode(){
     if(east::StmtNode::is_it(*this)){
         east::StmtNode* node = new east::StmtNode;
         if(east::OutStmtNode::is_it(*this)) node->outstmt = gen_outStmtNode();
+        else if(east::VorcStmtNode::is_it(*this)) node->vorcstmt = gen_vorcStmtNode();
+        else if(east::AssignStmtNode::is_it(*this)) node->assignstmt = gen_assignStmtNode();
         return node;
     }
     else throw epperr::Epperr("SyntaxError", "Unknown type of the stmt!", tg[pos].line, tg[pos].column);
@@ -177,6 +226,34 @@ east::OutStmtNode* east::astParser::gen_outStmtNode(){
         return node;
     }
     else throw epperr::Epperr("SyntaxError", "It is not a proper Out statement format", tg[pos].line, tg[pos].column);
+}
+east::VorcStmtNode* east::astParser::gen_vorcStmtNode(){
+    if(east::VorcStmtNode::is_it(*this)){
+        east::VorcStmtNode* node = new east::VorcStmtNode;
+        node->mark = token();
+        if(peek()->type == "__IDENTIFIER__") node->iden = token();
+        else throw epperr::Epperr("SyntaxError", "When defining a variable or constant, a name must be specified", tg[pos].line, tg[pos].column);
+        if(peek()->content == "=") node->equ = token();
+        else throw epperr::Epperr("SyntaxError", "Expect '='", tg[pos].line, tg[pos].column);
+        node->value = gen_exprNode();
+        if(peek()->content == ";") node->end = token();
+        else throw epperr::Epperr("SyntaxError", "Expect ';'", tg[pos].line, tg[pos].column);
+        return node;
+    }
+    else throw epperr::Epperr("SyntaxError", "It is not a proper Define-variable or Define-constant statement format", tg[pos].line, tg[pos].column);
+}
+east::AssignStmtNode* east::astParser::gen_assignStmtNode(){
+    if(east::AssignStmtNode::is_it(*this)){
+        east::AssignStmtNode* node = new east::AssignStmtNode;
+        node->iden = gen_identifierNode();
+        if(peek()->content == "=") node->equ = token();
+        else throw epperr::Epperr("SyntaxError", "Expect '='!", tg[pos].line, tg[pos].column);
+        node->val = gen_exprNode();
+        if(peek()->content == ";") node->end = token();
+        else throw epperr::Epperr("SyntaxError", "Expect ';'", tg[pos].line, tg[pos].column);
+        return node;
+    }
+    else throw epperr::Epperr("SyntaxError", "It is not a proper Assign statement format", tg[pos].line, tg[pos].column);
 }
 
 //
@@ -213,10 +290,11 @@ bool east::IdentifierNode::is_it(east::astParser ap){
 std::string east::ExprNode::to_string(){
     if(this->addexpr != nullptr) return this->addexpr->to_string();
     else if(this->boolexpr != nullptr) return this->boolexpr->to_string();
+    else if(this->listexpr != nullptr) return this->listexpr->to_string();
     else throw epperr::Epperr("SyntaxError", "Unknown type of the expr!", 0, 0);
 }
 bool east::ExprNode::is_it(east::astParser ap){
-    return east::AddExprNode::is_it(ap) || east::BoolExprNode::is_it(ap);
+    return east::AddExprNode::is_it(ap) || east::BoolExprNode::is_it(ap) || east::ListExprNode::is_it(ap);
 }
 //
 
@@ -234,11 +312,13 @@ std::string east::PrimExprNode::to_string(){
         return "prim_expr(ADDEXPR): {" + this->addexpr->to_string() + "}";
     else if(boolexpr != nullptr)
         return "prim_expr(BOOLEXPR): {" + this->boolexpr->to_string() + "}";
+    else if(tpof != nullptr)
+        return "prim_expr(BOOLEXPR): {" + this->tpof->to_string() + "}";
     else return "__NULL__";
 }
 bool east::PrimExprNode::is_it(east::astParser ap){
     return ap.peek()->type == "__IDENTIFIER__" || ap.peek()->type == "__NUMBER__" || ap.peek()->type == "__STRING__"||
-           ap.peek()->type == "__STRING__"|| ap.peek()->content == "(";
+           ap.peek()->type == "__CHAR__"|| ap.peek()->content == "(" || ap.peek()->content == "typeof";
 }
 //
 
@@ -265,7 +345,8 @@ std::string east::CmpOpNode::to_string(){
     return "cmp_op: {" + this->op->simply_format() + "}";
 }
 bool east::CmpOpNode::is_it(east::astParser ap){
-    return ap.peek()->content == "==" || ap.peek()->content == "/"|| ap.peek()->content == "%";
+    return ap.peek()->content == "==" || ap.peek()->content == "!=" || ap.peek()->content == ">=" || ap.peek()->content == "<="
+        || ap.peek()->content == ">" || ap.peek()->content == "<";
 }
 //
 
@@ -339,13 +420,39 @@ bool east::AddExprNode::is_it(east::astParser ap){
 }
 //
 
+//list expr node
+std::string east::ListExprNode::to_string(){
+    std::string ret = "list_expr: {" + this->left->simply_format() + ", ";
+    ret += arrayelts[0]->to_string();
+    for(int i = 0; i<arrayelts.size(); i++){
+        ret += arrayelts[i]->to_string();
+    }
+    ret += "}";
+    return ret;
+}
+bool east::ListExprNode::is_it(astParser ap){
+    return ap.peek()->content == "[";
+}
+//
+
+//typeof expr node
+std::string east::TypeOfExprNode::to_string(){
+    return "typeof_expr: {" + mark->simply_format() + ", " + expr->to_string() + "}";
+}
+bool east::TypeOfExprNode::is_it(east::astParser ap){
+    return ap.peek()->content == "typeof";
+}
+//
+
 //stmt node
 std::string east::StmtNode::to_string(){
     if(outstmt != nullptr) return "stmt_node: {" + this->outstmt->to_string() + "}";
+    else if(vorcstmt != nullptr) return "stmt_node: {" + this->vorcstmt->to_string() + "}";
+    else if(assignstmt != nullptr) return "stmt_node: {" + this->assignstmt->to_string() + "}";
     else return "__NULL__";
 }
 bool east::StmtNode::is_it(east::astParser ap){
-    return east::OutStmtNode::is_it(ap);
+    return east::OutStmtNode::is_it(ap) || east::VorcStmtNode::is_it(ap) || east::AssignStmtNode::is_it(ap);
 }
 //
 
@@ -369,5 +476,32 @@ std::string east::OutStmtNode::to_string(){
 }
 bool east::OutStmtNode::is_it(east::astParser ap){
     return ap.peek()->content == "out";
+}
+//
+
+//vorc stmt node
+std::string east::VorcStmtNode::to_string(){
+    return "vorc_stmt: {" + this->mark->simply_format() + "," + this->iden->simply_format() + ", " + this->equ->simply_format() + ", " + this->value->to_string() + ", "  + this->end->simply_format() + "}";
+}
+bool east::VorcStmtNode::is_it(east::astParser ap){
+    return ap.peek()->content == "var" || ap.peek()->content == "const";
+}
+//
+
+//assign stmt node
+std::string east::AssignStmtNode::to_string(){
+    return "assign_stmt: {[" + iden->to_string() + "]" + this->equ->simply_format() + ", " + this->val->to_string() + ", " + this->end->simply_format() + "}";
+}
+bool east::AssignStmtNode::is_it(east::astParser ap){
+    return east::IdentifierNode::is_it(ap);
+}
+//
+
+//block stmt node
+std::string east::BlockStmtNode::to_string(){
+
+}
+bool east::BlockStmtNode::is_it(astParser ap){
+
 }
 //
