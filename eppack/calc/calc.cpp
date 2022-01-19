@@ -1,5 +1,7 @@
 #include "calc.h"
 
+cenv::Calculation::Calculation(scope::ScopeSet sset_) : sset(sset_), is_array(false) {}
+
 void cenv::Calculation::push(cenv::calc_unit cu){
     if (env.size() <= env_top) {
         for (int i = env.size() ; i <= env_top ; i ++)
@@ -11,12 +13,41 @@ cenv::calc_unit cenv::Calculation::pop(){
     return env[-- env_top];
 }
 
+bool cenv::Calculation::isArray(){
+    return is_array;
+}
+
 void cenv::Calculation::run(){
+    int len = 1;
     for(int i = 0; i < ins.size(); i++){
-        if(ins[i].sym == "__PUSH__") {
+        if(ins[i].instr == "__PUSH__") {
             push(ins[i].unit);
         }
-        else if(ins[i].sym == "+") {
+        else if(ins[i].instr == "__PUSHA__") {
+            is_array = true;
+            len = atoi(ins[i].unit.first.c_str());
+        }
+        else if(ins[i].instr == "__TPOF__") {
+            constpool.push_back(pop().first);
+            push(cenv::calc_unit("__STRING__", constpool.size()-1));
+        }
+        else if(ins[i].instr == "__POP__") {
+            if(sset.findInAllScope(ins[i].para) != -1){
+                auto temp = sset.scope_pool[sset.getDeep()].vars[sset.findInAllScopeI(ins[i].para)];
+                if(temp.second.getType() == "__INT__") push(cenv::calc_unit("__INT__", temp.second.val_int()));
+                else if(temp.second.getType() == "__DECI__") push(cenv::calc_unit("__DECI__", temp.second.val_deci()));
+                else if(temp.second.getType() == "__BOOL__") push(cenv::calc_unit("__BOOL__", temp.second.val_bool()));
+                else if(temp.second.getType() == "__CHAR__") {
+
+                }
+                else if(temp.second.getType() == "__STRING__") {
+                    constpool.push_back(temp.second.val_string());
+                    push(cenv::calc_unit("__STRING__", constpool.size()-1));
+                }
+            }
+            else throw epperr::Epperr("NameError", "Unable to find identifier named: '" + ins[i].para + "'", ins[i].line, ins[i].column);
+        }
+        else if(ins[i].instr == "+") {
             auto right = pop();
             auto left = pop();
             if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__DECI__", left.second + right.second));
@@ -27,33 +58,38 @@ void cenv::Calculation::run(){
             }
             else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '+'", ins[i].line, ins[i].column);
         }
-        else if(ins[i].sym == "-") {
+        else if(ins[i].instr == "-") {
             auto right = pop();
             auto left = pop();
             if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__DECI__", left.second - right.second));
             else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__INT__", left.second - right.second));
             else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '-'", ins[i].line, ins[i].column);
         }
-        else if(ins[i].sym == "*") {
+        else if(ins[i].instr == "*") {
             auto right = pop();
             auto left = pop();
             if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__DECI__", right.second * left.second));
             else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__INT__", right.second * left.second));
             else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '*'", ins[i].line, ins[i].column);
         }
-        else if(ins[i].sym == "/") {
+        else if(ins[i].instr == "/") {
             auto right = pop();
             auto left = pop();
             if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__DECI__", left.second /right.second));
             else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__INT__", left.second /right.second));
             else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '/'", ins[i].line, ins[i].column);
         }
-        else if(ins[i].sym == "%") {
+        else if(ins[i].instr == "%") {
             auto right = pop();
             auto left = pop();
             if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__INT__", (int)left.second % (int)right.second));
             else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '%'", ins[i].line, ins[i].column);
         }
     }
-    result = pop();
+    if(is_array || len > 1){
+        for(auto re: env){
+            result.push_back(re);
+        }
+    }
+    else result.push_back(pop());
 }
