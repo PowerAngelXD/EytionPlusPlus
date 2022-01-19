@@ -25,6 +25,7 @@ namespace cvisitor{
         void visitString(epplex::Token* token);
         void visitChar(epplex::Token* token);
         void visitIden(east::IdentifierNode* node);
+        void visitTpof(east::TypeOfExprNode* node);
         void visitAddOp(east::AddOpNode* node);
         void visitMulOp(east::MulOpNode* node);
         void visitCmpOp(east::CmpOpNode* node);
@@ -34,5 +35,6 @@ namespace cvisitor{
         void visitPrimExpr(east::PrimExprNode* node);
         void visitMulExpr(east::MulExprNode* node);
         void visitAddExpr(east::AddExprNode* node);
+        void visitListExpr(east::ListExprNode* node);
     };
 }

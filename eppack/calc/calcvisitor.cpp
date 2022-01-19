@@ -41,10 +41,19 @@ void cvisitor::visitor::visitChar(epplex::Token* token){
         case '0': ch = '\0'; break;
         default: break;
     }
-    ins.push_back({"__PUSH__", cenv::calc_unit("__CHAR__", ch), "__NULL__", token->line, token->column});
+    std::string ch_s;
+    ch_s.push_back(ch);
+    constpool.push_back(ch_s);
+    ins.push_back({"__PUSH__", cenv::calc_unit("__CHAR__", constpool.size()-1), "__NULL__", token->line, token->column});
+}
+void cvisitor::visitor::visitTpof(east::TypeOfExprNode* node){
+    if(node->expr->addexpr != nullptr) visitAddExpr(node->expr->addexpr);
+    else if(node->expr->boolexpr != nullptr) visitBoolExpr(node->expr->boolexpr);
+    else if(node->expr->listexpr != nullptr) visitListExpr(node->expr->listexpr);
+    ins.push_back({"__TPOF__", cenv::calc_unit("__NULL__", 0.0), "__NULL__", node->mark->line, node->mark->column});
 }
 void cvisitor::visitor::visitIden(east::IdentifierNode* node){
-    ins.push_back({"__PUSH__", cenv::calc_unit("__NULL__", 0.0), node->idens[0]->content, node->idens[0]->line, node->idens[0]->column}); // TODO: After updating the scope, it needs to be adapted to the scope
+    ins.push_back({"__POP__", cenv::calc_unit("__NULL__", 0.0), node->idens[0]->content, node->idens[0]->line, node->idens[0]->column}); // TODO: After updating the scope, it needs to be adapted to the scope
 }
 void cvisitor::visitor::visitAddOp(east::AddOpNode* node){
     ins.push_back({node->op->content, cenv::calc_unit(node->op->content, 0.0), "__NULL__", node->op->line, node->op->column});
@@ -58,6 +67,7 @@ void cvisitor::visitor::visitPrimExpr(east::PrimExprNode* node){
     else if(node->ch != nullptr) visitChar(node->ch);
     else if(node->iden != nullptr) visitIden(node->iden);
     else if(node->addexpr != nullptr) visitAddExpr(node->addexpr);
+    else if(node->tpof != nullptr) visitTpof(node->tpof);
 }
 void cvisitor::visitor::visitMulExpr(east::MulExprNode* node){
     visitPrimExpr(node->prims[0]);
@@ -72,6 +82,11 @@ void cvisitor::visitor::visitAddExpr(east::AddExprNode* node){
         visitMulExpr(node->muls[i + 1]);
         visitAddOp(node->ops[i]);
     }
+}
+void cvisitor::visitor::visitListExpr(east::ListExprNode* node){
+    int len = 0;
+    for(len; len < node->arrayelts.size(); len++) visitAddExpr(node->arrayelts[len]->addexpr);
+    ins.push_back({"__PUSHA__", cenv::calc_unit("__NULL__", 0.0), std::to_string(len), node->left->line, node->left->column});
 }
 void cvisitor::visitor::visitCmpOp(east::CmpOpNode* node){
 
