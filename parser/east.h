@@ -37,7 +37,6 @@ namespace east{
         std::vector<epplex::Token*> idens;
         std::vector<epplex::Token*> dots; // .
 
-        epplex::Token* arrelt = nullptr;
         epplex::Token* arrleft = nullptr;
         AddExprNode* arrindex = nullptr;
         epplex::Token* arrright = nullptr;
@@ -107,9 +106,9 @@ namespace east{
 
     class CmpExprNode{
     public:
-        PrimExprNode* expr;
+        AddExprNode* expr;
         CmpOpNode* op;
-        PrimExprNode* target;
+        AddExprNode* target;
         std::string tag = "__CALC__";
 
         std::string to_string();
@@ -148,6 +147,16 @@ namespace east{
         static bool is_it(astParser ap);
     };
 
+    class InputExprNode{
+    public:
+        epplex::Token* mark;
+        ExprNode* expr;
+        std::string tag = "__CALC__";
+
+        std::string to_string();
+        static bool is_it(astParser ap);
+    };
+
     class ExprNode{
     public:
         AddExprNode* addexpr = nullptr;
@@ -163,10 +172,12 @@ namespace east{
     class PrimExprNode{
     public:
         epplex::Token* number = nullptr;
+        epplex::Token* boolconst = nullptr;
         IdentifierNode* iden = nullptr;
         epplex::Token* str = nullptr;
         epplex::Token* ch = nullptr;
         TypeOfExprNode* tpof = nullptr;
+        InputExprNode* input = nullptr;
         epplex::Token* left = nullptr;
         AddExprNode* addexpr = nullptr; // use '()'
         BoolExprNode* boolexpr = nullptr; // use '()'
@@ -207,6 +218,9 @@ namespace east{
     };
 
     class AssignStmtNode{
+        // a = 1;
+        // a.b.c = 2;
+        // list[3] = 5;
     public:
         IdentifierNode* iden;
         epplex::Token* equ;
@@ -217,6 +231,36 @@ namespace east{
         std::string to_string();
         static bool is_it(astParser ap);
     };
+
+    class DeleteStmtNode{
+        // delete c;
+    public:
+        epplex::Token* mark;
+        IdentifierNode* iden;
+        epplex::Token* end;
+        std::string tag = "__OTHER__";
+
+        std::string to_string();
+        static bool is_it(astParser ap);
+    };
+
+    class AreaStmtNode{
+        /*  area a{
+         *      var b="hello ";
+         *      var c="world!";
+         *      out a+b;
+         *  }
+         *  out a.b+a.c;
+         *  act a;
+         *  ---OutPut---
+         *  hello world!
+         *  hello world!
+         */
+    public:
+
+    };
+
+    class IfStmtNode{};
 
     class BlockStmtNode{
     public:
@@ -234,6 +278,8 @@ namespace east{
         OutStmtNode* outstmt = nullptr;
         VorcStmtNode* vorcstmt = nullptr;
         AssignStmtNode* assignstmt = nullptr;
+        DeleteStmtNode* deletestmt = nullptr;
+        BlockStmtNode* blockstmt = nullptr;
         std::string tag = "__OTHER__";
 
         std::string to_string();
@@ -285,11 +331,14 @@ namespace east{
         BoolExprNode* gen_boolExprNode();
         ListExprNode* gen_listExprNode();
         TypeOfExprNode* gen_tpofExprNode();
+        InputExprNode* gen_inputExprNode();
 
         StmtNode* gen_stmtNode();
         StatNode* gen_statNode();
         OutStmtNode* gen_outStmtNode();
         VorcStmtNode* gen_vorcStmtNode();
         AssignStmtNode* gen_assignStmtNode();
+        DeleteStmtNode* gen_delStmtNode();
+        BlockStmtNode* gen_blockStmtNode();
     };
 }
