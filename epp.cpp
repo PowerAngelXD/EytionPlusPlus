@@ -20,7 +20,7 @@ parser::Parser p;
 inline void epp_cli(){
     int code = 10;
     std::string cmd;
-    std::wcout<<L"Eytion++ ["<<__DATE__<<"]\nCopyright (c) PowerAngelXd\nNow version: 0.0.7\nyou can type 'help' to get 'Eytion++Cli & Eytion++Grammar' help document"<<std::endl;
+    std::wcout<<L"Eytion++ ["<<__DATE__<<"]\nCopyright (c) PowerAngelXd\nNow version: 0.0.9\nyou can type 'help' to get 'Eytion++Cli & Eytion++Grammar' help document"<<std::endl;
     while(true){
         if(code == 0) break;
         try{
@@ -142,7 +142,7 @@ inline void epp_cli(){
 int main(int argc, char *argv[]){
     std::string cmd;
     if(argc >= 2){
-        if(strcmp(argv[1], "-v")==0 || strcmp(argv[1], "-version")==0) std::cout<<"version => debug-0.0.7"<<std::endl;
+        if(strcmp(argv[1], "-v")==0 || strcmp(argv[1], "-version")==0) std::cout<<"version => debug-0.0.9"<<std::endl;
         else if(strcmp(argv[1], "-r")==0 || strcmp(argv[1], "-run")==0){
             std::ifstream file(argv[2]);
             std::size_t index = ((std::string)argv[2]).find(".epp", ((std::string)argv[2]).size() - ((std::string)".epp").size()); // file suffix check
