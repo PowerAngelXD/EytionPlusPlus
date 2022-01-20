@@ -8,6 +8,12 @@ inline cenv::Calculation _calc(east::ExprNode node, scope::ScopeSet sset) {
         calc.ins = v.ins; calc.constpool = v.constpool;
         calc.run();
     }
+    else if(node.boolexpr != nullptr){
+        cvisitor::visitor v;
+        v.visitBoolExpr(node.boolexpr);
+        calc.ins = v.ins; calc.constpool = v.constpool;
+        calc.run();
+    }
     else if(node.listexpr != nullptr){
         cvisitor::visitor v;
         v.visitListExpr(node.listexpr);
@@ -20,7 +26,7 @@ inline cenv::Calculation _calc(east::ExprNode node, scope::ScopeSet sset) {
 void parser::Parser::parse(){
     for(int index = 0; index < stat.stmts.size(); index++){
         if(stat.stmts[index]->outstmt != nullptr){
-            cenv::Calculation calc = _calc(*stat.stmts[index]->outstmt->content, sset);
+            cenv::Calculation calc = _calc(*stat.stmts[index]->outstmt->content, this->sset);
             if(calc.isArray()){
                 if(calc.result[0].first == "__STRING__") {
                     for(int i = 0; i < calc.result.size(); i++) {
@@ -48,7 +54,7 @@ void parser::Parser::parse(){
             auto name = stat.stmts[index]->vorcstmt->iden->content;
             auto expr = stat.stmts[index]->vorcstmt->value;
             cenv::Calculation calc = _calc(*expr, sset);
-            var::Value val;
+            var::Value val(false, false);
             val.set_lc(stat.stmts[index]->vorcstmt->iden->line, stat.stmts[index]->vorcstmt->iden->column);
             if(sset.findInAllScope(name)) throw epperr::Epperr("NameError", "duplicate identifier '" + name + "'!", val.line, val.column);
             if(calc.isArray()){
@@ -69,6 +75,8 @@ void parser::Parser::parse(){
             auto name = stat.stmts[index]->assignstmt->iden->idens[0]->content;
             auto expr = stat.stmts[index]->assignstmt->val;
             cenv::Calculation calc = _calc(*expr, sset);
+            if(sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.getDeep()].findI(name)].second.isConst())
+                throw epperr::Epperr("AssignError", "Cannot assign a value to a constant", stat.stmts[index]->assignstmt->iden->idens[0]->line, stat.stmts[index]->assignstmt->iden->idens[0]->column);
             if(sset.findInAllScope(name)){
                 if(calc.isArray()){
 
@@ -76,13 +84,28 @@ void parser::Parser::parse(){
                 else{
                     auto temp = sset.scope_pool[sset.getDeep()].vars[sset.findInAllScopeI(name)];
                     auto type = calc.result[0].first;
-                    sset.scope_pool[sset.getDeep()].vars[sset.findInAllScopeI(name)].second.set_val((int)calc.result[0].second);
+                    sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.findInAllScopeI(name)].second.set_val((int)calc.result[0].second);
                 }
             }
             else throw epperr::Epperr("NameError", "Unable to find identifier named: '" + name + "'",
                                       stat.stmts[index]->assignstmt->iden->idens[0]->line,
                                       stat.stmts[index]->assignstmt->iden->idens[0]->column);
         }
-
+        else if(stat.stmts[index]->deletestmt != nullptr){
+            auto name = stat.stmts[index]->deletestmt->iden->idens[0]->content;
+            if(!sset.findInAllScope(name)) throw epperr::Epperr("NameError", "Could not find a designator named '" + name + "'",
+                                                                stat.stmts[index]->deletestmt->iden->idens[0]->line,
+                                                                stat.stmts[index]->deletestmt->iden->idens[0]->column);
+            sset.scope_pool[sset.getDeep()].vars.erase(sset.scope_pool[sset.getDeep()].vars.begin() + sset.findInAllScopeI(name));
+        }
+        else if(stat.stmts[index]->blockstmt != nullptr){
+            Parser subp;
+            subp.stat = *stat.stmts[index]->blockstmt->body;
+            this->sset.next();
+            this->sset.newScope("__epp_temp_scope__");
+            subp.sset = this->sset;
+            subp.parse();
+            this->sset.remove();
+        }
     }
 }
