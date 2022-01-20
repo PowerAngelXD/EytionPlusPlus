@@ -31,9 +31,20 @@ void cenv::Calculation::run(){
             constpool.push_back(pop().first);
             push(cenv::calc_unit("__STRING__", constpool.size()-1));
         }
+        else if(ins[i].instr == "__INPUT__"){
+            auto temp = pop();
+            if(temp.first == "__STRING__"){
+                std::cout<<constpool[(int)temp.second];
+                std::string in;
+                std::getline(std::cin, in);
+                constpool.push_back(in);
+                push(cenv::calc_unit("__STRING__", constpool.size()-1));
+            }
+            else throw epperr::Epperr("TypeError", "Types other than String cannot be used here", ins[i].line, ins[i].column);
+        }
         else if(ins[i].instr == "__POP__") {
-            if(sset.findInAllScope(ins[i].para) != -1){
-                auto temp = sset.scope_pool[sset.getDeep()].vars[sset.findInAllScopeI(ins[i].para)];
+            if(sset.findInAllScope(ins[i].para)){
+                auto temp = sset.scope_pool[sset.findInAllScopeI(ins[i].para)].vars[sset.scope_pool[sset.findInAllScopeI(ins[i].para)].findI(ins[i].para)];
                 if(temp.second.getType() == "__INT__") push(cenv::calc_unit("__INT__", temp.second.val_int()));
                 else if(temp.second.getType() == "__DECI__") push(cenv::calc_unit("__DECI__", temp.second.val_deci()));
                 else if(temp.second.getType() == "__BOOL__") push(cenv::calc_unit("__BOOL__", temp.second.val_bool()));
@@ -84,6 +95,74 @@ void cenv::Calculation::run(){
             auto left = pop();
             if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__INT__", (int)left.second % (int)right.second));
             else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '%'", ins[i].line, ins[i].column);
+        }
+
+        else if(ins[i].instr == "==") {
+            auto right = pop();
+            auto left = pop();
+            if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__BOOL__", left.second == right.second));
+            else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__BOOL__", left.second == right.second));
+            else if(left.first == "__STRING__" && right.first == "__STRING__") {
+                push(cenv::calc_unit("__BOOL__", constpool[left.second] == constpool[right.second]));
+            }
+            else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '=='", ins[i].line, ins[i].column);
+        }
+        else if(ins[i].instr == ">=") {
+            auto right = pop();
+            auto left = pop();
+            if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__BOOL__", left.second >= right.second));
+            else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__BOOL__", left.second >= right.second));
+            else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '>='", ins[i].line, ins[i].column);
+        }
+        else if(ins[i].instr == "<=") {
+            auto right = pop();
+            auto left = pop();
+            if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__BOOL__", left.second <= right.second));
+            else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__BOOL__", left.second <= right.second));
+            else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '<='", ins[i].line, ins[i].column);
+        }
+        else if(ins[i].instr == ">") {
+            auto right = pop();
+            auto left = pop();
+            if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__BOOL__", left.second > right.second));
+            else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__BOOL__", left.second > right.second));
+            else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '>'", ins[i].line, ins[i].column);
+        }
+        else if(ins[i].instr == "<") {
+            auto right = pop();
+            auto left = pop();
+            if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__BOOL__", left.second < right.second));
+            else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__BOOL__", left.second < right.second));
+            else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '<'", ins[i].line, ins[i].column);
+        }
+        else if(ins[i].instr == "!=") {
+            auto right = pop();
+            auto left = pop();
+            if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__BOOL__", left.second != right.second));
+            else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__BOOL__", left.second != right.second));
+            else if(left.first == "__STRING__" && right.first == "__STRING__") {
+                push(cenv::calc_unit("__BOOL__", constpool[left.second] != constpool[right.second]));
+            }
+            else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '!='", ins[i].line, ins[i].column);
+        }
+        else if(ins[i].instr == "&&") {
+            auto right = pop();
+            auto left = pop();
+            if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__BOOL__", left.second && right.second));
+            else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__BOOL__", left.second && right.second));
+            else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '&&'", ins[i].line, ins[i].column);
+        }
+        else if(ins[i].instr == "||") {
+            auto right = pop();
+            auto left = pop();
+            if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__BOOL__", left.second || right.second));
+            else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__BOOL__", left.second || right.second));
+            else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '||'", ins[i].line, ins[i].column);
+        }
+        else if(ins[i].instr == "!") {
+            auto val = pop();
+            if(val.first == "__BOOL__") push(cenv::calc_unit("__DECI__", !(bool)val.second));
+            else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '!'", ins[i].line, ins[i].column);
         }
     }
     if(is_array || len > 1){
