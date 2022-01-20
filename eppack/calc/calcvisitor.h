@@ -26,6 +26,7 @@ namespace cvisitor{
         void visitChar(epplex::Token* token);
         void visitIden(east::IdentifierNode* node);
         void visitTpof(east::TypeOfExprNode* node);
+        void visitInput(east::InputExprNode* node);
         void visitAddOp(east::AddOpNode* node);
         void visitMulOp(east::MulOpNode* node);
         void visitCmpOp(east::CmpOpNode* node);
