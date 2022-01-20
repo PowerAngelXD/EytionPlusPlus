@@ -26,7 +26,7 @@ namespace var{
         std::string type = "__NULL__"; // __DECI__ __STRING__ __INT__ __CHAR__ __BOOL__
     public:
         int line, column;
-
+        Value(bool is_arr, bool is_con);
         int val_int();
         std::vector<int> val_int_array();
         float val_deci();

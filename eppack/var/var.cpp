@@ -1,6 +1,7 @@
 #include "var.h"
 
 //var
+var::Value::Value(bool is_arr, bool is_con) : is_array(is_arr), is_const(is_con) {}
 bool var::Value::isArray(){
     return is_array;
 }
@@ -138,8 +139,7 @@ bool scope::ScopeSet::findInAllScope(std::string name){
     if(scope_pool[deep_count].find(name)) return true;
     else{
         int temp = deep_count;
-        while(true){
-            if(temp <= 0) break;
+        while(temp >= 0){
             if(scope_pool[temp].find(name)) return true;
             --temp;
         }
@@ -147,11 +147,10 @@ bool scope::ScopeSet::findInAllScope(std::string name){
     }
 }
 int scope::ScopeSet::findInAllScopeI(std::string name){
-    if(scope_pool[deep_count].find(name)) return scope_pool[deep_count].findI(name);
+    if(scope_pool[deep_count].find(name)) return deep_count;
     else{
         int temp = deep_count;
-        while(true){
-            if(temp <= 0) break;
+        while(temp >= 0){
             if(scope_pool[temp].find(name)) return temp;
             --temp;
         }
