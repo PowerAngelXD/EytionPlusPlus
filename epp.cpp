@@ -87,6 +87,41 @@ inline void epp_cli(){
                 std::string str(begin, end);
                 std::cout<<std::endl<<"view file: "<<cut<<"\n"<<str<<std::endl;
             }
+            else if(cmd.find("$") == 0){
+                std::string cut;
+                cut.assign(cmd.begin() + 1, cmd.end());
+                std::stringstream ss(cut);
+                epplex::Lexer lexer(ss);
+                //std::cout<<ss.str()<<std::endl;
+                auto tokens = lexer.getTokenGroup();
+                //for(auto token:tokens){std::cout<<token.format()<<std::endl;}
+                east::astParser ast(tokens);
+                east::ExprNode* repl_node = ast.gen_exprNode();
+                cenv::Calculation calc(p.sset);
+                if(repl_node->addexpr != nullptr){
+                    cvisitor::visitor v;
+                    v.visitAddExpr(repl_node->addexpr);
+                    calc.ins = v.ins; calc.constpool = v.constpool;
+                    calc.run();
+                }
+                else if(repl_node->boolexpr != nullptr){
+                    cvisitor::visitor v;
+                    v.visitBoolExpr(repl_node->boolexpr);
+                    calc.ins = v.ins; calc.constpool = v.constpool;
+                    calc.run();
+                }
+                else if(repl_node->listexpr != nullptr){
+                    cvisitor::visitor v;
+                    v.visitListExpr(repl_node->listexpr);
+                    calc.ins = v.ins; calc.constpool = v.constpool;
+                    calc.run();
+                }
+                if(calc.result[0].first == "__STRING__")
+                    std::cout<<calc.constpool[calc.result[0].second];
+                else
+                    std::cout<<calc.result[0].second;
+                std::cout<<std::endl;
+            }
             else {
                 std::stringstream ss(cmd);
                 epplex::Lexer lexer(ss);
@@ -94,11 +129,9 @@ inline void epp_cli(){
                 auto tokens = lexer.getTokenGroup();
                 //for(auto token:tokens){std::cout<<token.format()<<std::endl;}
                 east::astParser ast(tokens);
-                //
-                    east::StatNode* node = ast.gen_statNode();
-                    p.stat = *node;
-                    p.parse();
-                //}
+                east::StatNode* node = ast.gen_statNode();
+                p.stat = *node;
+                p.parse();
                 //std::cout<<node->to_string()<<std::endl;
                 std::cout<<std::endl;
                 code = 1;
@@ -116,7 +149,7 @@ inline void epp_cli(){
 int main(int argc, char *argv[]){
     std::string cmd;
     if(argc >= 2){
-        if(strcmp(argv[1], "-v")==0 || strcmp(argv[1], "-version")==0) std::cout<<"version => dev-0.1.0"<<std::endl;
+        if(strcmp(argv[1], "-v")==0 || strcmp(argv[1], "-version")==0) std::cout<<"version => debug-0.1.0"<<std::endl;
         else if(strcmp(argv[1], "-r")==0 || strcmp(argv[1], "-run")==0){
             std::ifstream file(argv[2]);
             std::size_t index = ((std::string)argv[2]).find(".epp", ((std::string)argv[2]).size() - ((std::string)".epp").size()); // file suffix check
