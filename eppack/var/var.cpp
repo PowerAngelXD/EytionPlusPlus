@@ -89,25 +89,99 @@ void var::Value::set_val(int val){
     type = "__INT__";
 }
 void var::Value::set_val(std::string val){
-    str_val.push_back(val);
+    if(str_val.empty())
+        str_val.push_back(val);
+    else
+        str_val[0] = val;
     type = "__STRING__";
 }
 void var::Value::set_val(float val){
-    deci_val.push_back(val);
+    if(deci_val.empty())
+        deci_val.push_back(val);
+    else
+        deci_val[0] = val;
     type = "__DECI__";
 }
 void var::Value::set_val(bool val){
-    bool_val.push_back(val);
-    type = "__BOOL_";
+    if(bool_val.empty())
+        bool_val.push_back(val);
+    else
+        bool_val[0] = val;
+    type = "__BOOL__";
 }
 void var::Value::set_val(char val){
+    if(ch_val.empty())
+        ch_val.push_back(val);
+    else
+        ch_val[0] = val;
+    type = "__CHAR__";
+}
+
+void var::Value::arr_setVal(int val, int pos){
+    if(int_val.empty())
+        int_val.push_back(val);
+    else
+        int_val[pos] = val;
+    type = "__INT__";
+}
+void var::Value::arr_setVal(float val, int pos){
+    if(deci_val.empty())
+        deci_val.push_back(val);
+    else
+        deci_val[pos] = val;
+    type = "__DECI__";
+}
+void var::Value::arr_setVal(std::string val, int pos){
+    if(str_val.empty())
+        str_val.push_back(val);
+    else
+        str_val[pos] = val;
+    type = "__STRING__";
+}
+void var::Value::arr_setVal(bool val, int pos){
+    if(bool_val.empty())
+        bool_val.push_back(val);
+    else
+        bool_val[pos] = val;
+    type = "__BOOL__";
+}
+void var::Value::arr_setVal(char val, int pos){
+    if(ch_val.empty())
+        ch_val.push_back(val);
+    else
+        ch_val[pos] = val;
+    type = "__CHAR__";
+}
+void var::Value::arr_addVal(int val){
+    int_val.push_back(val);
+    type = "__INT__";
+    is_array = true;
+}
+void var::Value::arr_addVal(float val){
+    deci_val.push_back(val);
+    type = "__DECI__";
+    is_array = true;
+}
+void var::Value::arr_addVal(char val){
     ch_val.push_back(val);
     type = "__CHAR__";
+    is_array = true;
+}
+void var::Value::arr_addVal(std::string val){
+    str_val.push_back(val);
+    type = "__STRING__";
+    is_array = true;
+}
+void var::Value::arr_addVal(bool val){
+    bool_val.push_back(val);
+    type = "__BOOL__";
+    is_array = true;
 }
 void var::Value::set_lc(int line_, int col_){
     line = line_;
     column = col_;
 }
+
 //
 
 //scope

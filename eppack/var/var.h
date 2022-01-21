@@ -47,6 +47,18 @@ namespace var{
         void set_val(bool val);
         void set_val(char val);
         void set_lc(int line_, int col_);
+
+        void arr_setVal(int val, int pos);
+        void arr_setVal(float val, int pos);
+        void arr_setVal(std::string val, int pos);
+        void arr_setVal(bool val, int pos);
+        void arr_setVal(char val, int pos);
+
+        void arr_addVal(int val);
+        void arr_addVal(float val);
+        void arr_addVal(char val);
+        void arr_addVal(std::string val);
+        void arr_addVal(bool val);
     };
 }
 
