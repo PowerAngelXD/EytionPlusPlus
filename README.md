@@ -16,4 +16,16 @@ You can get the compilation by the following command:
 cmake --build build
 ```
 
-### 
+### Example
+> HelloWorld
+```c++
+out "hello world!";
+```
+> Variable
+```c++
+var a="hello ";
+var b="world";
+out a+b;
+a="helloworld!";
+out a;
+```
