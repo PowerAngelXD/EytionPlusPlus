@@ -93,7 +93,7 @@ east::InputExprNode* east::astParser::gen_inputExprNode(){
         if(peek()->content == "(") token();
         else throw epperr::Epperr("SyntaxErrror", "Expect '('!", tg[pos].line, tg[pos].column);
         if(east::ExprNode::is_it(*this)) node->expr = gen_exprNode();
-        else throw epperr::Epperr("SyntaxErrror", "Unknown type of the expr!", tg[pos].line, tg[pos].column);
+        else ;
         if(peek()->content == ")") token();
         else throw epperr::Epperr("SyntaxErrror", "Expect ')'!", tg[pos].line, tg[pos].column);
         return node;
@@ -495,7 +495,10 @@ bool east::TypeOfExprNode::is_it(east::astParser ap){
 
 //input expr node
 std::string east::InputExprNode::to_string(){
-    return "input_expr: {" + mark->simply_format() + ", " + expr->to_string() + "}";
+    if(expr != nullptr)
+        return "input_expr: {" + mark->simply_format() + ", " + expr->to_string() + "}";
+    else
+        return "input_expr: {" + mark->simply_format()  + "}";
 }
 bool east::InputExprNode::is_it(east::astParser ap){
     return ap.peek()->content == "input";

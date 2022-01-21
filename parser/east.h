@@ -150,7 +150,7 @@ namespace east{
     class InputExprNode{
     public:
         epplex::Token* mark;
-        ExprNode* expr;
+        ExprNode* expr = nullptr;
         std::string tag = "__CALC__";
 
         std::string to_string();
