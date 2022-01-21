@@ -18,11 +18,11 @@ cmake --build build
 
 ### Example
 > HelloWorld
-```c++
+```go
 out "hello world!";
 ```
 > Variable
-```c++
+```go
 var a="hello ";
 var b="world";
 out a+b;
