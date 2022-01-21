@@ -25,6 +25,7 @@ void cenv::Calculation::run(){
         }
         else if(ins[i].instr == "__PUSHA__") {
             is_array = true;
+            len+=1;
             len = atoi(ins[i].unit.first.c_str());
         }
         else if(ins[i].instr == "__TPOF__") {
@@ -32,15 +33,24 @@ void cenv::Calculation::run(){
             push(cenv::calc_unit("__STRING__", constpool.size()-1));
         }
         else if(ins[i].instr == "__INPUT__"){
-            auto temp = pop();
-            if(temp.first == "__STRING__"){
-                std::cout<<constpool[(int)temp.second];
+            if(ins[i].para == " "){
+                std::cout<<" ";
                 std::string in;
                 std::getline(std::cin, in);
                 constpool.push_back(in);
                 push(cenv::calc_unit("__STRING__", constpool.size()-1));
             }
-            else throw epperr::Epperr("TypeError", "Types other than String cannot be used here", ins[i].line, ins[i].column);
+            else{
+                auto temp = pop();
+                if(temp.first == "__STRING__"){
+                    std::cout<<constpool[(int)temp.second];
+                    std::string in;
+                    std::getline(std::cin, in);
+                    constpool.push_back(in);
+                    push(cenv::calc_unit("__STRING__", constpool.size()-1));
+                }
+                else throw epperr::Epperr("TypeError", "Types other than String cannot be used here", ins[i].line, ins[i].column);
+            }
         }
         else if(ins[i].instr == "__POP__") {
             if(sset.findInAllScope(ins[i].para)){
@@ -53,6 +63,26 @@ void cenv::Calculation::run(){
                 }
                 else if(temp.second.getType() == "__STRING__") {
                     constpool.push_back(temp.second.val_string());
+                    push(cenv::calc_unit("__STRING__", constpool.size()-1));
+                }
+            }
+            else throw epperr::Epperr("NameError", "Unable to find identifier named: '" + ins[i].para + "'", ins[i].line, ins[i].column);
+        }
+        else if(ins[i].instr == "__ARRE_POP__") {
+            is_array = true;
+            if(sset.findInAllScope(ins[i].para)){
+                auto index = pop();
+                if(index.first != "__INT__")
+                    throw epperr::Epperr("TypeError", "The index of the list must be of type int", ins[i].line, ins[i].column);
+                auto temp = sset.scope_pool[sset.findInAllScopeI(ins[i].para)].vars[sset.scope_pool[sset.findInAllScopeI(ins[i].para)].findI(ins[i].para)];
+                if(temp.second.getType() == "__INT__") push(cenv::calc_unit("__INT__", temp.second.val_int_array()[index.second]));
+                else if(temp.second.getType() == "__DECI__") push(cenv::calc_unit("__DECI__", temp.second.val_deci_array()[index.second]));
+                else if(temp.second.getType() == "__BOOL__") push(cenv::calc_unit("__BOOL__", temp.second.val_bool_array()[index.second]));
+                else if(temp.second.getType() == "__CHAR__") {
+
+                }
+                else if(temp.second.getType() == "__STRING__") {
+                    constpool.push_back(temp.second.val_string_array()[index.second]);
                     push(cenv::calc_unit("__STRING__", constpool.size()-1));
                 }
             }
@@ -166,8 +196,11 @@ void cenv::Calculation::run(){
         }
     }
     if(is_array || len > 1){
-        for(auto re: env){
-            result.push_back(re);
+        std::string firstType;
+        for(int i = 0; i < env.size(); i++){
+            if(i==0) firstType = env[i].first;
+            if(env[i].first != firstType) throw epperr::Epperr("TypeError", "Cannot use inconsistent types in lists!", ins[i].line, ins[i].column);
+            result.push_back(env[i]);
         }
     }
     else result.push_back(pop());
