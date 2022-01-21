@@ -94,37 +94,11 @@ inline void epp_cli(){
                 auto tokens = lexer.getTokenGroup();
                 //for(auto token:tokens){std::cout<<token.format()<<std::endl;}
                 east::astParser ast(tokens);
-                if(east::ExprNode::is_it(ast)){
-                    east::ExprNode* repl_node = ast.gen_exprNode();
-                    cenv::Calculation calc(p.sset);
-                    if(repl_node->addexpr != nullptr){
-                        cvisitor::visitor v;
-                        v.visitAddExpr(repl_node->addexpr);
-                        calc.ins = v.ins; calc.constpool = v.constpool;
-                        calc.run();
-                    }
-                    else if(repl_node->boolexpr != nullptr){
-                        cvisitor::visitor v;
-                        v.visitBoolExpr(repl_node->boolexpr);
-                        calc.ins = v.ins; calc.constpool = v.constpool;
-                        calc.run();
-                    }
-                    else if(repl_node->listexpr != nullptr){
-                        cvisitor::visitor v;
-                        v.visitListExpr(repl_node->listexpr);
-                        calc.ins = v.ins; calc.constpool = v.constpool;
-                        calc.run();
-                    }
-                    if(calc.result[0].first == "__STRING__")
-                        std::cout<<calc.constpool[calc.result[0].second];
-                    else
-                        std::cout<<calc.result[0].second;
-                }
-                else{
+                //
                     east::StatNode* node = ast.gen_statNode();
                     p.stat = *node;
                     p.parse();
-                }
+                //}
                 //std::cout<<node->to_string()<<std::endl;
                 std::cout<<std::endl;
                 code = 1;
