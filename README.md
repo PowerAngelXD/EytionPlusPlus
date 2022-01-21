@@ -29,3 +29,29 @@ out a+b;
 a="helloworld!";
 out a;
 ```
+> List
+```go
+var a=[1,2,3,4];
+out a[0];
+a[1] = 45;
+out a[1];
+```
+> Delete
+```go
+var a=[1,2,3,4];
+delete a;
+var b="string";
+delete b;
+```
+> Special keywords
+```go
+# typeof
+var a=typeof("hello");
+out a; # output: __STRING__
+
+# input
+var b=input();
+var c=input("input: ");
+out b;
+out c;
+```
