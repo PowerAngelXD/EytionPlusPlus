@@ -227,6 +227,7 @@ east::StmtNode* east::astParser::gen_stmtNode(){
         else if(east::AssignStmtNode::is_it(*this)) node->assignstmt = gen_assignStmtNode();
         else if(east::DeleteStmtNode::is_it(*this)) node->deletestmt = gen_delStmtNode();
         else if(east::BlockStmtNode::is_it(*this)) node->blockstmt = gen_blockStmtNode();
+        else if(east::IfStmtNode::is_it(*this)) node->ifstmt = gen_ifStmtNode();
         return node;
     }
     else throw epperr::Epperr("SyntaxError", "Unknown type of the stmt!", tg[pos].line, tg[pos].column);
@@ -283,7 +284,7 @@ east::DeleteStmtNode* east::astParser::gen_delStmtNode(){
         else throw epperr::Epperr("SyntaxError", "Expect ';'", tg[pos].line, tg[pos].column);
         return node;
     }
-    else throw epperr::Epperr("SyntaxError", "It is not a proper Assign statement format", tg[pos].line, tg[pos].column);
+    else throw epperr::Epperr("SyntaxError", "It is not a proper Delete statement format", tg[pos].line, tg[pos].column);
 }
 east::BlockStmtNode* east::astParser::gen_blockStmtNode(){
     if(east::BlockStmtNode::is_it(*this)){
@@ -294,7 +295,24 @@ east::BlockStmtNode* east::astParser::gen_blockStmtNode(){
         else throw epperr::Epperr("SyntaxError", "Expect '}'", tg[pos].line, tg[pos].column);
         return node;
     }
-    else throw epperr::Epperr("SyntaxError", "It is not a proper Assign statement format", tg[pos].line, tg[pos].column);
+    else throw epperr::Epperr("SyntaxError", "It is not a proper Block statement format", tg[pos].line, tg[pos].column);
+}
+east::IfStmtNode* east::astParser::gen_ifStmtNode(){
+    if(east::IfStmtNode::is_it(*this)){
+        east::IfStmtNode* node = new east::IfStmtNode;
+        node->mark = token();
+        if(peek()->content == "(") node->left = token();
+        else throw epperr::Epperr("SyntaxError", "Expect '('", tg[pos].line, tg[pos].column);
+        if(east::BoolExprNode::is_it(*this)) node->cond = gen_boolExprNode();
+        else throw epperr::Epperr("SyntaxError", "requires a boolean expression to supply to the if statement", tg[pos].line, tg[pos].column);
+        if(peek()->content == ")") node->right = token();
+        else throw epperr::Epperr("SyntaxError", "Expect ')'", tg[pos].line, tg[pos].column);
+        if(east::BlockStmtNode::is_it(*this)) node->body = gen_blockStmtNode();
+        else if(east::StmtNode::is_it(*this)) node->stc = gen_stmtNode();
+        else throw epperr::Epperr("SyntaxError", "There is at least one statement under the if statement", tg[pos].line, tg[pos].column);
+        return node;
+    }
+    else throw epperr::Epperr("SyntaxError", "It is not a proper If statement format", tg[pos].line, tg[pos].column);
 }
 
 //
@@ -407,9 +425,13 @@ bool east::BoolOpNode::is_it(east::astParser ap){
 
 //cmp expr node
 std::string east::CmpExprNode::to_string(){
-    return "cmp_expr: {" + this->expr->to_string() + ", symbol:" + this->op->to_string() + ", " + this->target->to_string() + "}";
+    if(op != nullptr)
+        return "cmp_expr: {" + this->expr->to_string() + ", symbol:" + this->op->to_string() + ", " + this->target->to_string() + "}";
+    else
+        return "cmp_expr: {" + this->expr->to_string()+ "}";
 }
 bool east::CmpExprNode::is_it(east::astParser ap){
+    if(ap.peek()->content == "true" || ap.peek()->content == "false") return true;
     int temp = ap.pos;
     if(east::AddExprNode::is_it(ap)) {
         ap.gen_addExprNode();
@@ -511,12 +533,13 @@ std::string east::StmtNode::to_string(){
     else if(vorcstmt != nullptr) return "stmt_node: {" + this->vorcstmt->to_string() + "}";
     else if(assignstmt != nullptr) return "stmt_node: {" + this->assignstmt->to_string() + "}";
     else if(deletestmt != nullptr) return "stmt_node: {" + this->deletestmt->to_string() + "}";
+    else if(ifstmt != nullptr) return "stmt_node: {" + this->ifstmt->to_string() + "}";
     else if(blockstmt != nullptr) return "stmt_node: {" + this->blockstmt->to_string() + "}";
     else return "__NULL__";
 }
 bool east::StmtNode::is_it(east::astParser ap){
     return east::OutStmtNode::is_it(ap) || east::VorcStmtNode::is_it(ap) || east::AssignStmtNode::is_it(ap) || east::DeleteStmtNode::is_it(ap)
-            || east::BlockStmtNode::is_it(ap);
+            || east::BlockStmtNode::is_it(ap) || east::IfStmtNode::is_it(ap);
 }
 //
 
@@ -576,11 +599,23 @@ bool east::BlockStmtNode::is_it(astParser ap){
 }
 //
 
-//delete stmt  node
+//delete stmt node
 std::string east::DeleteStmtNode::to_string(){
     return "delete_stmt: {" + this->mark->simply_format() + ", " + this->iden->to_string() + ", " + end->simply_format() + "}";
 }
 bool east::DeleteStmtNode::is_it(east::astParser ap){
     return ap.peek()->content == "delete";
+}
+//
+
+//if stmt node
+std::string east::IfStmtNode::to_string(){
+    if(body != nullptr)
+        return "if_stmt: {" + this->mark->simply_format() + ", " + this->cond->to_string() + ", " + this->body->to_string() + "}";
+    else
+        return "if_stmt: {" + this->mark->simply_format() + ", " + this->cond->to_string() + ", " + this->stc->to_string() + "}";
+}
+bool east::IfStmtNode::is_it(east::astParser ap){
+    return ap.peek()->content == "if";
 }
 //
