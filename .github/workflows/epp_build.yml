@@ -19,13 +19,14 @@ jobs:
       - name: cmake_config
         run: |
             mkdir build && cd build
-            cmake ${{github.workspace}}
+            ls .
+            cmake .
       - name: make
-        run: cmake --build .
+        run: cmake --build build
       - name: remove useless files
         run: rm -rf .git; rm -rf $(find . | grep ".cpp") ; rm -rf $(find . | grep ".h"); rm -rf $(find . | grep ".hpp")
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2.3.0
         with:
           name: build-all
-          path: .
+          path: build
