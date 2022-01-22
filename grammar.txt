@@ -1,0 +1,15 @@
+addop ::= '+'|'-'
+mulop ::= '/'|'*'|'%'
+primexpr ::= number|identifier|string|char|boolconst|typeof|input
+mulexpr ::= primexpr (mulop primexpr)*
+addexpr ::= addexpr (addop addexpr)*
+expr ::= addexpr | boolexpr | listexpr
+typeof ::= 'typeof' '(' expr ')'
+input ::= 'input' '(' string ')'
+
+outstmt ::= 'out' expr ';'
+vorcstmt ::= 'var'|'const' identifier '=' expr ';'
+assignstmt ::= identifier '=' expr ';'
+deletestmt ::= 'delete' identifier ';'
+blockstmt ::= '{' (stmt)* '}'
+ifstmt ::= 'if' '(' boolexpr ')' blockstmt|stmt
