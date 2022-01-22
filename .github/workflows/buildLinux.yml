@@ -1,4 +1,4 @@
-name: epp_build
+name: buildLinux
 
 on:
   push:
@@ -19,7 +19,6 @@ jobs:
       - name: cmake_config
         run: |
             mkdir build && cd build
-            ls ..
             cmake ..
       - name: make
         run: cmake --build build
@@ -28,5 +27,5 @@ jobs:
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2.3.0
         with:
-          name: build-all
+          name: epp-linux-(dev-0.1.1)
           path: build
