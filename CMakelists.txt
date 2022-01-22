@@ -1,4 +1,8 @@
+set(CMAKE_SYSTEM_NAME Windows)
+set(CMAKE_C_COMPILER E:/x86_64-8.1.0-release-posix-seh-rt_v6-rev0/mingw64/bin/gcc.exe)
+set(CMAKE_CXX_COMPILER E:/x86_64-8.1.0-release-posix-seh-rt_v6-rev0/mingw64/bin/g++.exe)
 cmake_minimum_required(VERSION 3.21)
+
 project(e++)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
