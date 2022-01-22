@@ -120,11 +120,11 @@ void parser::Parser::parse(){
                                                                            stat.stmts[index]->assignstmt->iden->idens[0]->line,
                                                                            stat.stmts[index]->assignstmt->iden->idens[0]->column);
                     else{
-                        if(type == "__INT__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.findInAllScopeI(name)].second.arr_setVal((int)calc.result[0].second, (int)arri.result[0].second);
-                        else if(type == "__DECI__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.findInAllScopeI(name)].second.arr_setVal(calc.result[0].second, (int)arri.result[0].second);
-                        else if(type == "__STRING__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.findInAllScopeI(name)].second.arr_setVal(calc.constpool[(int)calc.result[0].second], (int)arri.result[0].second);
-                        else if(type == "__CHAR__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.findInAllScopeI(name)].second.arr_setVal(calc.constpool[(int)calc.result[0].second], (int)arri.result[0].second);
-                        else if(type == "__BOOL__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.findInAllScopeI(name)].second.arr_setVal((bool)calc.result[0].second, (int)arri.result[0].second);
+                        if(type == "__INT__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal((int)calc.result[0].second, (int)arri.result[0].second);
+                        else if(type == "__DECI__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal(calc.result[0].second, (int)arri.result[0].second);
+                        else if(type == "__STRING__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal(calc.constpool[(int)calc.result[0].second], (int)arri.result[0].second);
+                        else if(type == "__CHAR__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal(calc.constpool[(int)calc.result[0].second], (int)arri.result[0].second);
+                        else if(type == "__BOOL__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal((bool)calc.result[0].second, (int)arri.result[0].second);
                     }
                 }
                 else{
@@ -161,6 +161,28 @@ void parser::Parser::parse(){
             subp.sset = this->sset;
             subp.parse();
             this->sset.remove();
+        }
+        else if(stat.stmts[index]->ifstmt != nullptr){
+            east::ExprNode temp;
+            temp.boolexpr = stat.stmts[index]->ifstmt->cond;
+            cenv::Calculation calc = _calc(temp, sset);
+            if(calc.result[0].first == "__BOOL__" && calc.result[0].second > 0){
+                if(stat.stmts[index]->ifstmt->stc != nullptr){
+                    parser::Parser stc_p;
+                    east::StatNode _stat;
+                    _stat.stmts.push_back(stat.stmts[index]->ifstmt->stc);
+                    stc_p.stat = _stat;
+                    stc_p.sset = sset;
+                    stc_p.parse();
+                }
+                else{
+                    parser::Parser stc_p;
+                    stc_p.stat = *stat.stmts[index]->ifstmt->body->body;
+                    stc_p.sset = sset;
+                    stc_p.parse();
+                }
+            }
+            else continue;
         }
     }
 }
