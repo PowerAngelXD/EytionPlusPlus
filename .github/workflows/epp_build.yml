@@ -1,8 +1,25 @@
-name: Epp build
-on: [push]
+name: C/C++ CI on Linux
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
 jobs:
-  Explore-GitHub-Actions:
-    runs-on: windows-latest
+  build:
+    runs-on: ubuntu-latest
+
     steps:
-      run: mkdir build
-      run: cmake --build build
+      - uses: actions/checkout@v2
+      - name: prepare
+        run: sudo apt install mingw-w64 -y
+      - name: make
+        run: make product_unix product_win
+      - name: remove useless files
+        run: rm -rf .git; rm -rf $(find . | grep ".cpp") ; rm -rf $(find . | grep ".h"); rm -rf $(find . | grep ".hpp")
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v2.3.0
+        with:
+          name: build-all
+          path: .
