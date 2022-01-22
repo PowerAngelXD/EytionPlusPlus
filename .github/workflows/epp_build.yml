@@ -14,8 +14,12 @@ jobs:
       - uses: actions/checkout@v2
       - name: prepare
         run: sudo apt install mingw-w64 -y
+      - name: cmake_prepare
+        run: sudo apt install cmake -y
+      - name: bin_dir
+        run: mkdir bin
       - name: make
-        run: make product_unix product_win
+        run: cmake --build bin
       - name: remove useless files
         run: rm -rf .git; rm -rf $(find . | grep ".cpp") ; rm -rf $(find . | grep ".h"); rm -rf $(find . | grep ".hpp")
       - name: Upload a Build Artifact
