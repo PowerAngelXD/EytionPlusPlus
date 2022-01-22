@@ -4,4 +4,5 @@ jobs:
   Explore-GitHub-Actions:
     runs-on: windows-latest
     steps:
+      run: mkdir build
       run: cmake --build build
