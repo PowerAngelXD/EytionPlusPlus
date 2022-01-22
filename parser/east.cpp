@@ -580,7 +580,13 @@ std::string east::AssignStmtNode::to_string(){
     return "assign_stmt: {[" + iden->to_string() + "]" + this->equ->simply_format() + ", " + this->val->to_string() + ", " + this->end->simply_format() + "}";
 }
 bool east::AssignStmtNode::is_it(east::astParser ap){
-    return east::IdentifierNode::is_it(ap);
+    if(east::IdentifierNode::is_it(ap)){
+        int temp = ap.pos;
+        ap.gen_identifierNode();
+        if(ap.peek()->content == "=") {ap.pos = temp; return true;}
+        else {ap.pos = temp; return false;}
+    }
+    return false;
 }
 //
 

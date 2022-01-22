@@ -111,7 +111,7 @@ void parser::Parser::parse(){
                 throw epperr::Epperr("AssignError", "Cannot assign a value to a constant", stat.stmts[index]->assignstmt->iden->idens[0]->line, stat.stmts[index]->assignstmt->iden->idens[0]->column);
             if(sset.findInAllScope(name)){
                 if(stat.stmts[index]->assignstmt->iden->getIdenType() == "__ARRE__"){
-                    auto temp = sset.scope_pool[sset.getDeep()].vars[sset.findInAllScopeI(name)];
+                    auto temp = sset.scope_pool[sset.getDeep()].vars[sset.scope_pool[sset.getDeep()].findI(name)];
                     auto type = calc.result[0].first;
                     east::ExprNode _temp;
                     _temp.addexpr = stat.stmts[index]->assignstmt->iden->arrindex;
@@ -128,17 +128,17 @@ void parser::Parser::parse(){
                     }
                 }
                 else{
-                    auto temp = sset.scope_pool[sset.getDeep()].vars[sset.findInAllScopeI(name)];
+                    auto temp = sset.scope_pool[sset.getDeep()].vars[sset.scope_pool[sset.getDeep()].findI(name)];
                     auto type = calc.result[0].first;
                     if(temp.second.getType() != type) throw epperr::Epperr("TypeError", "A value of a different type cannot be assigned to this variable",
                                                                                 stat.stmts[index]->assignstmt->iden->idens[0]->line,
                                                                                 stat.stmts[index]->assignstmt->iden->idens[0]->column);
                     else{
-                        if(type == "__INT__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.findInAllScopeI(name)].second.set_val((int)calc.result[0].second);
-                        else if(type == "__DECI__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.findInAllScopeI(name)].second.set_val(calc.result[0].second);
-                        else if(type == "__STRING__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.findInAllScopeI(name)].second.set_val(calc.constpool[(int)calc.result[0].second]);
-                        else if(type == "__CHAR__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.findInAllScopeI(name)].second.set_val(calc.constpool[(int)calc.result[0].second]);
-                        else if(type == "__BOOL__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.findInAllScopeI(name)].second.set_val((bool)calc.result[0].second);
+                        if(type == "__INT__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.getDeep()].findI(name)].second.set_val((int)calc.result[0].second);
+                        else if(type == "__DECI__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.getDeep()].findI(name)].second.set_val(calc.result[0].second);
+                        else if(type == "__STRING__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.getDeep()].findI(name)].second.set_val(calc.constpool[(int)calc.result[0].second]);
+                        else if(type == "__CHAR__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.getDeep()].findI(name)].second.set_val(calc.constpool[(int)calc.result[0].second]);
+                        else if(type == "__BOOL__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.getDeep()].findI(name)].second.set_val((bool)calc.result[0].second);
                     }
                 }
             }
