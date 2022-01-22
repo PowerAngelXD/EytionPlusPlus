@@ -27,6 +27,7 @@ namespace var{
     public:
         int line, column;
         Value(bool is_arr, bool is_con);
+        Value(bool is_arr, bool is_con, std::string _type);
         int val_int();
         std::vector<int> val_int_array();
         float val_deci();

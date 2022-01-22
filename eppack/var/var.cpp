@@ -2,6 +2,7 @@
 
 //var
 var::Value::Value(bool is_arr, bool is_con) : is_array(is_arr), is_const(is_con) {}
+var::Value::Value(bool is_arr, bool is_con, std::string _type) : is_array(is_arr), is_const(is_con), type(_type) {}
 bool var::Value::isArray(){
     return is_array;
 }
@@ -207,7 +208,15 @@ int scope::Scope::findI(std::string target){
 }
 
 scope::ScopeSet::ScopeSet(){
+    var::Value epp_version(false, true, "__STRING__");
+    var::Value epp_build_time(false, true, "__STRING__");
+    epp_version.set_val((std::string)"dev-0.1.1");
+    epp_build_time.set_val((std::string)__DATE__);
     this->newScope("__epp_global_scope__");
+    this->scope_pool[0].identifier_table.push_back("epp_version");
+    this->scope_pool[0].vars.push_back(std::pair<std::string, var::Value>("epp_version", epp_version));
+    this->scope_pool[0].identifier_table.push_back("epp_build_time");
+    this->scope_pool[0].vars.push_back(std::pair<std::string, var::Value>("epp_build_time", epp_build_time));
 }
 bool scope::ScopeSet::findInAllScope(std::string name){
     if(scope_pool[deep_count].find(name)) return true;
