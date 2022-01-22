@@ -1,4 +1,4 @@
-name: C/C++ CI on Linux
+name: epp_build
 
 on:
   push:
