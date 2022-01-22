@@ -20,7 +20,7 @@ parser::Parser p;
 inline void epp_cli(){
     int code = 10;
     std::string cmd;
-    std::wcout<<L"Eytion++ ["<<__DATE__<<"]\nCopyright (c) PowerAngelXd\nNow version: 0.1.0\nyou can type 'help' to get 'Eytion++Cli & Eytion++Grammar' help document"<<std::endl;
+    std::wcout<<L"Eytion++ ["<<__DATE__<<"]\nCopyright (c) PowerAngelXd\nNow version: 0.1.1\nyou can type 'help' to get 'Eytion++Cli & Eytion++Grammar' help document"<<std::endl;
     while(true){
         if(code == 0) break;
         try{
@@ -54,7 +54,8 @@ inline void epp_cli(){
                                    "vorcstmt ::= 'var'|'const' identifier '=' expr ';'\n"
                                    "assignstmt ::= identifier '=' expr ';'\n"
                                    "deletestmt ::= 'delete' identifier ';'\n"
-                                   "blockstmt ::= '{' (stmt)* '}'\n";
+                                   "blockstmt ::= '{' (stmt)* '}'\n"
+                                   "ifstmt ::= 'if' '(' boolexpr ')' blockstmt|stmt";
                 std::cout<<help<<std::endl;
             }
             else if(cmd.find("run") == 0){
@@ -77,6 +78,8 @@ inline void epp_cli(){
                     std::cout<<std::endl;
                     code = 1;
                 }
+                parser::Parser new_p;
+                p = new_p;
             }
             else if(cmd.find("view") == 0){
                 std::string cut;
@@ -149,7 +152,7 @@ inline void epp_cli(){
 int main(int argc, char *argv[]){
     std::string cmd;
     if(argc >= 2){
-        if(strcmp(argv[1], "-v")==0 || strcmp(argv[1], "-version")==0) std::cout<<"version => debug-0.1.0"<<std::endl;
+        if(strcmp(argv[1], "-v")==0 || strcmp(argv[1], "-version")==0) std::cout<<"version => dev-0.1.1"<<std::endl;
         else if(strcmp(argv[1], "-r")==0 || strcmp(argv[1], "-run")==0){
             std::ifstream file(argv[2]);
             std::size_t index = ((std::string)argv[2]).find(".epp", ((std::string)argv[2]).size() - ((std::string)".epp").size()); // file suffix check
@@ -179,7 +182,10 @@ int main(int argc, char *argv[]){
             std::cout<<help<<std::endl;
         }
     }
-    else std::cout<<"parameter '"<<argv[1]<<"' that does not exist"<<std::endl;
+    else{
+        std::cout<<"If you want to run EytionCli you can type './e++ -cli'"<<std::endl;
+        std::cout<<"If you want to run the \".epp\" file, you can type \"./e++ -r (filename)\""<<std::endl;
+    }
     end:
     return 0;
 }
