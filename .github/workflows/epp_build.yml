@@ -19,8 +19,8 @@ jobs:
       - name: cmake_config
         run: |
             mkdir build && cd build
-            ls .
-            cmake .
+            ls ..
+            cmake ..
       - name: make
         run: cmake --build build
       - name: remove useless files
