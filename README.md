@@ -43,6 +43,15 @@ delete a;
 var b="string";
 delete b;
 ```
+> If
+```go
+var a=input();
+if (a=="hello")
+    out "hello! my friend!";
+if (a=="good bye"){
+    out "good bye!!!";
+}
+```
 > Special keywords
 ```go
 # typeof
