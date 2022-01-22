@@ -140,7 +140,7 @@ epplex::Token epplex::Lexer::Identifier() {
         ch = get();
     }
     put(ch);
-    std::vector keymap = {"out", "var", "const", "typeof", "input", "delete", "area", "act", "true", "false"};
+    std::vector keymap = {"out", "var", "const", "typeof", "input", "delete", "area", "act", "true", "false", "if"};
     for(auto iden : keymap)
         if (str == iden) {return {str, "__KEYWORD__", "__IDENTIFIER__", line, column};}
     return {str, "__IDENTIFIER__", "__IDENTIFIER__", line, column};
@@ -152,6 +152,7 @@ epplex::Token epplex::Lexer::String(){
     std::string str;
     if(sign == '"'){
         while (ch != '"'){
+            if(input.eof()) if(str.size() > 1) throw epperr::Epperr("StringError", "Expect '\"'", line, column);
             str += ch;
             ch = get();
         }
@@ -159,6 +160,7 @@ epplex::Token epplex::Lexer::String(){
     }
     else if(sign == '\''){
         while (ch != '\''){
+            if(input.eof()) if(str.size() > 1) throw epperr::Epperr("StringError", "Expect '\''", line, column);
             str += ch;
             ch = get();
         }
