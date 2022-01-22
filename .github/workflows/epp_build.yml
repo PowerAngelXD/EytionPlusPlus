@@ -11,19 +11,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Build CMake
-        uses: ashutoshvarma/action-cmake-build@v1
+      - uses: actions/checkout@v2
+      - name: prepare
+        run: | 
+            sudo apt install mingw-w64 -y
+            sudo apt install cmake -y
+      - name: cmake_config
+        run: |
+            mkdir build && cd build
+            ls
+      - name: make
+        run: cmake --build .
+      - name: remove useless files
+        run: rm -rf .git; rm -rf $(find . | grep ".cpp") ; rm -rf $(find . | grep ".h"); rm -rf $(find . | grep ".hpp")
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v2.3.0
         with:
-          build-dir: ${{ runner.workspace }}/build
-          # will set the CC & CXX for cmake
-          cc: gcc
-          cxx: g++
-          build-type: Release
-          # Extra options pass to cmake while configuring project
-          configure-options: -DCMAKE_C_FLAGS=-w32 -DPNG_INCLUDE=OFF
-          run-test: false
-          ctest-options: -cli
-          # install the build using cmake --install
-          install-build: true
-          # run build using '-j [parallel]' to use multiple threads to build
-          parallel: 14
+          name: build-all
+          path: .
