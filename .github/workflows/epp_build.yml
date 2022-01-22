@@ -4,5 +4,4 @@ jobs:
   Explore-GitHub-Actions:
     runs-on: windows-latest
     steps:
-      run: echo "epp build start..."
       run: cmake --build build
