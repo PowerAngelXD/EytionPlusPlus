@@ -9,6 +9,10 @@ and has some more practical functions than Eytion
 This project uses the MIT open source license
 
 ### Install
+If you are a linux system, you can get the latest compilation through action \
+If your system is Windows, you can get the compilation through release
+
+### Build
 After you download the source code package of this project, go to the inside of the downloaded folder\
 after setting the working directory of the console to that directory, \
 You can get the compilation by the following command:
