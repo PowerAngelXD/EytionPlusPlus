@@ -19,7 +19,7 @@ jobs:
       - name: bin_dir
         run: mkdir bin
       - name: cmake_config
-        run: cmake bin
+        run: cmake .
       - name: make
         run: cmake --build bin
       - name: remove useless files
