@@ -116,8 +116,10 @@ void cvisitor::visitor::visitBoolOp(east::BoolOpNode* node){
 }
 void cvisitor::visitor::visitCmpExpr(east::CmpExprNode* node){
     visitAddExpr(node->expr);
-    visitAddExpr(node->target);
-    visitCmpOp(node->op);
+    if(node->op != nullptr){
+        visitAddExpr(node->target);
+        visitCmpOp(node->op);
+    }
 }
 void cvisitor::visitor::visitBoolExpr(east::BoolExprNode* node){
     visitCmpExpr(node->cmps[0]);
