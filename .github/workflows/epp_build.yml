@@ -16,10 +16,9 @@ jobs:
         run: | 
             sudo apt install mingw-w64 -y
             sudo apt install cmake -y
-      - name: bin_dir
-        run: mkdir bin
       - name: cmake_config
         run: |
+            cd ..
             cd ..
             cmake .
       - name: make
