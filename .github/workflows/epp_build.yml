@@ -21,7 +21,7 @@ jobs:
       - name: cmake_config
         run: cmake .
       - name: make
-        run: cmake --build bin
+        run: cmake --build .
       - name: remove useless files
         run: rm -rf .git; rm -rf $(find . | grep ".cpp") ; rm -rf $(find . | grep ".h"); rm -rf $(find . | grep ".hpp")
       - name: Upload a Build Artifact
