@@ -75,13 +75,23 @@ void cenv::Calculation::run(){
                 if(index.first != "__INT__")
                     throw epperr::Epperr("TypeError", "The index of the list must be of type int", ins[i].line, ins[i].column);
                 auto temp = sset.scope_pool[sset.findInAllScopeI(ins[i].para)].vars[sset.scope_pool[sset.findInAllScopeI(ins[i].para)].findI(ins[i].para)];
-                if(temp.second.getType() == "__INT__") push(cenv::calc_unit("__INT__", temp.second.val_int_array()[index.second]));
-                else if(temp.second.getType() == "__DECI__") push(cenv::calc_unit("__DECI__", temp.second.val_deci_array()[index.second]));
-                else if(temp.second.getType() == "__BOOL__") push(cenv::calc_unit("__BOOL__", temp.second.val_bool_array()[index.second]));
+                if(temp.second.getType() == "__INT__") {
+                    if(index.second > temp.second.val_int_array().size()-1) throw epperr::Epperr("ArrayError", "The referenced content is outside the bounds of the array", ins[i].line, ins[i].column);
+                    push(cenv::calc_unit("__INT__", temp.second.val_int_array()[index.second]));
+                }
+                else if(temp.second.getType() == "__DECI__") {
+                    if(index.second > temp.second.val_deci_array().size()-1) throw epperr::Epperr("ArrayError", "The referenced content is outside the bounds of the array", ins[i].line, ins[i].column);
+                    push(cenv::calc_unit("__DECI__", temp.second.val_deci_array()[index.second]));
+                }
+                else if(temp.second.getType() == "__BOOL__") {
+                    if(index.second > temp.second.val_bool_array().size()-1) throw epperr::Epperr("ArrayError", "The referenced content is outside the bounds of the array", ins[i].line, ins[i].column);
+                    push(cenv::calc_unit("__BOOL__", temp.second.val_bool_array()[index.second]));
+                }
                 else if(temp.second.getType() == "__CHAR__") {
 
                 }
                 else if(temp.second.getType() == "__STRING__") {
+                    if(index.second > temp.second.val_string_array().size()-1) throw epperr::Epperr("ArrayError", "The referenced content is outside the bounds of the array", ins[i].line, ins[i].column);
                     constpool.push_back(temp.second.val_string_array()[index.second]);
                     push(cenv::calc_unit("__STRING__", constpool.size()-1));
                 }
