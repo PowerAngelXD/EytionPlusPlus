@@ -22,7 +22,7 @@ jobs:
           # Extra options pass to cmake while configuring project
           configure-options: -DCMAKE_C_FLAGS=-w32 -DPNG_INCLUDE=OFF
           run-test: false
-          ctest-options:
+          ctest-options: -cli
           # install the build using cmake --install
           install-build: true
           # run build using '-j [parallel]' to use multiple threads to build
