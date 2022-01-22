@@ -69,7 +69,7 @@ void cenv::Calculation::run(){
             else throw epperr::Epperr("NameError", "Unable to find identifier named: '" + ins[i].para + "'", ins[i].line, ins[i].column);
         }
         else if(ins[i].instr == "__ARRE_POP__") {
-            is_array = true;
+            //is_array = true;
             if(sset.findInAllScope(ins[i].para)){
                 auto index = pop();
                 if(index.first != "__INT__")
@@ -180,6 +180,7 @@ void cenv::Calculation::run(){
             auto left = pop();
             if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__BOOL__", left.second && right.second));
             else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__BOOL__", left.second && right.second));
+            else if(left.first == "__BOOL__" || right.first == "__BOOL__") push(cenv::calc_unit("__BOOL__", left.second && right.second));
             else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '&&'", ins[i].line, ins[i].column);
         }
         else if(ins[i].instr == "||") {
@@ -187,6 +188,7 @@ void cenv::Calculation::run(){
             auto left = pop();
             if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__BOOL__", left.second || right.second));
             else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__BOOL__", left.second || right.second));
+            else if(left.first == "__BOOL__" || right.first == "__BOOL__") push(cenv::calc_unit("__BOOL__", left.second || right.second));
             else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '||'", ins[i].line, ins[i].column);
         }
         else if(ins[i].instr == "!") {
