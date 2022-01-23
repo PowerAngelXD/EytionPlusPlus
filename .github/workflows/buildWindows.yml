@@ -16,7 +16,7 @@ jobs:
         run: |
           sudo apt install mingw-w64 -y
           mkdir build && cd build
-          cmake .. -DCMAKE_CXX_COMPILER=x86_64-w64-mingw-g++-posix
+          cmake .. -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++
       - name: make
         run: cmake --build build
       - name: remove useless files
