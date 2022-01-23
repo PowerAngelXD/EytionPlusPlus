@@ -170,6 +170,26 @@ namespace east{
         static bool is_it(astParser ap);
     };
 
+    class TypeToExprNode{
+    public:
+        epplex::Token* mark;
+        ExprNode* expr = nullptr;
+        std::string tag = "__CALC__";
+
+        std::string to_string();
+        static bool is_it(astParser ap);
+    };
+
+    class LenExprNode{
+    public:
+        epplex::Token* mark;
+        ExprNode* expr = nullptr;
+        std::string tag = "__CALC__";
+
+        std::string to_string();
+        static bool is_it(astParser ap);
+    };
+
     class PrimExprNode{
     public:
         epplex::Token* number = nullptr;
@@ -179,6 +199,8 @@ namespace east{
         epplex::Token* ch = nullptr;
         TypeOfExprNode* tpof = nullptr;
         InputExprNode* input = nullptr;
+        TypeToExprNode* typeto = nullptr;
+        LenExprNode* glen = nullptr;
         epplex::Token* left = nullptr;
         AddExprNode* addexpr = nullptr; // use '()'
         BoolExprNode* boolexpr = nullptr; // use '()'
@@ -276,7 +298,7 @@ namespace east{
     public:
         epplex::Token* mark;
         epplex::Token* left;
-        BoolExprNode* cond;
+        ExprNode* cond;
         epplex::Token* right;
         BlockStmtNode* body = nullptr;
         StmtNode* stc = nullptr;
@@ -346,6 +368,8 @@ namespace east{
         ListExprNode* gen_listExprNode();
         TypeOfExprNode* gen_tpofExprNode();
         InputExprNode* gen_inputExprNode();
+        LenExprNode* gen_lenExprNode();
+        TypeToExprNode* gen_tytExprNode();
 
         StmtNode* gen_stmtNode();
         StatNode* gen_statNode();
