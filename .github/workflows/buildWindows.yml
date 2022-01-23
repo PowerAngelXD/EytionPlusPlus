@@ -15,7 +15,7 @@ jobs:
       - name: cmake_config
         run: |
           mkdir build && cd build
-          cmake ..
+          cmake .. -DCMAKE_CXX_COMPILER=g++
       - name: make
         run: cmake --build build
       - name: remove useless files
