@@ -16,7 +16,7 @@
 
 namespace cenv{
     typedef std::string calc_type; // __INT__ __DECI__ __STRING__ __CHAR__ __BOOL__ __NULL__
-    typedef std::string calc_instr; // __PUSH__ __PUSHA__ __TPOF__ __INPUT__ __ARRE_POP__
+    typedef std::string calc_instr; // __PUSH__ __PUSHA__ __TPOF__ __INPUT__ __ARRE_POP__ __LEN__ __TYT__
     typedef std::pair<calc_type, float> calc_unit;
 
     struct calc_ins{

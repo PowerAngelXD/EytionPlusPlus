@@ -28,6 +28,67 @@ void cenv::Calculation::run(){
             len+=1;
             len = atoi(ins[i].unit.first.c_str());
         }
+        else if(ins[i].instr == "__TYT__") {
+            auto original = pop();
+            auto target_type = ins[i].para;
+            if(!is_array){
+                if(target_type == original.first) push(cenv::calc_unit(original.first, original.second));
+                else if(target_type == "__INT__"){
+                    if(original.first == "__STRING__")
+                        push(cenv::calc_unit(target_type, atoi(constpool[original.second].c_str())));
+                    else if(original.first == "__DECI__")
+                        push(cenv::calc_unit(target_type, (int)original.second));
+                    else if(original.first == "__BOOL__")
+                        push(cenv::calc_unit(target_type, (int)original.second));
+                }
+                else if(target_type == "__DECI__"){
+                    if(original.first == "__STRING__")
+                        push(cenv::calc_unit(target_type, atof(constpool[original.second].c_str())));
+                    else if(original.first == "__INT__")
+                        push(cenv::calc_unit(target_type, (float)original.second));
+                    else if(original.first == "__BOOL__")
+                        push(cenv::calc_unit(target_type, (float)original.second));
+                }
+                else if(target_type == "__BOOL__"){
+                    if(original.first == "__STRING__"){
+                        if(constpool[original.second] == "false")
+                            push(cenv::calc_unit(target_type, 0));
+                        else push(cenv::calc_unit(target_type, 1));
+                    }
+                    else if(original.first == "__DECI__")
+                        push(cenv::calc_unit(target_type, (bool)original.second));
+                    else if(original.first == "__INT__")
+                        push(cenv::calc_unit(target_type, (bool)original.second));
+                }
+                else if(target_type == "__STRING__"){
+                    if(original.first == "__INT__"){
+                        constpool.push_back(std::to_string(original.second));
+                        push(cenv::calc_unit(target_type, constpool.size()-1));
+                    }
+                    else if(original.first == "__DECI__"){
+                        constpool.push_back(std::to_string(original.second));
+                        push(cenv::calc_unit(target_type, constpool.size()-1));
+                    }
+                    else if(original.first == "__BOOL__"){
+                        if(original.second == 0.0)
+                            constpool.push_back("false");
+                        else constpool.push_back("true");
+                        push(cenv::calc_unit(target_type, constpool.size()-1));
+                    }
+                }
+            }
+        }
+        else if(ins[i].instr == "__LEN__") {
+            auto temp = pop();
+            if(is_array){
+                is_array = false;
+                push(cenv::calc_unit("__INT__", env.size()));
+            }
+            else if(temp.first == "__STRING__"){
+                push(cenv::calc_unit("__INT__", constpool[temp.second].size()));
+            }
+            else throw epperr::Epperr("SyntaxError", "Only lists can use len expressions!", ins[i].line, ins[i].column);
+        }
         else if(ins[i].instr == "__TPOF__") {
             constpool.push_back(pop().first);
             push(cenv::calc_unit("__STRING__", constpool.size()-1));
@@ -55,15 +116,35 @@ void cenv::Calculation::run(){
         else if(ins[i].instr == "__POP__") {
             if(sset.findInAllScope(ins[i].para)){
                 auto temp = sset.scope_pool[sset.findInAllScopeI(ins[i].para)].vars[sset.scope_pool[sset.findInAllScopeI(ins[i].para)].findI(ins[i].para)];
-                if(temp.second.getType() == "__INT__") push(cenv::calc_unit("__INT__", temp.second.val_int()));
-                else if(temp.second.getType() == "__DECI__") push(cenv::calc_unit("__DECI__", temp.second.val_deci()));
-                else if(temp.second.getType() == "__BOOL__") push(cenv::calc_unit("__BOOL__", temp.second.val_bool()));
-                else if(temp.second.getType() == "__CHAR__") {
-
+                if(temp.second.isArray()){
+                    is_array = true;
+                    if(temp.second.getType() == "__INT__")
+                        for(int x=0; x<temp.second.val_int_array().size(); x++)
+                            push(cenv::calc_unit("__INT__", temp.second.val_int_array()[x]));
+                    else if(temp.second.getType() == "__DECI__")
+                        for(int x=0; x<temp.second.val_deci_array().size(); x++)
+                            push(cenv::calc_unit("__DECI__", temp.second.val_deci_array()[x]));
+                    else if(temp.second.getType() == "__BOOL__")
+                        for(int x=0; x<temp.second.val_bool_array().size(); x++)
+                            push(cenv::calc_unit("__BOOL__", temp.second.val_bool_array()[x]));
+                    else if(temp.second.getType() == "__CHAR__");
+                    else if(temp.second.getType() == "__STRING__")
+                        for(int x=0; x<temp.second.val_string_array().size(); x++) {
+                            constpool.push_back(temp.second.val_string_array()[x]);
+                            push(cenv::calc_unit("__STRING__", constpool.size()-1));
+                        }
                 }
-                else if(temp.second.getType() == "__STRING__") {
-                    constpool.push_back(temp.second.val_string());
-                    push(cenv::calc_unit("__STRING__", constpool.size()-1));
+                else{
+                    if(temp.second.getType() == "__INT__") push(cenv::calc_unit("__INT__", temp.second.val_int()));
+                    else if(temp.second.getType() == "__DECI__") push(cenv::calc_unit("__DECI__", temp.second.val_deci()));
+                    else if(temp.second.getType() == "__BOOL__") push(cenv::calc_unit("__BOOL__", temp.second.val_bool()));
+                    else if(temp.second.getType() == "__CHAR__") {
+
+                    }
+                    else if(temp.second.getType() == "__STRING__") {
+                        constpool.push_back(temp.second.val_string());
+                        push(cenv::calc_unit("__STRING__", constpool.size()-1));
+                    }
                 }
             }
             else throw epperr::Epperr("NameError", "Unable to find identifier named: '" + ins[i].para + "'", ins[i].line, ins[i].column);
@@ -140,6 +221,7 @@ void cenv::Calculation::run(){
         else if(ins[i].instr == "==") {
             auto right = pop();
             auto left = pop();
+            if(left.first != right.first) push(cenv::calc_unit("__BOOL__", 0));
             if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__BOOL__", left.second == right.second));
             else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__BOOL__", left.second == right.second));
             else if(left.first == "__STRING__" && right.first == "__STRING__") {
@@ -178,6 +260,7 @@ void cenv::Calculation::run(){
         else if(ins[i].instr == "!=") {
             auto right = pop();
             auto left = pop();
+            if(left.first == right.first) push(cenv::calc_unit("__BOOL__", 0));
             if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__BOOL__", left.second != right.second));
             else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__BOOL__", left.second != right.second));
             else if(left.first == "__STRING__" && right.first == "__STRING__") {

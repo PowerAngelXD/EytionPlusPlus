@@ -59,6 +59,38 @@ void cvisitor::visitor::visitInput(east::InputExprNode* node){
         ins.push_back({"__INPUT__", cenv::calc_unit("__NULL__", 0.0), "__NULL__", node->mark->line, node->mark->column});
     }
 }
+void cvisitor::visitor::visitTypeTo(east::TypeToExprNode* node){
+    if(node->mark->content == "int"){
+        if(node->expr->addexpr != nullptr) visitAddExpr(node->expr->addexpr);
+        else if(node->expr->boolexpr != nullptr) visitBoolExpr(node->expr->boolexpr);
+        else if(node->expr->listexpr != nullptr) visitListExpr(node->expr->listexpr);
+        ins.push_back({"__TYT__", cenv::calc_unit("__NULL__", 0.0), "__INT__", node->mark->line, node->mark->column});
+    }
+    else if(node->mark->content == "str"){
+        if(node->expr->addexpr != nullptr) visitAddExpr(node->expr->addexpr);
+        else if(node->expr->boolexpr != nullptr) visitBoolExpr(node->expr->boolexpr);
+        else if(node->expr->listexpr != nullptr) visitListExpr(node->expr->listexpr);
+        ins.push_back({"__TYT__", cenv::calc_unit("__NULL__", 0.0), "__STRING__", node->mark->line, node->mark->column});
+    }
+    else if(node->mark->content == "bool"){
+        if(node->expr->addexpr != nullptr) visitAddExpr(node->expr->addexpr);
+        else if(node->expr->boolexpr != nullptr) visitBoolExpr(node->expr->boolexpr);
+        else if(node->expr->listexpr != nullptr) visitListExpr(node->expr->listexpr);
+        ins.push_back({"__TYT__", cenv::calc_unit("__NULL__", 0.0), "__BOOL__", node->mark->line, node->mark->column});
+    }
+    else if(node->mark->content == "deci"){
+        if(node->expr->addexpr != nullptr) visitAddExpr(node->expr->addexpr);
+        else if(node->expr->boolexpr != nullptr) visitBoolExpr(node->expr->boolexpr);
+        else if(node->expr->listexpr != nullptr) visitListExpr(node->expr->listexpr);
+        ins.push_back({"__TYT__", cenv::calc_unit("__NULL__", 0.0), "__DECI__", node->mark->line, node->mark->column});
+    }
+}
+void cvisitor::visitor::visitLen(east::LenExprNode* node){
+    if(node->expr->addexpr != nullptr) visitAddExpr(node->expr->addexpr);
+    else if(node->expr->boolexpr != nullptr) visitBoolExpr(node->expr->boolexpr);
+    else if(node->expr->listexpr != nullptr) visitListExpr(node->expr->listexpr);
+    ins.push_back({"__LEN__", cenv::calc_unit("__NULL__", 0.0), "__NULL__", node->mark->line, node->mark->column});
+}
 void cvisitor::visitor::visitIden(east::IdentifierNode* node){
     if(node->getIdenType() == "__ARRE__"){
         visitAddExpr(node->arrindex);
@@ -88,6 +120,8 @@ void cvisitor::visitor::visitPrimExpr(east::PrimExprNode* node){
     else if(node->addexpr != nullptr) visitAddExpr(node->addexpr);
     else if(node->tpof != nullptr) visitTpof(node->tpof);
     else if(node->input != nullptr) visitInput(node->input);
+    else if(node->glen != nullptr) visitLen(node->glen);
+    else if(node->typeto != nullptr) visitTypeTo(node->typeto);
 }
 void cvisitor::visitor::visitMulExpr(east::MulExprNode* node){
     visitPrimExpr(node->prims[0]);
@@ -105,7 +139,12 @@ void cvisitor::visitor::visitAddExpr(east::AddExprNode* node){
 }
 void cvisitor::visitor::visitListExpr(east::ListExprNode* node){
     int len = 0;
-    for(len; len < node->arrayelts.size(); len++) visitAddExpr(node->arrayelts[len]->addexpr);
+    for(len; len < node->arrayelts.size(); len++) {
+        if(node->arrayelts[len]->addexpr != nullptr)
+            visitAddExpr(node->arrayelts[len]->addexpr);
+        else if(node->arrayelts[len]->boolexpr != nullptr)
+            visitBoolExpr(node->arrayelts[len]->boolexpr);
+    }
     ins.push_back({"__PUSHA__", cenv::calc_unit("__NULL__", 0.0), std::to_string(len), node->left->line, node->left->column});
 }
 void cvisitor::visitor::visitCmpOp(east::CmpOpNode* node){
