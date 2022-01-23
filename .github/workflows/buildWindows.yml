@@ -8,14 +8,15 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
       - name: cmake_config
         run: |
+          apt install mingw-w64 -y
           mkdir build && cd build
-          cmake .. -DCMAKE_CXX_COMPILER=g++
+          cmake .. -DCMAKE_CXX_COMPILER=x86_64-w64-mingw-g++-posix
       - name: make
         run: cmake --build build
       - name: remove useless files
