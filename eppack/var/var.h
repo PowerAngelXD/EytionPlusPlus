@@ -26,6 +26,7 @@ namespace var{
         std::string type = "__NULL__"; // __DECI__ __STRING__ __INT__ __CHAR__ __BOOL__
     public:
         int line, column;
+        int len = 1;
         Value(bool is_arr, bool is_con);
         Value(bool is_arr, bool is_con, std::string _type);
         int val_int();
