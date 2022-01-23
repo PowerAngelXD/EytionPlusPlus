@@ -258,6 +258,8 @@ east::StmtNode* east::astParser::gen_stmtNode(){
         else if(east::DeleteStmtNode::is_it(*this)) node->deletestmt = gen_delStmtNode();
         else if(east::BlockStmtNode::is_it(*this)) node->blockstmt = gen_blockStmtNode();
         else if(east::IfStmtNode::is_it(*this)) node->ifstmt = gen_ifStmtNode();
+        else if(east::WhileStmtNode::is_it(*this)) node->whilestmt = gen_whileStmtNode();
+        else if(east::RepeatStmtNode::is_it(*this)) node->reptstmt = gen_reptStmtNode();
         return node;
     }
     else throw epperr::Epperr("SyntaxError", "Unknown type of the stmt!", tg[pos].line, tg[pos].column);
@@ -344,6 +346,40 @@ east::IfStmtNode* east::astParser::gen_ifStmtNode(){
     }
     else throw epperr::Epperr("SyntaxError", "It is not a proper If statement format", tg[pos].line, tg[pos].column);
 }
+east::WhileStmtNode* east::astParser::gen_whileStmtNode(){
+    if(east::WhileStmtNode::is_it(*this)){
+        east::WhileStmtNode* node = new east::WhileStmtNode;
+        node->mark = token();
+        if(peek()->content == "(") node->left = token();
+        else throw epperr::Epperr("SyntaxError", "Expect '('", tg[pos].line, tg[pos].column);
+        if(east::ExprNode::is_it(*this)) node->cond = gen_exprNode();
+        else throw epperr::Epperr("SyntaxError", "requires a boolean expression to supply to the if statement", tg[pos].line, tg[pos].column);
+        if(peek()->content == ")") node->right = token();
+        else throw epperr::Epperr("SyntaxError", "Expect ')'", tg[pos].line, tg[pos].column);
+        if(east::BlockStmtNode::is_it(*this)) node->body = gen_blockStmtNode();
+        else if(east::StmtNode::is_it(*this)) node->stc = gen_stmtNode();
+        else throw epperr::Epperr("SyntaxError", "There is at least one statement under the if statement", tg[pos].line, tg[pos].column);
+        return node;
+    }
+    else throw epperr::Epperr("SyntaxError", "It is not a proper While statement format", tg[pos].line, tg[pos].column);
+}
+east::RepeatStmtNode* east::astParser::gen_reptStmtNode(){
+    if(east::RepeatStmtNode::is_it(*this)){
+        east::RepeatStmtNode* node = new east::RepeatStmtNode;
+        node->mark = token();
+        if(peek()->content == "(") node->left = token();
+        else throw epperr::Epperr("SyntaxError", "Expect '('", tg[pos].line, tg[pos].column);
+        if(east::ExprNode::is_it(*this)) node->cond = gen_exprNode();
+        else throw epperr::Epperr("SyntaxError", "requires a boolean expression to supply to the if statement", tg[pos].line, tg[pos].column);
+        if(peek()->content == ")") node->right = token();
+        else throw epperr::Epperr("SyntaxError", "Expect ')'", tg[pos].line, tg[pos].column);
+        if(east::BlockStmtNode::is_it(*this)) node->body = gen_blockStmtNode();
+        else if(east::StmtNode::is_it(*this)) node->stc = gen_stmtNode();
+        else throw epperr::Epperr("SyntaxError", "There is at least one statement under the if statement", tg[pos].line, tg[pos].column);
+        return node;
+    }
+    else throw epperr::Epperr("SyntaxError", "It is not a proper Repeat statement format", tg[pos].line, tg[pos].column);
+}
 
 //
 
@@ -415,8 +451,8 @@ std::string east::PrimExprNode::to_string(){
 }
 bool east::PrimExprNode::is_it(east::astParser ap){
     return ap.peek()->type == "__IDENTIFIER__" || ap.peek()->type == "__NUMBER__" || ap.peek()->type == "__STRING__"||
-           ap.peek()->type == "__CHAR__"|| ap.peek()->content == "(" || ap.peek()->content == "typeof" || ap.peek()->content == "input"
-           ||ap.peek()->content == "true"||ap.peek()->content == "false"||east::TypeToExprNode::is_it(ap)||east::LenExprNode::is_it(ap);
+           ap.peek()->type == "__CHAR__"|| ap.peek()->content == "(" || ap.peek()->content == "typeof"
+           ||ap.peek()->content == "true"||ap.peek()->content == "false"|| ap.peek()->type == "__BIFIDEN__";
 }
 //
 
@@ -587,11 +623,13 @@ std::string east::StmtNode::to_string(){
     else if(deletestmt != nullptr) return "stmt_node: {" + this->deletestmt->to_string() + "}";
     else if(ifstmt != nullptr) return "stmt_node: {" + this->ifstmt->to_string() + "}";
     else if(blockstmt != nullptr) return "stmt_node: {" + this->blockstmt->to_string() + "}";
+    else if(whilestmt != nullptr) return "stmt_node: {" + this->whilestmt->to_string() + "}";
+    else if(reptstmt != nullptr) return "stmt_node: {" + this->reptstmt->to_string() + "}";
     else return "__NULL__";
 }
 bool east::StmtNode::is_it(east::astParser ap){
     return east::OutStmtNode::is_it(ap) || east::VorcStmtNode::is_it(ap) || east::AssignStmtNode::is_it(ap) || east::DeleteStmtNode::is_it(ap)
-            || east::BlockStmtNode::is_it(ap) || east::IfStmtNode::is_it(ap);
+            || east::BlockStmtNode::is_it(ap) || east::IfStmtNode::is_it(ap) || east::RepeatStmtNode::is_it(ap) || east::WhileStmtNode::is_it(ap);
 }
 //
 
@@ -675,5 +713,23 @@ std::string east::IfStmtNode::to_string(){
 }
 bool east::IfStmtNode::is_it(east::astParser ap){
     return ap.peek()->content == "if";
+}
+//
+
+//while stmt node
+std::string east::WhileStmtNode::to_string(){
+    return "while_stmt: {" + mark->simply_format() + ", " = cond->to_string() + ", " + body->to_string() + "}";
+}
+bool east::WhileStmtNode::is_it(east::astParser ap){
+    return ap.peek()->content == "while";
+}
+//
+
+//repeat stmt node
+std::string east::RepeatStmtNode::to_string(){
+    return "repeat_stmt: {" + mark->simply_format() + ", " = cond->to_string() + ", " + body->to_string() + "}";
+}
+bool east::RepeatStmtNode::is_it(east::astParser ap){
+    return ap.peek()->content == "repeat";
 }
 //

@@ -58,7 +58,7 @@ void parser::Parser::parse(){
             if(calc.isArray()){
                 var::Value val(true, false);
                 if(sset.findInAllScope(name)) throw epperr::Epperr("NameError", "duplicate identifier '" + name + "'!", val.line, val.column);
-                val.set_lc(stat.stmts[index]->vorcstmt->iden->line, stat.stmts[index]->vorcstmt->iden->column);
+                val.set_lc(stat.stmts[index]->vorcstmt->mark->line, stat.stmts[index]->vorcstmt->mark->column);
                 if(stat.stmts[index]->vorcstmt->mark->content == "const") {
                     var::Value _val(true, true);
                     val = _val;
@@ -90,11 +90,10 @@ void parser::Parser::parse(){
                 sset.scope_pool[sset.getDeep()].identifier_table.emplace_back(name);
                 sset.scope_pool[sset.getDeep()].vars.emplace_back(name, val);
             }
-
             else{
                 var::Value val(false, false);
                 if(sset.findInAllScope(name)) throw epperr::Epperr("NameError", "duplicate identifier '" + name + "'!", val.line, val.column);
-                val.set_lc(stat.stmts[index]->vorcstmt->iden->line, stat.stmts[index]->vorcstmt->iden->column);
+                val.set_lc(stat.stmts[index]->vorcstmt->mark->line, stat.stmts[index]->vorcstmt->mark->column);
                 if(stat.stmts[index]->vorcstmt->mark->content == "const") {
                     var::Value _val(false, true);
                     val = _val;
@@ -175,8 +174,8 @@ void parser::Parser::parse(){
         else if(stat.stmts[index]->ifstmt != nullptr){
             cenv::Calculation calc = _calc(*stat.stmts[index]->ifstmt->cond, sset);
             if(calc.result[0].first != "__STRING__" && calc.result[0].second > 0){
+                parser::Parser stc_p;
                 if(stat.stmts[index]->ifstmt->stc != nullptr){
-                    parser::Parser stc_p;
                     east::StatNode _stat;
                     _stat.stmts.push_back(stat.stmts[index]->ifstmt->stc);
                     stc_p.stat = _stat;
@@ -189,8 +188,56 @@ void parser::Parser::parse(){
                     stc_p.sset = sset;
                     stc_p.parse();
                 }
+                sset = stc_p.sset;
             }
             else continue;
+        }
+        else if(stat.stmts[index]->whilestmt != nullptr){
+            cenv::Calculation calc = _calc(*stat.stmts[index]->whilestmt->cond, sset);
+            while(calc.result[0].first != "__STRING__" && calc.result[0].second > 0){
+                parser::Parser stc_p;
+                if(stat.stmts[index]->whilestmt->stc != nullptr){
+                    east::StatNode _stat;
+                    _stat.stmts.push_back(stat.stmts[index]->whilestmt->stc);
+                    stc_p.stat = _stat;
+                    stc_p.sset = sset;
+                    stc_p.parse();
+                }
+                else{
+                    parser::Parser stc_p;
+                    stc_p.stat = *stat.stmts[index]->whilestmt->body->body;
+                    stc_p.sset = sset;
+                    stc_p.parse();
+                }
+                sset = stc_p.sset;
+                calc = _calc(*stat.stmts[index]->whilestmt->cond, sset);
+            }
+        }
+        else if(stat.stmts[index]->reptstmt != nullptr){
+            cenv::Calculation calc = _calc(*stat.stmts[index]->reptstmt->cond, sset);
+            if(calc.result[0].first != "__INT__" || calc.isArray())
+                throw epperr::Epperr("TypeError", "The condition of the repeat statement must be an integer",
+                                     stat.stmts[index]->reptstmt->mark->line,
+                                     stat.stmts[index]->reptstmt->mark->column);
+            int i=1;
+            while(i<=(int)calc.result[0].second){
+                i+=1;
+                parser::Parser stc_p;
+                if(stat.stmts[index]->reptstmt->stc != nullptr){
+                    east::StatNode _stat;
+                    _stat.stmts.push_back(stat.stmts[index]->reptstmt->stc);
+                    stc_p.stat = _stat;
+                    stc_p.sset = sset;
+                    stc_p.parse();
+                }
+                else{
+                    parser::Parser stc_p;
+                    stc_p.stat = *stat.stmts[index]->reptstmt->body->body;
+                    stc_p.sset = sset;
+                    stc_p.parse();
+                }
+                sset = stc_p.sset;
+            }
         }
     }
 }

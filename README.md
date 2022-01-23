@@ -56,7 +56,7 @@ if (a=="good bye"){
     out "good bye!!!";
 }
 ```
-> Special keywords
+> Special keywords/built-in functions
 ```go
 # typeof
 var a=typeof("hello");
@@ -67,4 +67,13 @@ var b=input();
 var c=input("input: ");
 out b;
 out c;
+
+# len
+var list = [1,2,3,4,5];
+out len(list);
+
+# type conversion
+var i=input() # type: __STRING__
+if(int(i) == 12)
+    out "yes!";
 ```

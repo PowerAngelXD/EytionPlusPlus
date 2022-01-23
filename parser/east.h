@@ -308,6 +308,36 @@ namespace east{
         static bool is_it(astParser ap);
     };
 
+    class WhileStmtNode{
+    public:
+        epplex::Token* mark;
+        epplex::Token* left;
+        ExprNode* cond;
+        epplex::Token* right;
+        BlockStmtNode* body = nullptr;
+        StmtNode* stc = nullptr;
+        std::string tag = "__OTHER__";
+
+        std::string to_string();
+        static bool is_it(astParser ap);
+    };
+
+    class RepeatStmtNode{
+    public:
+        epplex::Token* mark;
+        epplex::Token* left;
+        ExprNode* cond;
+        epplex::Token* right;
+        BlockStmtNode* body = nullptr;
+        StmtNode* stc = nullptr;
+        std::string tag = "__OTHER__";
+
+        std::string to_string();
+        static bool is_it(astParser ap);
+    };
+
+    class ForStmtNode{};
+
     class StmtNode{
     public:
         OutStmtNode* outstmt = nullptr;
@@ -316,6 +346,9 @@ namespace east{
         DeleteStmtNode* deletestmt = nullptr;
         BlockStmtNode* blockstmt = nullptr;
         IfStmtNode* ifstmt = nullptr;
+        WhileStmtNode* whilestmt = nullptr;
+        RepeatStmtNode* reptstmt = nullptr;
+
         std::string tag = "__OTHER__";
 
         std::string to_string();
@@ -378,6 +411,8 @@ namespace east{
         AssignStmtNode* gen_assignStmtNode();
         DeleteStmtNode* gen_delStmtNode();
         IfStmtNode* gen_ifStmtNode();
+        WhileStmtNode* gen_whileStmtNode();
+        RepeatStmtNode* gen_reptStmtNode();
         BlockStmtNode* gen_blockStmtNode();
     };
 }

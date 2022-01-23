@@ -90,41 +90,6 @@ inline void epp_cli(){
                 std::string str(begin, end);
                 std::cout<<std::endl<<"view file: "<<cut<<"\n"<<str<<std::endl;
             }
-            else if(cmd.find("$") == 0){
-                std::string cut;
-                cut.assign(cmd.begin() + 1, cmd.end());
-                std::stringstream ss(cut);
-                epplex::Lexer lexer(ss);
-                //std::cout<<ss.str()<<std::endl;
-                auto tokens = lexer.getTokenGroup();
-                //for(auto token:tokens){std::cout<<token.format()<<std::endl;}
-                east::astParser ast(tokens);
-                east::ExprNode* repl_node = ast.gen_exprNode();
-                cenv::Calculation calc(p.sset);
-                if(repl_node->addexpr != nullptr){
-                    cvisitor::visitor v;
-                    v.visitAddExpr(repl_node->addexpr);
-                    calc.ins = v.ins; calc.constpool = v.constpool;
-                    calc.run();
-                }
-                else if(repl_node->boolexpr != nullptr){
-                    cvisitor::visitor v;
-                    v.visitBoolExpr(repl_node->boolexpr);
-                    calc.ins = v.ins; calc.constpool = v.constpool;
-                    calc.run();
-                }
-                else if(repl_node->listexpr != nullptr){
-                    cvisitor::visitor v;
-                    v.visitListExpr(repl_node->listexpr);
-                    calc.ins = v.ins; calc.constpool = v.constpool;
-                    calc.run();
-                }
-                if(calc.result[0].first == "__STRING__")
-                    std::cout<<calc.constpool[calc.result[0].second];
-                else
-                    std::cout<<calc.result[0].second;
-                std::cout<<std::endl;
-            }
             else {
                 std::stringstream ss(cmd);
                 epplex::Lexer lexer(ss);
@@ -132,9 +97,38 @@ inline void epp_cli(){
                 auto tokens = lexer.getTokenGroup();
                 //for(auto token:tokens){std::cout<<token.format()<<std::endl;}
                 east::astParser ast(tokens);
-                east::StatNode* node = ast.gen_statNode();
-                p.stat = *node;
-                p.parse();
+                if(east::ExprNode::is_it(ast) && !east::AssignStmtNode::is_it(ast)){
+                    east::ExprNode* repl_node = ast.gen_exprNode();
+                    cenv::Calculation calc(p.sset);
+                    if(repl_node->addexpr != nullptr){
+                        cvisitor::visitor v;
+                        v.visitAddExpr(repl_node->addexpr);
+                        calc.ins = v.ins; calc.constpool = v.constpool;
+                        calc.run();
+                    }
+                    else if(repl_node->boolexpr != nullptr){
+                        cvisitor::visitor v;
+                        v.visitBoolExpr(repl_node->boolexpr);
+                        calc.ins = v.ins; calc.constpool = v.constpool;
+                        calc.run();
+                    }
+                    else if(repl_node->listexpr != nullptr){
+                        cvisitor::visitor v;
+                        v.visitListExpr(repl_node->listexpr);
+                        calc.ins = v.ins; calc.constpool = v.constpool;
+                        calc.run();
+                    }
+                    if(calc.result[0].first == "__STRING__")
+                        std::cout<<calc.constpool[calc.result[0].second];
+                    else
+                        std::cout<<calc.result[0].second;
+                    std::cout<<std::endl;
+                }
+                else{
+                    east::StatNode* node = ast.gen_statNode();
+                    p.stat = *node;
+                    p.parse();
+                }
                 //std::cout<<node->to_string()<<std::endl;
                 std::cout<<std::endl;
                 code = 1;
