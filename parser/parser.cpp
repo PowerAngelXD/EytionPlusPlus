@@ -67,16 +67,26 @@ void parser::Parser::parse(){
                     var::Value _val(true, false);
                     val = _val;
                 }
-                if(calc.result[0].first == "__INT__")
+                if(calc.result[0].first == "__INT__"){
                     for(int i=0; i<calc.result.size(); i++) val.arr_addVal((int)calc.result[i].second);
-                if(calc.result[0].first == "__STRING__")
+                    val.len = val.val_int_array().size();
+                }
+                if(calc.result[0].first == "__STRING__"){
                     for(int i=0; i<calc.result.size(); i++) val.arr_addVal(calc.constpool[(int)calc.result[i].second]);
-                if(calc.result[0].first == "__DECI__")
+                    val.len = val.val_string_array().size();
+                }
+                if(calc.result[0].first == "__DECI__"){
                     for(int i=0; i<calc.result.size(); i++) val.arr_addVal((float)calc.result[i].second);
-                if(calc.result[0].first == "__BOOL__")
+                    val.len = val.val_deci_array().size();
+                }
+                if(calc.result[0].first == "__BOOL__"){
                     for(int i=0; i<calc.result.size(); i++) val.arr_addVal((bool)calc.result[i].second);
-                if(calc.result[0].first == "__CHAR__")
+                    val.len = val.val_bool_array().size();
+                }
+                if(calc.result[0].first == "__CHAR__"){
                     for(int i=0; i<calc.result.size(); i++) val.arr_addVal(calc.constpool[(int)calc.result[i].second]);
+                    val.len = val.val_char_array().size();
+                }
                 sset.scope_pool[sset.getDeep()].identifier_table.emplace_back(name);
                 sset.scope_pool[sset.getDeep()].vars.emplace_back(name, val);
             }
@@ -151,7 +161,7 @@ void parser::Parser::parse(){
             if(!sset.findInAllScope(name)) throw epperr::Epperr("NameError", "Could not find a designator named '" + name + "'",
                                                                 stat.stmts[index]->deletestmt->iden->idens[0]->line,
                                                                 stat.stmts[index]->deletestmt->iden->idens[0]->column);
-            sset.scope_pool[sset.getDeep()].vars.erase(sset.scope_pool[sset.getDeep()].vars.begin() + sset.findInAllScopeI(name));
+            sset.scope_pool[sset.getDeep()].vars.erase(sset.scope_pool[sset.getDeep()].vars.begin() + sset.scope_pool[sset.getDeep()].findI(name));
         }
         else if(stat.stmts[index]->blockstmt != nullptr){
             Parser subp;
@@ -163,10 +173,8 @@ void parser::Parser::parse(){
             this->sset.remove();
         }
         else if(stat.stmts[index]->ifstmt != nullptr){
-            east::ExprNode temp;
-            temp.boolexpr = stat.stmts[index]->ifstmt->cond;
-            cenv::Calculation calc = _calc(temp, sset);
-            if(calc.result[0].first == "__BOOL__" && calc.result[0].second > 0){
+            cenv::Calculation calc = _calc(*stat.stmts[index]->ifstmt->cond, sset);
+            if(calc.result[0].first != "__STRING__" && calc.result[0].second > 0){
                 if(stat.stmts[index]->ifstmt->stc != nullptr){
                     parser::Parser stc_p;
                     east::StatNode _stat;
