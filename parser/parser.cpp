@@ -196,7 +196,10 @@ void parser::Parser::parse(){
             cenv::Calculation calc = _calc(*stat.stmts[index]->whilestmt->cond, sset);
             while(calc.result[0].first != "__STRING__" && calc.result[0].second > 0){
                 parser::Parser stc_p;
+<<<<<<< Updated upstream
                 sset.remove();
+=======
+>>>>>>> Stashed changes
                 if(stat.stmts[index]->whilestmt->stc != nullptr){
                     east::StatNode _stat;
                     _stat.stmts.push_back(stat.stmts[index]->whilestmt->stc);
@@ -205,12 +208,19 @@ void parser::Parser::parse(){
                     stc_p.parse();
                 }
                 else{
+<<<<<<< Updated upstream
                     stc_p.stat = *stat.stmts[index]->whilestmt->body->body;
                     this->sset.next();
                     this->sset.newScope("__epp_whileTemp_scope__");
                     stc_p.sset = this->sset;
                     stc_p.parse();
                     this->sset.remove();
+=======
+                    parser::Parser stc_p;
+                    stc_p.stat = *stat.stmts[index]->whilestmt->body->body;
+                    stc_p.sset = sset;
+                    stc_p.parse();
+>>>>>>> Stashed changes
                 }
                 sset = stc_p.sset;
                 calc = _calc(*stat.stmts[index]->whilestmt->cond, sset);
