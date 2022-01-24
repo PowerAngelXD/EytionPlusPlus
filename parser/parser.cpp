@@ -116,11 +116,11 @@ void parser::Parser::parse(){
             auto name = stat.stmts[index]->assignstmt->iden->idens[0]->content;
             auto expr = stat.stmts[index]->assignstmt->val;
             cenv::Calculation calc = _calc(*expr, sset);
-            if(sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.getDeep()].findI(name)].second.isConst())
+            if(sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.isConst())
                 throw epperr::Epperr("AssignError", "Cannot assign a value to a constant", stat.stmts[index]->assignstmt->iden->idens[0]->line, stat.stmts[index]->assignstmt->iden->idens[0]->column);
             if(sset.findInAllScope(name)){
                 if(stat.stmts[index]->assignstmt->iden->getIdenType() == "__ARRE__"){
-                    auto temp = sset.scope_pool[sset.getDeep()].vars[sset.scope_pool[sset.getDeep()].findI(name)];
+                    auto temp = sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)];
                     auto type = calc.result[0].first;
                     east::ExprNode _temp;
                     _temp.addexpr = stat.stmts[index]->assignstmt->iden->arrindex;
@@ -137,17 +137,17 @@ void parser::Parser::parse(){
                     }
                 }
                 else{
-                    auto temp = sset.scope_pool[sset.getDeep()].vars[sset.scope_pool[sset.getDeep()].findI(name)];
+                    auto temp = sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)];
                     auto type = calc.result[0].first;
                     if(temp.second.getType() != type) throw epperr::Epperr("TypeError", "A value of a different type cannot be assigned to this variable",
                                                                                 stat.stmts[index]->assignstmt->iden->idens[0]->line,
                                                                                 stat.stmts[index]->assignstmt->iden->idens[0]->column);
                     else{
-                        if(type == "__INT__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.getDeep()].findI(name)].second.set_val((int)calc.result[0].second);
-                        else if(type == "__DECI__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.getDeep()].findI(name)].second.set_val(calc.result[0].second);
-                        else if(type == "__STRING__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.getDeep()].findI(name)].second.set_val(calc.constpool[(int)calc.result[0].second]);
-                        else if(type == "__CHAR__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.getDeep()].findI(name)].second.set_val(calc.constpool[(int)calc.result[0].second]);
-                        else if(type == "__BOOL__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.getDeep()].findI(name)].second.set_val((bool)calc.result[0].second);
+                        if(type == "__INT__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val((int)calc.result[0].second);
+                        else if(type == "__DECI__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.result[0].second);
+                        else if(type == "__STRING__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.constpool[(int)calc.result[0].second]);
+                        else if(type == "__CHAR__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.constpool[(int)calc.result[0].second]);
+                        else if(type == "__BOOL__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val((bool)calc.result[0].second);
                     }
                 }
             }
@@ -196,6 +196,7 @@ void parser::Parser::parse(){
             cenv::Calculation calc = _calc(*stat.stmts[index]->whilestmt->cond, sset);
             while(calc.result[0].first != "__STRING__" && calc.result[0].second > 0){
                 parser::Parser stc_p;
+                sset.remove();
                 if(stat.stmts[index]->whilestmt->stc != nullptr){
                     east::StatNode _stat;
                     _stat.stmts.push_back(stat.stmts[index]->whilestmt->stc);
@@ -204,10 +205,12 @@ void parser::Parser::parse(){
                     stc_p.parse();
                 }
                 else{
-                    parser::Parser stc_p;
                     stc_p.stat = *stat.stmts[index]->whilestmt->body->body;
-                    stc_p.sset = sset;
+                    this->sset.next();
+                    this->sset.newScope("__epp_whileTemp_scope__");
+                    stc_p.sset = this->sset;
                     stc_p.parse();
+                    this->sset.remove();
                 }
                 sset = stc_p.sset;
                 calc = _calc(*stat.stmts[index]->whilestmt->cond, sset);
