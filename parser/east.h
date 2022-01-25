@@ -278,6 +278,16 @@ namespace east{
         static bool is_it(astParser ap);
     };
 
+    class BreakStmtNode{
+    public:
+        epplex::Token* mark;
+        epplex::Token* end;
+        std::string tag = "__OTHER__";
+
+        std::string to_string();
+        static bool is_it(astParser ap);
+    };
+
     class AreaStmtNode{
         /*  area a{
          *      var b="hello ";
@@ -346,6 +356,7 @@ namespace east{
         DeleteStmtNode* deletestmt = nullptr;
         BlockStmtNode* blockstmt = nullptr;
         IfStmtNode* ifstmt = nullptr;
+        BreakStmtNode* brkstmt = nullptr;
         WhileStmtNode* whilestmt = nullptr;
         RepeatStmtNode* reptstmt = nullptr;
 
@@ -411,6 +422,7 @@ namespace east{
         AssignStmtNode* gen_assignStmtNode();
         DeleteStmtNode* gen_delStmtNode();
         IfStmtNode* gen_ifStmtNode();
+        BreakStmtNode* gen_brkStmtNode();
         WhileStmtNode* gen_whileStmtNode();
         RepeatStmtNode* gen_reptStmtNode();
         BlockStmtNode* gen_blockStmtNode();

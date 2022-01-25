@@ -258,6 +258,7 @@ east::StmtNode* east::astParser::gen_stmtNode(){
         else if(east::DeleteStmtNode::is_it(*this)) node->deletestmt = gen_delStmtNode();
         else if(east::BlockStmtNode::is_it(*this)) node->blockstmt = gen_blockStmtNode();
         else if(east::IfStmtNode::is_it(*this)) node->ifstmt = gen_ifStmtNode();
+        else if(east::BreakStmtNode::is_it(*this)) node->brkstmt = gen_brkStmtNode();
         else if(east::WhileStmtNode::is_it(*this)) node->whilestmt = gen_whileStmtNode();
         else if(east::RepeatStmtNode::is_it(*this)) node->reptstmt = gen_reptStmtNode();
         return node;
@@ -345,6 +346,16 @@ east::IfStmtNode* east::astParser::gen_ifStmtNode(){
         return node;
     }
     else throw epperr::Epperr("SyntaxError", "It is not a proper If statement format", tg[pos].line, tg[pos].column);
+}
+east::BreakStmtNode* east::astParser::gen_brkStmtNode(){
+    if(east::BreakStmtNode::is_it(*this)){
+        east::BreakStmtNode* node = new east::BreakStmtNode;
+        node->mark = token();
+        if(peek()->content == ";") node->end = token();
+        else throw epperr::Epperr("SyntaxError", "Expect ';'", tg[pos].line, tg[pos].column);
+        return node;
+    }
+    else throw epperr::Epperr("SyntaxError", "It is not a proper Break statement format", tg[pos].line, tg[pos].column);
 }
 east::WhileStmtNode* east::astParser::gen_whileStmtNode(){
     if(east::WhileStmtNode::is_it(*this)){
@@ -623,13 +634,15 @@ std::string east::StmtNode::to_string(){
     else if(deletestmt != nullptr) return "stmt_node: {" + this->deletestmt->to_string() + "}";
     else if(ifstmt != nullptr) return "stmt_node: {" + this->ifstmt->to_string() + "}";
     else if(blockstmt != nullptr) return "stmt_node: {" + this->blockstmt->to_string() + "}";
+    else if(brkstmt != nullptr) return "stmt_node: {" + this->brkstmt->to_string() + "}";
     else if(whilestmt != nullptr) return "stmt_node: {" + this->whilestmt->to_string() + "}";
     else if(reptstmt != nullptr) return "stmt_node: {" + this->reptstmt->to_string() + "}";
     else return "__NULL__";
 }
 bool east::StmtNode::is_it(east::astParser ap){
     return east::OutStmtNode::is_it(ap) || east::VorcStmtNode::is_it(ap) || east::AssignStmtNode::is_it(ap) || east::DeleteStmtNode::is_it(ap)
-            || east::BlockStmtNode::is_it(ap) || east::IfStmtNode::is_it(ap) || east::RepeatStmtNode::is_it(ap) || east::WhileStmtNode::is_it(ap);
+            || east::BlockStmtNode::is_it(ap) || east::IfStmtNode::is_it(ap) || east::RepeatStmtNode::is_it(ap) || east::WhileStmtNode::is_it(ap)
+            || east::BreakStmtNode::is_it(ap);
 }
 //
 
@@ -731,5 +744,14 @@ std::string east::RepeatStmtNode::to_string(){
 }
 bool east::RepeatStmtNode::is_it(east::astParser ap){
     return ap.peek()->content == "repeat";
+}
+//
+
+//break stmt node
+std::string east::BreakStmtNode::to_string(){
+    return "break_stmt: {" + mark->simply_format() + "}";
+}
+bool east::BreakStmtNode::is_it(east::astParser ap){
+    return ap.peek()->content == "break";
 }
 //
