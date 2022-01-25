@@ -214,6 +214,7 @@ void parser::Parser::parse(){
                 }
                 sset = stc_p.sset;
                 calc = _calc(*stat.stmts[index]->whilestmt->cond, sset);
+                if(calc.result[0].second == 0) break;
             }
         }
         else if(stat.stmts[index]->reptstmt != nullptr){
@@ -234,10 +235,12 @@ void parser::Parser::parse(){
                     stc_p.parse();
                 }
                 else{
-                    parser::Parser stc_p;
                     stc_p.stat = *stat.stmts[index]->reptstmt->body->body;
-                    stc_p.sset = sset;
+                    this->sset.next();
+                    this->sset.newScope("__epp_repeatTemp_scope__");
+                    stc_p.sset = this->sset;
                     stc_p.parse();
+                    this->sset.remove();
                 }
                 sset = stc_p.sset;
             }
