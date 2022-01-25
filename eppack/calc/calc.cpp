@@ -10,7 +10,8 @@ void cenv::Calculation::push(cenv::calc_unit cu){
     env[env_top ++] = cu;
 }
 cenv::calc_unit cenv::Calculation::pop(){
-    return env[-- env_top];
+    auto ret = env[-- env_top];
+    return ret;
 }
 
 bool cenv::Calculation::isArray(){
@@ -18,15 +19,13 @@ bool cenv::Calculation::isArray(){
 }
 
 void cenv::Calculation::run(){
-    int len = 1;
     for(int i = 0; i < ins.size(); i++){
         if(ins[i].instr == "__PUSH__") {
             push(ins[i].unit);
         }
         else if(ins[i].instr == "__PUSHA__") {
             is_array = true;
-            len+=1;
-            len = atoi(ins[i].unit.first.c_str());
+            for(len = 0; len<env.size(); len++);
         }
         else if(ins[i].instr == "__TYT__") {
             auto original = pop();
@@ -82,7 +81,7 @@ void cenv::Calculation::run(){
             auto temp = pop();
             if(is_array){
                 is_array = false;
-                push(cenv::calc_unit("__INT__", env.size()));
+                push(cenv::calc_unit("__INT__", len));
             }
             else if(temp.first == "__STRING__"){
                 push(cenv::calc_unit("__INT__", constpool[temp.second].size()));
@@ -119,18 +118,18 @@ void cenv::Calculation::run(){
                 if(temp.second.isArray()){
                     is_array = true;
                     if(temp.second.getType() == "__INT__")
-                        for(int x=0; x<temp.second.val_int_array().size(); x++)
-                            push(cenv::calc_unit("__INT__", temp.second.val_int_array()[x]));
+                        for(len = 0; len<temp.second.val_int_array().size(); len++)
+                            push(cenv::calc_unit("__INT__", temp.second.val_int_array()[len]));
                     else if(temp.second.getType() == "__DECI__")
-                        for(int x=0; x<temp.second.val_deci_array().size(); x++)
-                            push(cenv::calc_unit("__DECI__", temp.second.val_deci_array()[x]));
+                        for(len = 0; len<temp.second.val_deci_array().size(); len++)
+                            push(cenv::calc_unit("__DECI__", temp.second.val_deci_array()[len]));
                     else if(temp.second.getType() == "__BOOL__")
-                        for(int x=0; x<temp.second.val_bool_array().size(); x++)
-                            push(cenv::calc_unit("__BOOL__", temp.second.val_bool_array()[x]));
+                        for(len = 0; len<temp.second.val_bool_array().size(); len++)
+                            push(cenv::calc_unit("__BOOL__", temp.second.val_bool_array()[len]));
                     else if(temp.second.getType() == "__CHAR__");
                     else if(temp.second.getType() == "__STRING__")
-                        for(int x=0; x<temp.second.val_string_array().size(); x++) {
-                            constpool.push_back(temp.second.val_string_array()[x]);
+                        for(len = 0; len<temp.second.val_string_array().size(); len++) {
+                            constpool.push_back(temp.second.val_string_array()[len]);
                             push(cenv::calc_unit("__STRING__", constpool.size()-1));
                         }
                 }
@@ -157,22 +156,22 @@ void cenv::Calculation::run(){
                     throw epperr::Epperr("TypeError", "The index of the list must be of type int", ins[i].line, ins[i].column);
                 auto temp = sset.scope_pool[sset.findInAllScopeI(ins[i].para)].vars[sset.scope_pool[sset.findInAllScopeI(ins[i].para)].findI(ins[i].para)];
                 if(temp.second.getType() == "__INT__") {
-                    if(index.second > temp.second.val_int_array().size()-1) throw epperr::Epperr("ArrayError", "The referenced content is outside the bounds of the array", ins[i].line, ins[i].column);
+                    if(index.second > temp.second.len-1) throw epperr::Epperr("ArrayError", "The referenced content is outside the bounds of the array", ins[i].line, ins[i].column);
                     push(cenv::calc_unit("__INT__", temp.second.val_int_array()[index.second]));
                 }
                 else if(temp.second.getType() == "__DECI__") {
-                    if(index.second > temp.second.val_deci_array().size()-1) throw epperr::Epperr("ArrayError", "The referenced content is outside the bounds of the array", ins[i].line, ins[i].column);
+                    if(index.second > temp.second.len-1) throw epperr::Epperr("ArrayError", "The referenced content is outside the bounds of the array", ins[i].line, ins[i].column);
                     push(cenv::calc_unit("__DECI__", temp.second.val_deci_array()[index.second]));
                 }
                 else if(temp.second.getType() == "__BOOL__") {
-                    if(index.second > temp.second.val_bool_array().size()-1) throw epperr::Epperr("ArrayError", "The referenced content is outside the bounds of the array", ins[i].line, ins[i].column);
+                    if(index.second > temp.second.len-1) throw epperr::Epperr("ArrayError", "The referenced content is outside the bounds of the array", ins[i].line, ins[i].column);
                     push(cenv::calc_unit("__BOOL__", temp.second.val_bool_array()[index.second]));
                 }
                 else if(temp.second.getType() == "__CHAR__") {
 
                 }
                 else if(temp.second.getType() == "__STRING__") {
-                    if(index.second > temp.second.val_string_array().size()-1) throw epperr::Epperr("ArrayError", "The referenced content is outside the bounds of the array", ins[i].line, ins[i].column);
+                    if(index.second > temp.second.len-1) throw epperr::Epperr("ArrayError", "The referenced content is outside the bounds of the array", ins[i].line, ins[i].column);
                     constpool.push_back(temp.second.val_string_array()[index.second]);
                     push(cenv::calc_unit("__STRING__", constpool.size()-1));
                 }
@@ -290,7 +289,7 @@ void cenv::Calculation::run(){
             else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '!'", ins[i].line, ins[i].column);
         }
     }
-    if(is_array || len > 1){
+    if(is_array){
         std::string firstType;
         for(int i = 0; i < env.size(); i++){
             if(i==0) firstType = env[i].first;

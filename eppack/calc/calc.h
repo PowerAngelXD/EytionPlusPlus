@@ -28,7 +28,9 @@ namespace cenv{
 
     class Calculation{
         bool is_array = false;
+        bool is_top = false;
         scope::ScopeSet sset;
+        int len = 1;
     public:
         Calculation(scope::ScopeSet sset_);
 
