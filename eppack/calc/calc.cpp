@@ -81,6 +81,7 @@ void cenv::Calculation::run(){
             auto temp = pop();
             if(is_array){
                 is_array = false;
+                for(int i = 0; i < len - 1;i++) pop();
                 push(cenv::calc_unit("__INT__", len));
             }
             else if(temp.first == "__STRING__"){
