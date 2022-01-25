@@ -65,6 +65,26 @@ repeat(len(a)){
     index=index+1;
 }
 ```
+> While
+```go
+var a=[1,6,2,5];
+var index = 0;
+while(index < len(a)){
+    out str(a[index]) + "\n";
+    index=index+1;
+}
+```
+> Break
+```go
+var a=[1,6,2,5];
+var index = 0;
+var in = input();
+while(index < len(a)){
+    if(index == 2 && in == "yes") break;
+    out str(a[index]) + "\n";
+    index=index+1;
+}
+```
 > Special keywords/built-in functions
 ```go
 # typeof
