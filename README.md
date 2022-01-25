@@ -56,6 +56,15 @@ if (a=="good bye"){
     out "good bye!!!";
 }
 ```
+> Repeat
+```go
+var a=["a","cb",fgh","err"];
+var index = 0;
+repeat(len(a)){
+    out a[index];
+    index=index+1;
+}
+```
 > Special keywords/built-in functions
 ```go
 # typeof
