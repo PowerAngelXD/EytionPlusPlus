@@ -194,28 +194,31 @@ void parser::Parser::parse(){
         }
         else if(stat.stmts[index]->whilestmt != nullptr){
             cenv::Calculation calc = _calc(*stat.stmts[index]->whilestmt->cond, sset);
-            while(calc.result[0].first != "__STRING__" && calc.result[0].second > 0){
-                parser::Parser stc_p;
-                sset.remove();
-                if(stat.stmts[index]->whilestmt->stc != nullptr){
-                    east::StatNode _stat;
-                    _stat.stmts.push_back(stat.stmts[index]->whilestmt->stc);
-                    stc_p.stat = _stat;
-                    stc_p.sset = sset;
-                    stc_p.parse();
+            try{
+                while(calc.result[0].first != "__STRING__" && calc.result[0].second > 0){
+                    parser::Parser stc_p;
+                    sset.remove();
+                    if(stat.stmts[index]->whilestmt->stc != nullptr){
+                        east::StatNode _stat;
+                        _stat.stmts.push_back(stat.stmts[index]->whilestmt->stc);
+                        stc_p.stat = _stat;
+                        stc_p.sset = sset;
+                        stc_p.parse();
+                    }
+                    else{
+                        stc_p.stat = *stat.stmts[index]->whilestmt->body->body;
+                        this->sset.next();
+                        this->sset.newScope("__epp_whileTemp_scope__");
+                        stc_p.sset = this->sset;
+                        stc_p.parse();
+                        this->sset.remove();
+                    }
+                    sset = stc_p.sset;
+                    calc = _calc(*stat.stmts[index]->whilestmt->cond, sset);
+                    if(calc.result[0].second == 0) break;
                 }
-                else{
-                    stc_p.stat = *stat.stmts[index]->whilestmt->body->body;
-                    this->sset.next();
-                    this->sset.newScope("__epp_whileTemp_scope__");
-                    stc_p.sset = this->sset;
-                    stc_p.parse();
-                    this->sset.remove();
-                }
-                sset = stc_p.sset;
-                calc = _calc(*stat.stmts[index]->whilestmt->cond, sset);
-                if(calc.result[0].second == 0) break;
             }
+            catch(...){}
         }
         else if(stat.stmts[index]->reptstmt != nullptr){
             cenv::Calculation calc = _calc(*stat.stmts[index]->reptstmt->cond, sset);
@@ -223,27 +226,33 @@ void parser::Parser::parse(){
                 throw epperr::Epperr("TypeError", "The condition of the repeat statement must be an integer",
                                      stat.stmts[index]->reptstmt->mark->line,
                                      stat.stmts[index]->reptstmt->mark->column);
-            int i=1;
-            while(i<=(int)calc.result[0].second){
-                i+=1;
-                parser::Parser stc_p;
-                if(stat.stmts[index]->reptstmt->stc != nullptr){
-                    east::StatNode _stat;
-                    _stat.stmts.push_back(stat.stmts[index]->reptstmt->stc);
-                    stc_p.stat = _stat;
-                    stc_p.sset = sset;
-                    stc_p.parse();
+            try{
+                int i=1;
+                while(i<=(int)calc.result[0].second){
+                    i+=1;
+                    parser::Parser stc_p;
+                    if(stat.stmts[index]->reptstmt->stc != nullptr){
+                        east::StatNode _stat;
+                        _stat.stmts.push_back(stat.stmts[index]->reptstmt->stc);
+                        stc_p.stat = _stat;
+                        stc_p.sset = sset;
+                        stc_p.parse();
+                    }
+                    else{
+                        stc_p.stat = *stat.stmts[index]->reptstmt->body->body;
+                        this->sset.next();
+                        this->sset.newScope("__epp_repeatTemp_scope__");
+                        stc_p.sset = this->sset;
+                        stc_p.parse();
+                        this->sset.remove();
+                    }
+                    sset = stc_p.sset;
                 }
-                else{
-                    stc_p.stat = *stat.stmts[index]->reptstmt->body->body;
-                    this->sset.next();
-                    this->sset.newScope("__epp_repeatTemp_scope__");
-                    stc_p.sset = this->sset;
-                    stc_p.parse();
-                    this->sset.remove();
-                }
-                sset = stc_p.sset;
             }
+            catch(...){}
+        }
+        else if(stat.stmts[index]->brkstmt != nullptr){
+            throw epperr::Epperr("SyntaxError", "You cannot use the 'break' statement outside the loop body", stat.stmts[index]->brkstmt->mark->line, stat.stmts[index]->brkstmt->mark->column);
         }
     }
 }
