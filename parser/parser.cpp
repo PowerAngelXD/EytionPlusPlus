@@ -63,7 +63,7 @@ void parser::Parser::parse(){
                     val.len = val.val_int_array().size();
                 }
                 if(calc.result[0].first == "__STRING__"){
-                    for(int i=0; i<calc.result.size(); i++) val.arr_addVal(calc.constpool[(int)calc.result[i].second]);
+                    for(int i=0; i<calc.result.size(); i++) val.arr_addVal(calc.constpool[(int)calc.result[i].second], false);
                     val.len = val.val_string_array().size();
                 }
                 if(calc.result[0].first == "__DECI__"){
@@ -75,7 +75,7 @@ void parser::Parser::parse(){
                     val.len = val.val_bool_array().size();
                 }
                 if(calc.result[0].first == "__CHAR__"){
-                    for(int i=0; i<calc.result.size(); i++) val.arr_addVal(calc.constpool[(int)calc.result[i].second]);
+                    for(int i=0; i<calc.result.size(); i++) val.arr_addVal(calc.constpool[(int)calc.result[i].second], true);
                     val.len = val.val_char_array().size();
                 }
                 sset.scope_pool[sset.getDeep()].identifier_table.emplace_back(name);
@@ -96,8 +96,8 @@ void parser::Parser::parse(){
                 if(calc.result[0].first == "__INT__") val.set_val((int)calc.result[0].second);
                 else if(calc.result[0].first == "__DECI__") val.set_val((float)calc.result[0].second);
                 else if(calc.result[0].first == "__BOOL__") val.set_val((bool)calc.result[0].second);
-                else if(calc.result[0].first == "__STRING__") val.set_val(calc.constpool[(int)calc.result[0].second]);
-                else if(calc.result[0].first == "__CHAR__") val.set_val(calc.constpool[(int)calc.result[0].second]);
+                else if(calc.result[0].first == "__STRING__") val.set_val(calc.constpool[(int)calc.result[0].second], false);
+                else if(calc.result[0].first == "__CHAR__") val.set_val(calc.constpool[(int)calc.result[0].second], true);
                 else{std::cout<<"none"<<std::endl;}
                 sset.scope_pool[sset.getDeep()].identifier_table.emplace_back(name);
                 sset.scope_pool[sset.getDeep()].vars.emplace_back(name, val);
@@ -122,8 +122,8 @@ void parser::Parser::parse(){
                     else{
                         if(type == "__INT__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal((int)calc.result[0].second, (int)arri.result[0].second);
                         else if(type == "__DECI__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal(calc.result[0].second, (int)arri.result[0].second);
-                        else if(type == "__STRING__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal(calc.constpool[(int)calc.result[0].second], (int)arri.result[0].second);
-                        else if(type == "__CHAR__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal(calc.constpool[(int)calc.result[0].second], (int)arri.result[0].second);
+                        else if(type == "__STRING__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal(calc.constpool[(int)calc.result[0].second], (int)arri.result[0].second, false);
+                        else if(type == "__CHAR__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal(calc.constpool[(int)calc.result[0].second], (int)arri.result[0].second, true);
                         else if(type == "__BOOL__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal((bool)calc.result[0].second, (int)arri.result[0].second);
                     }
                 }
@@ -136,8 +136,8 @@ void parser::Parser::parse(){
                     else{
                         if(type == "__INT__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val((int)calc.result[0].second);
                         else if(type == "__DECI__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.result[0].second);
-                        else if(type == "__STRING__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.constpool[(int)calc.result[0].second]);
-                        else if(type == "__CHAR__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.constpool[(int)calc.result[0].second]);
+                        else if(type == "__STRING__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.constpool[(int)calc.result[0].second], false);
+                        else if(type == "__CHAR__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.constpool[(int)calc.result[0].second], true);
                         else if(type == "__BOOL__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val((bool)calc.result[0].second);
                     }
                 }
