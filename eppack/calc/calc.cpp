@@ -1,3 +1,4 @@
+#include <sstream>
 #include "calc.h"
 
 cenv::Calculation::Calculation(scope::ScopeSet sset_) : sset(sset_), is_array(false) {}
@@ -61,11 +62,15 @@ void cenv::Calculation::run(){
                 }
                 else if(target_type == "__STRING__"){
                     if(original.first == "__INT__"){
-                        constpool.push_back(std::to_string(original.second));
+                        std::ostringstream oss;
+                        oss<<original.second;
+                        constpool.push_back(oss.str());
                         push(cenv::calc_unit(target_type, constpool.size()-1));
                     }
                     else if(original.first == "__DECI__"){
-                        constpool.push_back(std::to_string(original.second));
+                        std::ostringstream oss;
+                        oss<<original.second;
+                        constpool.push_back(oss.str());
                         push(cenv::calc_unit(target_type, constpool.size()-1));
                     }
                     else if(original.first == "__BOOL__"){
