@@ -33,6 +33,12 @@ out a+b;
 a="helloworld!";
 out a;
 ```
+> Constant
+```go
+const c="constant";
+out c;
+c="hello" # will error
+```
 > List
 ```go
 var a=[1,2,3,4];
