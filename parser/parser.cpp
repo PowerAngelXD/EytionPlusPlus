@@ -252,6 +252,32 @@ void parser::Parser::parse(){
         else if(stat.stmts[index]->brkstmt != nullptr){
             throw epperr::Epperr("SyntaxError", "You cannot use the 'break' statement outside the loop body", stat.stmts[index]->brkstmt->mark->line, stat.stmts[index]->brkstmt->mark->column);
         }
+        else if(stat.stmts[index]->elifstmt != nullptr){
+            cenv::Calculation calc = _calc(*stat.stmts[index]->elifstmt->cond, sset);
+            if(_if_control == -1)
+                throw epperr::Epperr("SyntaxError", "Cannot use else statement without else-if statement",
+                                     stat.stmts[index]->elsestmt->mark->line,
+                                     stat.stmts[index]->elsestmt->mark->column);
+            if((_if_control == 0) && (calc.result[0].first != "__STRING__" && calc.result[0].second > 0)){
+                parser::Parser stc_p;
+                if(stat.stmts[index]->elifstmt->stc != nullptr){
+                    east::StatNode _stat;
+                    _stat.stmts.push_back(stat.stmts[index]->elifstmt->stc);
+                    stc_p.stat = _stat;
+                    stc_p.sset = sset;
+                    stc_p.parse();
+                }
+                else{
+                    parser::Parser stc_p;
+                    stc_p.stat = *stat.stmts[index]->elifstmt->body->body;
+                    stc_p.sset = sset;
+                    stc_p.parse();
+                }
+                sset = stc_p.sset;
+                _if_control = 1;
+            }
+            else ;
+        }
         else if(stat.stmts[index]->elsestmt != nullptr){
             if(_if_control == -1)
                 throw epperr::Epperr("SyntaxError", "Cannot use else statement without if statement",
