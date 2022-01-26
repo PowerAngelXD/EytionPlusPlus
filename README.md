@@ -53,12 +53,12 @@ delete a;
 var b="string";
 delete b;
 ```
-> If-else
+> If--elif-else
 ```go
 var a=input();
 if (a=="hello")
     out "hello! my friend!";
-if (a=="good bye"){
+elif (a=="good bye"){
     out "good bye!!!";
 }
 else{
