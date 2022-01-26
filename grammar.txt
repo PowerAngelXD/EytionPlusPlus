@@ -14,5 +14,6 @@ assignstmt ::= identifier '=' expr ';'
 deletestmt ::= 'delete' identifier ';'
 blockstmt ::= '{' (stmt)* '}'
 ifstmt ::= 'if' '(' boolexpr ')' blockstmt|stmt
+elsestmt ::= 'else' blockstmt
 whilestmt ::= 'while' '(' boolexpr ')' blockstmt|stmt
 repeatstmt ::= 'repeat' '(' addexpr ')' blockstmt|stmt
