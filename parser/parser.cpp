@@ -2,24 +2,15 @@
 
 inline cenv::Calculation _calc(east::ExprNode node, scope::ScopeSet sset) {
     cenv::Calculation calc(sset);
-    if(node.addexpr != nullptr){
-        cvisitor::visitor v;
+    cvisitor::visitor v;
+    if(node.addexpr != nullptr)
         v.visitAddExpr(node.addexpr);
-        calc.ins = v.ins; calc.constpool = v.constpool;
-        calc.run();
-    }
-    else if(node.boolexpr != nullptr){
-        cvisitor::visitor v;
+    else if(node.boolexpr != nullptr)
         v.visitBoolExpr(node.boolexpr);
-        calc.ins = v.ins; calc.constpool = v.constpool;
-        calc.run();
-    }
-    else if(node.listexpr != nullptr){
-        cvisitor::visitor v;
+    else if(node.listexpr != nullptr)
         v.visitListExpr(node.listexpr);
-        calc.ins = v.ins; calc.constpool = v.constpool;
-        calc.run();
-    }
+    calc.ins = v.ins; calc.constpool = v.constpool;
+    calc.run();
     return calc;
 }
 
@@ -189,8 +180,12 @@ void parser::Parser::parse(){
                     stc_p.parse();
                 }
                 sset = stc_p.sset;
+                _if_control = 1;
             }
-            else continue;
+            else {
+                _if_control = 0;
+                continue;
+            }
         }
         else if(stat.stmts[index]->whilestmt != nullptr){
             cenv::Calculation calc = _calc(*stat.stmts[index]->whilestmt->cond, sset);
@@ -253,6 +248,30 @@ void parser::Parser::parse(){
         }
         else if(stat.stmts[index]->brkstmt != nullptr){
             throw epperr::Epperr("SyntaxError", "You cannot use the 'break' statement outside the loop body", stat.stmts[index]->brkstmt->mark->line, stat.stmts[index]->brkstmt->mark->column);
+        }
+        else if(stat.stmts[index]->elsestmt != nullptr){
+            if(_if_control == -1)
+                throw epperr::Epperr("SyntaxError", "Cannot use else statement without if statement",
+                                     stat.stmts[index]->elsestmt->mark->line,
+                                     stat.stmts[index]->elsestmt->mark->column);
+            if(_if_control == 0){
+                parser::Parser stc_p;
+                if(stat.stmts[index]->elsestmt->stc != nullptr){
+                    east::StatNode _stat;
+                    _stat.stmts.push_back(stat.stmts[index]->elsestmt->stc);
+                    stc_p.stat = _stat;
+                    stc_p.sset = sset;
+                    stc_p.parse();
+                }
+                else{
+                    parser::Parser stc_p;
+                    stc_p.stat = *stat.stmts[index]->elsestmt->body->body;
+                    stc_p.sset = sset;
+                    stc_p.parse();
+                }
+                sset = stc_p.sset;
+            }
+            else _if_control = -1;
         }
     }
 }

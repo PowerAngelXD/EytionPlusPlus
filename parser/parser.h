@@ -12,12 +12,12 @@
 #include <string>
 #include <vector>
 #include <stdio.h>
-#include "east.h"
 #include "../eppack/calc/calc.h"
 #include "../eppack/calc/calcvisitor.h"
 
 namespace parser{
     class Parser{
+        int _if_control = -1;
     public:
         east::StatNode stat;
         scope::ScopeSet sset;
