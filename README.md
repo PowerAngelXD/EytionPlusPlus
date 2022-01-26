@@ -47,13 +47,16 @@ delete a;
 var b="string";
 delete b;
 ```
-> If
+> If-else
 ```go
 var a=input();
 if (a=="hello")
     out "hello! my friend!";
 if (a=="good bye"){
     out "good bye!!!";
+}
+else{
+    out "well done!";
 }
 ```
 > Repeat
