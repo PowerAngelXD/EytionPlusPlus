@@ -43,14 +43,14 @@ std::vector<float> var::Value::val_deci_array(){
     }
     else throw epperr::Epperr("TypeError", "The type of the variable is not Decimal(array)", line, column);
 }
-char var::Value::val_char(){
+std::string var::Value::val_char(){
     if(type == "__CHAR__"){
         if(!is_array) return ch_val[0];
         else throw epperr::Epperr("TypeError", "Cannot call the value of a non-array variable as an array", line, column);
     }
     else throw epperr::Epperr("TypeError", "The type of the variable is not Char", line, column);
 }
-std::vector<char> var::Value::val_char_array(){
+std::vector<std::string> var::Value::val_char_array(){
     if(type == "__CHAR__"){
         if(is_array) return ch_val;
         else throw epperr::Epperr("TypeError", "Cannot call the value of a array variable as an non-array", line, column);
@@ -107,12 +107,21 @@ void var::Value::set_val(int val){
         int_val[0] = val;
     type = "__INT__";
 }
-void var::Value::set_val(std::string val){
-    if(str_val.empty())
-        str_val.push_back(val);
-    else
-        str_val[0] = val;
-    type = "__STRING__";
+void var::Value::set_val(std::string val, bool is_ch){
+    if(is_ch){
+        if(ch_val.empty())
+            ch_val.push_back(val);
+        else
+            ch_val[0] = val;
+        type = "__CHAR__";
+    }
+    else{
+        if(str_val.empty())
+            str_val.push_back(val);
+        else
+            str_val[0] = val;
+        type = "__STRING__";
+    }
 }
 void var::Value::set_val(float val){
     if(deci_val.empty())
@@ -127,13 +136,6 @@ void var::Value::set_val(bool val){
     else
         bool_val[0] = val;
     type = "__BOOL__";
-}
-void var::Value::set_val(char val){
-    if(ch_val.empty())
-        ch_val.push_back(val);
-    else
-        ch_val[0] = val;
-    type = "__CHAR__";
 }
 void var::Value::set_val(efunc::Efunction val){
     if(func_val.empty())
@@ -157,12 +159,21 @@ void var::Value::arr_setVal(float val, int pos){
         deci_val[pos] = val;
     type = "__DECI__";
 }
-void var::Value::arr_setVal(std::string val, int pos){
-    if(str_val.empty())
-        str_val.push_back(val);
-    else
-        str_val[pos] = val;
-    type = "__STRING__";
+void var::Value::arr_setVal(std::string val, int pos, bool is_ch){
+    if(is_ch){
+        if(ch_val.empty())
+            ch_val.push_back(val);
+        else
+            ch_val[pos] = val;
+        type = "__CHAR__";
+    }
+    else{
+        if(str_val.empty())
+            str_val.push_back(val);
+        else
+            str_val[pos] = val;
+        type = "__STRING__";
+    }
 }
 void var::Value::arr_setVal(bool val, int pos){
     if(bool_val.empty())
@@ -170,13 +181,6 @@ void var::Value::arr_setVal(bool val, int pos){
     else
         bool_val[pos] = val;
     type = "__BOOL__";
-}
-void var::Value::arr_setVal(char val, int pos){
-    if(ch_val.empty())
-        ch_val.push_back(val);
-    else
-        ch_val[pos] = val;
-    type = "__CHAR__";
 }
 void var::Value::arr_setVal(efunc::Efunction val, int pos){
     if(func_val.empty())
@@ -195,15 +199,17 @@ void var::Value::arr_addVal(float val){
     type = "__DECI__";
     is_array = true;
 }
-void var::Value::arr_addVal(char val){
-    ch_val.push_back(val);
-    type = "__CHAR__";
-    is_array = true;
-}
-void var::Value::arr_addVal(std::string val){
-    str_val.push_back(val);
-    type = "__STRING__";
-    is_array = true;
+void var::Value::arr_addVal(std::string val, bool is_ch){
+    if(is_ch){
+        ch_val.push_back(val);
+        type = "__CHAR__";
+        is_array = true;
+    }
+    else{
+        str_val.push_back(val);
+        type = "__STRING__";
+        is_array = true;
+    }
 }
 void var::Value::arr_addVal(bool val){
     bool_val.push_back(val);
@@ -248,8 +254,8 @@ int scope::Scope::findI(std::string target){
 scope::ScopeSet::ScopeSet(){
     var::Value epp_version(false, true, "__STRING__");
     var::Value epp_build_time(false, true, "__STRING__");
-    epp_version.set_val((std::string)"dev-0.1.1");
-    epp_build_time.set_val((std::string)__DATE__);
+    epp_version.set_val((std::string)"dev-0.1.6", false);
+    epp_build_time.set_val((std::string)__DATE__, false);
     this->newScope("__epp_global_scope__");
     this->scope_pool[0].identifier_table.push_back("epp_version");
     this->scope_pool[0].vars.push_back(std::pair<std::string, var::Value>("epp_version", epp_version));

@@ -18,7 +18,7 @@ namespace var{
     class Value{
         std::vector<int> int_val;
         std::vector<float> deci_val;
-        std::vector<char> ch_val;
+        std::vector<std::string> ch_val;
         std::vector<std::string> str_val;
         std::vector<bool> bool_val;
         std::vector<efunc::Efunction> func_val;
@@ -36,8 +36,8 @@ namespace var{
         std::vector<int> val_int_array();
         float val_deci();
         std::vector<float> val_deci_array();
-        char val_char();
-        std::vector<char> val_char_array();
+        std::string val_char();
+        std::vector<std::string> val_char_array();
         std::string val_string();
         std::vector<std::string> val_string_array();
         bool val_bool();
@@ -50,24 +50,21 @@ namespace var{
         bool isFunc();
         std::string getType();
         void set_val(int val);
-        void set_val(std::string val);
+        void set_val(std::string val, bool is_ch);
         void set_val(float val);
         void set_val(bool val);
-        void set_val(char val);
         void set_val(efunc::Efunction val);
         void set_lc(int line_, int col_);
 
         void arr_setVal(int val, int pos);
         void arr_setVal(float val, int pos);
-        void arr_setVal(std::string val, int pos);
+        void arr_setVal(std::string val, int pos, bool is_ch);
         void arr_setVal(bool val, int pos);
-        void arr_setVal(char val, int pos);
         void arr_setVal(efunc::Efunction val, int pos);
 
         void arr_addVal(int val);
         void arr_addVal(float val);
-        void arr_addVal(char val);
-        void arr_addVal(std::string val);
+        void arr_addVal(std::string val, bool is_ch);
         void arr_addVal(bool val);
         void arr_addVal(efunc::Efunction val);
     };
