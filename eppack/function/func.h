@@ -8,18 +8,16 @@
  *
  */
 #pragma once
-#include "../../parser/parser.h"
+#include "../../parser/east.h"
 
 namespace efunc{
     class Efunction{
     public:
         std::string name = "__FUNC__";
+        std::string ret_type = "__NULL__";
         std::vector<std::string> nor_para;
+        std::vector<std::string> norp_type;
         std::vector<east::ExprNode> act_para;
         east::BlockStmtNode body;
-        scope::ScopeSet func_sset;
-        std::vector<cenv::calc_unit> ret;
-
-        void exec();
     };
 }
