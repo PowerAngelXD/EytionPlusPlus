@@ -22,13 +22,16 @@ void parser::Parser::parse(){
                 if(calc.result[0].first == "__STRING__") {
                     for(int i = 0; i < calc.result.size(); i++) {
                         std::cout << calc.constpool[calc.result[i].second];
-                        std::cout << " " ;
+                    }
+                }
+                else if(calc.result[0].first == "__CHAR__") {
+                    for(int i = 0; i < calc.result.size(); i++) {
+                        std::cout << calc.constpool[calc.result[i].second];
                     }
                 }
                 else {
                     for(int i = 0; i < calc.result.size(); i++) {
                         std::cout << calc.result[i].second;
-                        std::cout << " " ;
                     }
                 }
             }
