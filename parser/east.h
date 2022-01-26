@@ -343,6 +343,20 @@ namespace east{
         static bool is_it(astParser ap);
     };
 
+    class ElseifStmtNode{
+    public:
+        epplex::Token* mark;
+        epplex::Token* left;
+        ExprNode* cond;
+        epplex::Token* right;
+        BlockStmtNode* body = nullptr;
+        StmtNode* stc = nullptr;
+        std::string tag = "__OTHER__";
+
+        std::string to_string();
+        static bool is_it(astParser ap);
+    };
+
     class ElseStmtNode{
     public:
         epplex::Token* mark;
@@ -392,6 +406,7 @@ namespace east{
         DeleteStmtNode* deletestmt = nullptr;
         BlockStmtNode* blockstmt = nullptr;
         IfStmtNode* ifstmt = nullptr;
+        ElseifStmtNode* elifstmt = nullptr;
         BreakStmtNode* brkstmt = nullptr;
         WhileStmtNode* whilestmt = nullptr;
         RepeatStmtNode* reptstmt = nullptr;
@@ -461,6 +476,7 @@ namespace east{
         AssignStmtNode* gen_assignStmtNode();
         DeleteStmtNode* gen_delStmtNode();
         IfStmtNode* gen_ifStmtNode();
+        ElseifStmtNode* gen_elifStmtNode();
         ElseStmtNode* gen_elseStmtNode();
         BreakStmtNode* gen_brkStmtNode();
         WhileStmtNode* gen_whileStmtNode();

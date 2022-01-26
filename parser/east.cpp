@@ -290,6 +290,7 @@ east::StmtNode* east::astParser::gen_stmtNode(){
         else if(east::DeleteStmtNode::is_it(*this)) node->deletestmt = gen_delStmtNode();
         else if(east::BlockStmtNode::is_it(*this)) node->blockstmt = gen_blockStmtNode();
         else if(east::IfStmtNode::is_it(*this)) node->ifstmt = gen_ifStmtNode();
+        else if(east::ElseifStmtNode::is_it(*this)) node->elifstmt = gen_elifStmtNode();
         else if(east::ElseStmtNode::is_it(*this)) node->elsestmt = gen_elseStmtNode();
         else if(east::BreakStmtNode::is_it(*this)) node->brkstmt = gen_brkStmtNode();
         else if(east::WhileStmtNode::is_it(*this)) node->whilestmt = gen_whileStmtNode();
@@ -379,6 +380,23 @@ east::IfStmtNode* east::astParser::gen_ifStmtNode(){
         return node;
     }
     else throw epperr::Epperr("SyntaxError", "It is not a proper If statement format", tg[pos].line, tg[pos].column);
+}
+east::ElseifStmtNode* east::astParser::gen_elifStmtNode(){
+    if(east::ElseifStmtNode::is_it(*this)){
+        east::ElseifStmtNode* node = new east::ElseifStmtNode;
+        node->mark = token();
+        if(peek()->content == "(") node->left = token();
+        else throw epperr::Epperr("SyntaxError", "Expect '('", tg[pos].line, tg[pos].column);
+        if(east::ExprNode::is_it(*this)) node->cond = gen_exprNode();
+        else throw epperr::Epperr("SyntaxError", "requires a boolean expression to supply to the elif statement", tg[pos].line, tg[pos].column);
+        if(peek()->content == ")") node->right = token();
+        else throw epperr::Epperr("SyntaxError", "Expect ')'", tg[pos].line, tg[pos].column);
+        if(east::BlockStmtNode::is_it(*this)) node->body = gen_blockStmtNode();
+        else if(east::StmtNode::is_it(*this)) node->stc = gen_stmtNode();
+        else throw epperr::Epperr("SyntaxError", "There is at least one statement under the elif statement", tg[pos].line, tg[pos].column);
+        return node;
+    }
+    else throw epperr::Epperr("SyntaxError", "It is not a proper Else-If statement format", tg[pos].line, tg[pos].column);
 }
 east::ElseStmtNode* east::astParser::gen_elseStmtNode(){
     if(east::ElseStmtNode::is_it(*this)){
@@ -726,6 +744,7 @@ std::string east::StmtNode::to_string(){
     else if(assignstmt != nullptr) return "stmt_node: {" + this->assignstmt->to_string() + "}";
     else if(deletestmt != nullptr) return "stmt_node: {" + this->deletestmt->to_string() + "}";
     else if(ifstmt != nullptr) return "stmt_node: {" + this->ifstmt->to_string() + "}";
+    else if(elifstmt != nullptr) return "stmt_node: {" + this->elifstmt->to_string() + "}";
     else if(elsestmt != nullptr) return "stmt_node: {" + this->elsestmt->to_string() + "}";
     else if(blockstmt != nullptr) return "stmt_node: {" + this->blockstmt->to_string() + "}";
     else if(brkstmt != nullptr) return "stmt_node: {" + this->brkstmt->to_string() + "}";
@@ -736,7 +755,7 @@ std::string east::StmtNode::to_string(){
 bool east::StmtNode::is_it(east::astParser ap){
     return east::OutStmtNode::is_it(ap) || east::VorcStmtNode::is_it(ap) || east::AssignStmtNode::is_it(ap) || east::DeleteStmtNode::is_it(ap)
             || east::BlockStmtNode::is_it(ap) || east::IfStmtNode::is_it(ap) || east::RepeatStmtNode::is_it(ap) || east::WhileStmtNode::is_it(ap)
-            || east::BreakStmtNode::is_it(ap) || east::ElseStmtNode::is_it(ap);
+            || east::BreakStmtNode::is_it(ap) || east::ElseStmtNode::is_it(ap) || east::ElseifStmtNode::is_it(ap);
 }
 //
 
@@ -820,6 +839,18 @@ std::string east::IfStmtNode::to_string(){
 }
 bool east::IfStmtNode::is_it(east::astParser ap){
     return ap.peek()->content == "if";
+}
+//
+
+//if stmt node
+std::string east::ElseifStmtNode::to_string(){
+    if(body != nullptr)
+        return "elif_stmt: {" + this->mark->simply_format() + ", " + this->cond->to_string() + ", " + this->body->to_string() + "}";
+    else
+        return "elif_stmt: {" + this->mark->simply_format() + ", " + this->cond->to_string() + ", " + this->stc->to_string() + "}";
+}
+bool east::ElseifStmtNode::is_it(east::astParser ap){
+    return ap.peek()->content == "elif";
 }
 //
 
