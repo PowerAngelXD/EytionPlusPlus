@@ -69,6 +69,22 @@ epplex::Token epplex::Lexer::Sign() { //符号
     char ch = get();
     std::string str;
     str += ch;
+    if (ch == '+'){
+        ch = get();
+        if(ch == '+')
+            str += ch;
+        else if(ch == '=')
+            str += ch;
+        else put(ch);
+    }
+    if (ch == '-'){
+        ch = get();
+        if(ch == '-')
+            str += ch;
+        else if(ch == '=')
+            str += ch;
+        else put(ch);
+    }
     if (ch == '=') {
         ch = get();
         if (ch == '=')
@@ -113,22 +129,7 @@ epplex::Token epplex::Lexer::Sign() { //符号
         else
             put(ch);
     }
-
-    if (str == "=") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
-    else if (str == ">") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
-    else if (str == "<") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
-    else if (str == "!") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
-    else if (str == "&") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
-    else if (str == "|") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
-    else if (str == "==") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
-    else if (str == "=>") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
-    else if (str == ">=") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
-    else if (str == "<=") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
-    else if (str == "!=") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
-    else if (str == "&&") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
-    else if (str == "||") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
-    else if (str == ">>") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
-    else if (str == "<<") return {str, "__SYMBOL__", "__SYMBOL__", line, column};
+    return {str, "__SYMBOL__", "__SYMBOL__", line, column};
     return {};
 }
 
@@ -198,10 +199,6 @@ epplex::Token epplex::Lexer::Start() {
     }
     else {
         switch (ch) {
-        case '+':
-            return {"+", "__SYMBOL__", "__SYMBOL__", line, column};
-        case '-':
-            return {"-", "__SYMBOL__", "__SYMBOL__", line, column};
         case '*':
             return {"*", "__SYMBOL__", "__SYMBOL__", line, column};
         case '/':
@@ -232,6 +229,8 @@ epplex::Token epplex::Lexer::Start() {
             return {",", "__SYMBOL__", "__SYMBOL__", line, column};
         case '.':
             return {".", "__SYMBOL__", "__SYMBOL__", line, column};
+        case '+':
+        case '-':
         case '=':
         case '>':
         case '<':
