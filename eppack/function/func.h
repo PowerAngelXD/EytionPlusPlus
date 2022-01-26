@@ -8,11 +8,6 @@
  *
  */
 #pragma once
-#include <iostream>
-#include <string>
-#include <vector>
-#include <stdio.h>
-#include "../../parser/east.h"
 #include "../../parser/parser.h"
 
 namespace efunc{
