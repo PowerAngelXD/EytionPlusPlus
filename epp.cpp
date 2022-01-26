@@ -20,7 +20,7 @@ parser::Parser p;
 inline void epp_cli(){
     int code = 10;
     std::string cmd;
-    std::wcout<<L"Eytion++ ["<<__DATE__<<"]\nCopyright (c) PowerAngelXd\nNow version: 0.1.5\nyou can type 'help' to get 'Eytion++Cli & Eytion++Grammar' help document"<<std::endl;
+    std::wcout<<L"Eytion++ ["<<__DATE__<<"]\nCopyright (c) PowerAngelXd\nNow version: 0.1.6\nyou can type 'help' to get 'Eytion++Cli & Eytion++Grammar' help document"<<std::endl;
     while(true){
         if(code == 0) break;
         try{
@@ -57,6 +57,7 @@ inline void epp_cli(){
                                    "deletestmt ::= 'delete' identifier ';'\n"
                                    "blockstmt ::= '{' (stmt)* '}'\n"
                                    "ifstmt ::= 'if' '(' boolexpr ')' blockstmt|stmt\n"
+                                   "elsestmt ::= 'else' blockstmt\n"
                                    "whilestmt ::= 'while' '(' boolexpr ')' blockstmt|stmt\n"
                                    "repeatstmt ::= 'repeat' '(' addexpr ')' blockstmt|stmt\n"
                                    "breakstmt ::= 'break' ';'";
@@ -104,6 +105,7 @@ inline void epp_cli(){
                 if(east::ExprNode::is_it(ast) && !east::AssignStmtNode::is_it(ast)){
                     east::ExprNode* repl_node = ast.gen_exprNode();
                     cenv::Calculation calc(p.sset);
+                    //std::cout<<repl_node->to_string()<<std::endl;
                     if(repl_node->addexpr != nullptr){
                         cvisitor::visitor v;
                         v.visitAddExpr(repl_node->addexpr);
@@ -130,10 +132,10 @@ inline void epp_cli(){
                 }
                 else{
                     east::StatNode* node = ast.gen_statNode();
+                    //std::cout<<node->to_string()<<std::endl;
                     p.stat = *node;
                     p.parse();
                 }
-                //std::cout<<node->to_string()<<std::endl;
                 std::cout<<std::endl;
                 code = 1;
             }
@@ -150,7 +152,7 @@ inline void epp_cli(){
 int main(int argc, char *argv[]){
     std::string cmd;
     if(argc >= 2){
-        if(strcmp(argv[1], "-v")==0 || strcmp(argv[1], "-version")==0) std::cout<<"version => dev-0.1.5"<<std::endl;
+        if(strcmp(argv[1], "-v")==0 || strcmp(argv[1], "-version")==0) std::cout<<"version => dev-0.1.6"<<std::endl;
         else if(strcmp(argv[1], "-r")==0 || strcmp(argv[1], "-run")==0){
             std::ifstream file(argv[2]);
             std::size_t index = ((std::string)argv[2]).find(".epp", ((std::string)argv[2]).size() - ((std::string)".epp").size()); // file suffix check
