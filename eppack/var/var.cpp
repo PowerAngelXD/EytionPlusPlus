@@ -9,6 +9,9 @@ bool var::Value::isArray(){
 bool var::Value::isConst(){
     return is_const;
 }
+bool var::Value::isFunc(){
+    return is_func;
+}
 std::string var::Value::getType(){
     return type;
 }
@@ -82,6 +85,21 @@ std::vector<bool> var::Value::val_bool_array(){
     }
     else throw epperr::Epperr("TypeError", "The type of the variable is not Bool(array)", line, column);
 }
+efunc::Efunction var::Value::val_func(){
+    if(type == "__FUNC__"){
+        if(!is_array) return func_val[0];
+        else throw epperr::Epperr("TypeError", "Cannot call the value of a non-array variable as an array", line, column);
+    }
+    else throw epperr::Epperr("TypeError", "The type of the variable is not Function", line, column);
+}
+std::vector<efunc::Efunction> var::Value::val_func_array(){
+    if(type == "__FUNC__"){
+        if(is_array) return func_val;
+        else throw epperr::Epperr("TypeError", "Cannot call the value of a non-array variable as an array", line, column);
+    }
+    else throw epperr::Epperr("TypeError", "The type of the variable is not Function", line, column);
+}
+
 void var::Value::set_val(int val){
     if(int_val.empty())
         int_val.push_back(val);
@@ -116,6 +134,13 @@ void var::Value::set_val(char val){
     else
         ch_val[0] = val;
     type = "__CHAR__";
+}
+void var::Value::set_val(efunc::Efunction val){
+    if(func_val.empty())
+        func_val.push_back(val);
+    else
+        func_val[0] = val;
+    type = "__FUNC__";
 }
 
 void var::Value::arr_setVal(int val, int pos){
@@ -153,6 +178,13 @@ void var::Value::arr_setVal(char val, int pos){
         ch_val[pos] = val;
     type = "__CHAR__";
 }
+void var::Value::arr_setVal(efunc::Efunction val, int pos){
+    if(func_val.empty())
+        func_val.push_back(val);
+    else
+        func_val[pos] = val;
+    type = "__FUNC__";
+}
 void var::Value::arr_addVal(int val){
     int_val.push_back(val);
     type = "__INT__";
@@ -177,6 +209,12 @@ void var::Value::arr_addVal(bool val){
     bool_val.push_back(val);
     type = "__BOOL__";
     is_array = true;
+}
+void var::Value::arr_addVal(efunc::Efunction val){
+    func_val.push_back(val);
+    type = "__FUNC__";
+    is_array = true;
+    is_func = true;
 }
 void var::Value::set_lc(int line_, int col_){
     line = line_;
