@@ -1,6 +1,6 @@
 #include "parser.h"
 
-inline cenv::Calculation _calc(east::ExprNode node, scope::ScopeSet sset) {
+inline cenv::Calculation _calc(east::ValExprNode node, scope::ScopeSet sset) {
     cenv::Calculation calc(sset);
     cvisitor::visitor v;
     if(node.addexpr != nullptr)
@@ -116,7 +116,7 @@ void parser::Parser::parse(){
                 if(stat.stmts[index]->assignstmt->iden->getIdenType() == "__ARRE__"){
                     auto temp = sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)];
                     auto type = calc.result[0].first;
-                    east::ExprNode _temp;
+                    east::ValExprNode _temp;
                     _temp.addexpr = stat.stmts[index]->assignstmt->iden->arrindex;
                     auto arri = _calc(_temp, sset);
                     if(temp.second.getType() != type) throw epperr::Epperr("TypeError", "A value of a different type cannot be assigned to this variable",

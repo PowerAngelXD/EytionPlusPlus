@@ -11,8 +11,8 @@ epplex::Token* east::astParser::token(){
     return new epplex::Token(this->tg[this->pos++]);
 }
 
-east::ExprNode* east::astParser::gen_exprNode(){
-    east::ExprNode* node = new east::ExprNode;
+east::ValExprNode* east::astParser::gen_exprNode(){
+    east::ValExprNode* node = new east::ValExprNode;
     if(east::ListExprNode::is_it(*this))
         node->listexpr = gen_listExprNode();
     else if(east::BoolExprNode::is_it(*this))
@@ -55,6 +55,19 @@ east::BoolOpNode* east::astParser::gen_boolOpNode(){
     }
     else throw epperr::Epperr("SyntaxError", "Expect '||' or '&&'!", tg[pos].line, tg[pos].column);
 }
+east::AssignExprNode* east::astParser::gen_assignExprNode(){
+    if(east::AssignExprNode::is_it(*this)){
+        east::AssignExprNode* node = new east::AssignExprNode;
+        node->iden = gen_identifierNode();
+        if(peek()->content == "=") node->equ = token();
+        else throw epperr::Epperr("SyntaxError", "Expect '='!", tg[pos].line, tg[pos].column);
+        node->val = gen_exprNode();
+        if(peek()->content == ";") node->end = token();
+        else throw epperr::Epperr("SyntaxError", "Expect ';'", tg[pos].line, tg[pos].column);
+        return node;
+    }
+    else throw epperr::Epperr("SyntaxError", "It is not a proper Assign statement format", tg[pos].line, tg[pos].column);
+}
 east::PrimExprNode* east::astParser::gen_primExprNode(){
     if(east::PrimExprNode::is_it(*this)){
         east::PrimExprNode* node = new east::PrimExprNode;
@@ -88,7 +101,7 @@ east::FuncCallExprNode* east::astParser::gen_fcallExprNode(){
     if(east::FuncCallExprNode::is_it(*this)){
         east::FuncCallExprNode* node = new east::FuncCallExprNode;
         node->func_name = gen_identifierNode();token();
-        if(east::ExprNode::is_it(*this)) node->act_paras.push_back(gen_exprNode());
+        if(east::ValExprNode::is_it(*this)) node->act_paras.push_back(gen_exprNode());
         while(true){
             if(peek()->content != ",") break;
             token();
@@ -106,7 +119,7 @@ east::InputExprNode* east::astParser::gen_inputExprNode(){
         node->mark = token();
         if(peek()->content == "(") token();
         else throw epperr::Epperr("SyntaxErrror", "Expect '('!", tg[pos].line, tg[pos].column);
-        if(east::ExprNode::is_it(*this)) node->expr = gen_exprNode();
+        if(east::ValExprNode::is_it(*this)) node->expr = gen_exprNode();
         else ;
         if(peek()->content == ")") token();
         else throw epperr::Epperr("SyntaxErrror", "Expect ')'!", tg[pos].line, tg[pos].column);
@@ -120,7 +133,7 @@ east::TypeOfExprNode* east::astParser::gen_tpofExprNode(){
         node->mark = token();
         if(peek()->content == "(") token();
         else throw epperr::Epperr("SyntaxErrror", "Expect '('!", tg[pos].line, tg[pos].column);
-        if(east::ExprNode::is_it(*this)) node->expr = gen_exprNode();
+        if(east::ValExprNode::is_it(*this)) node->expr = gen_exprNode();
         else throw epperr::Epperr("SyntaxErrror", "Unknown type of the expr!", tg[pos].line, tg[pos].column);
         if(peek()->content == ")") token();
         else throw epperr::Epperr("SyntaxErrror", "Expect ')'!", tg[pos].line, tg[pos].column);
@@ -134,7 +147,7 @@ east::LenExprNode* east::astParser::gen_lenExprNode(){
         node->mark = token();
         if(peek()->content == "(") token();
         else throw epperr::Epperr("SyntaxErrror", "Expect '('!", tg[pos].line, tg[pos].column);
-        if(east::ExprNode::is_it(*this)) node->expr = gen_exprNode();
+        if(east::ValExprNode::is_it(*this)) node->expr = gen_exprNode();
         else throw epperr::Epperr("SyntaxErrror", "Unknown type of the expr!", tg[pos].line, tg[pos].column);
         if(peek()->content == ")") token();
         else throw epperr::Epperr("SyntaxErrror", "Expect ')'!", tg[pos].line, tg[pos].column);
@@ -148,7 +161,7 @@ east::TypeToExprNode* east::astParser::gen_tytExprNode(){
         node->mark = token();
         if(peek()->content == "(") token();
         else throw epperr::Epperr("SyntaxErrror", "Expect '('!", tg[pos].line, tg[pos].column);
-        if(east::ExprNode::is_it(*this)) node->expr = gen_exprNode();
+        if(east::ValExprNode::is_it(*this)) node->expr = gen_exprNode();
         else throw epperr::Epperr("SyntaxErrror", "Unknown type of the expr!", tg[pos].line, tg[pos].column);
         if(peek()->content == ")") token();
         else throw epperr::Epperr("SyntaxErrror", "Expect ')'!", tg[pos].line, tg[pos].column);
@@ -303,7 +316,7 @@ east::OutStmtNode* east::astParser::gen_outStmtNode(){
     if(east::OutStmtNode::is_it(*this)){
         east::OutStmtNode* node = new east::OutStmtNode;
         node->mark = token();
-        if(east::ExprNode::is_it(*this)) node->content = gen_exprNode();
+        if(east::ValExprNode::is_it(*this)) node->content = gen_exprNode();
         else throw epperr::Epperr("SyntaxError", "Requires an expression", tg[pos].line, tg[pos].column);
 
         if(peek()->content == ";") node->end = token();
@@ -370,7 +383,7 @@ east::IfStmtNode* east::astParser::gen_ifStmtNode(){
         node->mark = token();
         if(peek()->content == "(") node->left = token();
         else throw epperr::Epperr("SyntaxError", "Expect '('", tg[pos].line, tg[pos].column);
-        if(east::ExprNode::is_it(*this)) node->cond = gen_exprNode();
+        if(east::ValExprNode::is_it(*this)) node->cond = gen_exprNode();
         else throw epperr::Epperr("SyntaxError", "requires a boolean expression to supply to the if statement", tg[pos].line, tg[pos].column);
         if(peek()->content == ")") node->right = token();
         else throw epperr::Epperr("SyntaxError", "Expect ')'", tg[pos].line, tg[pos].column);
@@ -387,7 +400,7 @@ east::ElseifStmtNode* east::astParser::gen_elifStmtNode(){
         node->mark = token();
         if(peek()->content == "(") node->left = token();
         else throw epperr::Epperr("SyntaxError", "Expect '('", tg[pos].line, tg[pos].column);
-        if(east::ExprNode::is_it(*this)) node->cond = gen_exprNode();
+        if(east::ValExprNode::is_it(*this)) node->cond = gen_exprNode();
         else throw epperr::Epperr("SyntaxError", "requires a boolean expression to supply to the elif statement", tg[pos].line, tg[pos].column);
         if(peek()->content == ")") node->right = token();
         else throw epperr::Epperr("SyntaxError", "Expect ')'", tg[pos].line, tg[pos].column);
@@ -425,7 +438,7 @@ east::WhileStmtNode* east::astParser::gen_whileStmtNode(){
         node->mark = token();
         if(peek()->content == "(") node->left = token();
         else throw epperr::Epperr("SyntaxError", "Expect '('", tg[pos].line, tg[pos].column);
-        if(east::ExprNode::is_it(*this)) node->cond = gen_exprNode();
+        if(east::ValExprNode::is_it(*this)) node->cond = gen_exprNode();
         else throw epperr::Epperr("SyntaxError", "requires a boolean expression to supply to the if statement", tg[pos].line, tg[pos].column);
         if(peek()->content == ")") node->right = token();
         else throw epperr::Epperr("SyntaxError", "Expect ')'", tg[pos].line, tg[pos].column);
@@ -442,7 +455,7 @@ east::RepeatStmtNode* east::astParser::gen_reptStmtNode(){
         node->mark = token();
         if(peek()->content == "(") node->left = token();
         else throw epperr::Epperr("SyntaxError", "Expect '('", tg[pos].line, tg[pos].column);
-        if(east::ExprNode::is_it(*this)) node->cond = gen_exprNode();
+        if(east::ValExprNode::is_it(*this)) node->cond = gen_exprNode();
         else throw epperr::Epperr("SyntaxError", "requires a boolean expression to supply to the if statement", tg[pos].line, tg[pos].column);
         if(peek()->content == ")") node->right = token();
         else throw epperr::Epperr("SyntaxError", "Expect ')'", tg[pos].line, tg[pos].column);
@@ -484,15 +497,30 @@ bool east::IdentifierNode::is_it(east::astParser ap){
 }
 //
 
+//assign expr node
+std::string east::AssignExprNode::to_string(){
+    return "assign_stmt: {[" + iden->to_string() + "]" + this->equ->simply_format() + ", " + this->val->to_string() + ", " + this->end->simply_format() + "}";
+}
+bool east::AssignExprNode::is_it(east::astParser ap){
+    if(east::IdentifierNode::is_it(ap)){
+        int temp = ap.pos;
+        ap.gen_identifierNode();
+        if(ap.peek()->content == "=") {ap.pos = temp; return true;}
+        else {ap.pos = temp; return false;}
+    }
+    return false;
+}
+//
+
 //expr node
-std::string east::ExprNode::to_string(){
+std::string east::ValExprNode::to_string(){
     if(this->addexpr != nullptr) return this->addexpr->to_string();
     else if(this->boolexpr != nullptr) return this->boolexpr->to_string();
     else if(this->listexpr != nullptr) return this->listexpr->to_string();
     else if(this->fdefexpr != nullptr) return this->fdefexpr->to_string();
     else throw epperr::Epperr("SyntaxError", "Unknown type of the expr!", 0, 0);
 }
-bool east::ExprNode::is_it(east::astParser ap){
+bool east::ValExprNode::is_it(east::astParser ap){
     return east::AddExprNode::is_it(ap) || east::BoolExprNode::is_it(ap) || east::ListExprNode::is_it(ap) || east::FuncDefineExprNode::is_it(ap);
 }
 //

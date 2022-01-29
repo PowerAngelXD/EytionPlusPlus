@@ -17,7 +17,7 @@ namespace efunc{
         std::string ret_type = "__NULL__";
         std::vector<std::string> nor_para;
         std::vector<std::string> norp_type;
-        std::vector<east::ExprNode> act_para;
+        std::vector<east::ValExprNode> act_para;
         east::BlockStmtNode body;
     };
 }

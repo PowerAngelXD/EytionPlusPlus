@@ -28,6 +28,9 @@ void cenv::Calculation::run(){
             is_array = true;
             for(len = 0; len<env.size(); len++);
         }
+        else if(ins[i].instr == "__PUSHI__") {
+            push(ins[i].unit);
+        }
         else if(ins[i].instr == "__TYT__") {
             auto original = pop();
             auto target_type = ins[i].para;

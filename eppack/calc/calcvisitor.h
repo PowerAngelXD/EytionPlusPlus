@@ -17,7 +17,7 @@
 namespace cvisitor{
     class visitor{
     public:
-        east::ExprNode* expr;
+        east::ValExprNode* expr;
         std::vector<cenv::calc_ins> ins;
         std::vector<std::string> constpool;
 

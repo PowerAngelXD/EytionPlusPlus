@@ -102,8 +102,8 @@ inline void epp_cli(){
                 auto tokens = lexer.getTokenGroup();
                 //for(auto token:tokens){std::cout<<token.format()<<std::endl;}
                 east::astParser ast(tokens);
-                if(east::ExprNode::is_it(ast) && !east::AssignStmtNode::is_it(ast)){
-                    east::ExprNode* repl_node = ast.gen_exprNode();
+                if(east::ValExprNode::is_it(ast) && !east::AssignStmtNode::is_it(ast)){
+                    east::ValExprNode* repl_node = ast.gen_exprNode();
                     cenv::Calculation calc(p.sset);
                     //std::cout<<repl_node->to_string()<<std::endl;
                     if(repl_node->addexpr != nullptr){
