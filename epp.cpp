@@ -62,7 +62,7 @@ inline void epp_cli(){
                 getAllFile(crt_path, files);
                 for(auto file: files) std::cout<<file<<std::endl;
                 std::cout<<"================================================="<<std::endl;
-                #elif
+                #elif __linux__
                 system("ls");
                 #endif
 
