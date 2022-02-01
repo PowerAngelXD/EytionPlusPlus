@@ -11,22 +11,56 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <stdio.h>
+#include <unistd.h>
 #include <cstring>
-
+#include <direct.h>
 #include "lexer/eplex.h"
 #include "parser/parser.h"
 #include "eppack/error/epperr.h"
+//#define EPP_DEBUG
+
+void getAllFile(std::string path, std::vector<std::string>& files){
+    long hFile = 0;
+    struct _finddata_t fileinfo;
+    std::string p;
+    if ((hFile = _findfirst(p.assign(path).append("\\*").c_str(), &fileinfo)) != -1){
+        do{
+            files.push_back(p.assign(path).append("\\").append(fileinfo.name));
+        } while (_findnext(hFile, &fileinfo) == 0);
+
+        _findclose(hFile);
+    }
+}
+
 parser::Parser p;
+#ifdef EPP_DEBUG
+int main(){
+#else
 inline void epp_cli(){
+#endif
     int code = 10;
     std::string cmd;
-    std::wcout<<L"Eytion++ ["<<__DATE__<<"]\nCopyright (c) PowerAngelXd\nNow version: 0.1.6\nyou can type 'help' to get 'Eytion++Cli & Eytion++Grammar' help document"<<std::endl;
+    char work_path[256];
+    std::wcout<<L"Eytion++ ["<<__DATE__<<"]\nCopyright (c) PowerAngelXd\nNow version: 0.1.7\nyou can type 'help' to get 'Eytion++Cli & Eytion++Grammar' help document\n"<<std::endl;
     while(true){
         if(code == 0) break;
         try{
-            std::cout<<">> ";
+            getcwd(work_path, 256); std::cout<<"\033[33m["<<work_path<<"]\033[0m"<<std::endl;
+            std::cout<<"> ";
             std::getline(std::cin, cmd);
             if(cmd == "quit") code = 0;
+            else if(cmd == "ls"){
+                std::vector<std::string> files;
+                std::string crt_path;
+                std::cout<<"================================================="<<std::endl;
+                for(int i = 0; i < strlen(work_path); i++){
+                    crt_path.push_back(work_path[i]);
+                }
+                getAllFile(crt_path, files);
+                for(auto file: files) std::cout<<file<<std::endl;
+                std::cout<<"================================================="<<std::endl;
+            }
             else if(cmd == "envc"){
                 parser::Parser _p;
                 p = _p;
@@ -95,6 +129,11 @@ inline void epp_cli(){
                 std::string str(begin, end);
                 std::cout<<std::endl<<"view file: "<<cut<<"\n"<<str<<std::endl;
             }
+            else if(cmd.find("cd") == 0){
+                std::string cut;
+                cut.assign(cmd.begin() + 3, cmd.end());
+                chdir(cut.c_str());
+            }
             else {
                 std::stringstream ss(cmd);
                 epplex::Lexer lexer(ss);
@@ -149,10 +188,11 @@ inline void epp_cli(){
     }
 }
 
+#ifndef EPP_DEBUG
 int main(int argc, char *argv[]){
     std::string cmd;
     if(argc >= 2){
-        if(strcmp(argv[1], "-v")==0 || strcmp(argv[1], "-version")==0) std::cout<<"version => dev-0.1.6"<<std::endl;
+        if(strcmp(argv[1], "-v")==0 || strcmp(argv[1], "-version")==0) std::cout<<"version => dev-0.1.7"<<std::endl;
         else if(strcmp(argv[1], "-r")==0 || strcmp(argv[1], "-run")==0){
             std::ifstream file(argv[2]);
             std::size_t index = ((std::string)argv[2]).find(".epp", ((std::string)argv[2]).size() - ((std::string)".epp").size()); // file suffix check
@@ -189,3 +229,4 @@ int main(int argc, char *argv[]){
     end:
     return 0;
 }
+#endif
