@@ -14,7 +14,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <cstring>
-#include <direct.h>
 #include "lexer/eplex.h"
 #include "parser/parser.h"
 #include "eppack/error/epperr.h"
