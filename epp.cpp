@@ -19,6 +19,7 @@
 #include "eppack/error/epperr.h"
 //#define EPP_DEBUG
 
+#ifdef _WIN32
 void getAllFile(std::string path, std::vector<std::string>& files){
     long hFile = 0;
     struct _finddata_t fileinfo;
@@ -31,6 +32,7 @@ void getAllFile(std::string path, std::vector<std::string>& files){
         _findclose(hFile);
     }
 }
+#endif
 
 parser::Parser p;
 #ifdef EPP_DEBUG
@@ -50,6 +52,7 @@ inline void epp_cli(){
             std::getline(std::cin, cmd);
             if(cmd == "quit") code = 0;
             else if(cmd == "ls"){
+                #ifdef _WIN32
                 std::vector<std::string> files;
                 std::string crt_path;
                 std::cout<<"================================================="<<std::endl;
@@ -59,6 +62,10 @@ inline void epp_cli(){
                 getAllFile(crt_path, files);
                 for(auto file: files) std::cout<<file<<std::endl;
                 std::cout<<"================================================="<<std::endl;
+                #elif
+                system("ls");
+                #endif
+
             }
             else if(cmd == "envc"){
                 parser::Parser _p;
