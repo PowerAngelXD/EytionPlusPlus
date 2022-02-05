@@ -17,7 +17,7 @@
 #include "lexer/eplex.h"
 #include "parser/parser.h"
 #include "eppack/error/epperr.h"
-//#define EPP_DEBUG
+#define EPP_DEBUG
 
 #ifdef _WIN32
 void getAllFile(std::string path, std::vector<std::string>& files){
@@ -47,7 +47,7 @@ inline void epp_cli(){
     while(true){
         if(code == 0) break;
         try{
-            getcwd(work_path, 256); std::cout<<"\033[33m["<<work_path<<"]\033[0m"<<std::endl;
+            getcwd(work_path, 256); std::cout<<"\033[33m"<<work_path<<"\033[0m";
             std::cout<<"> ";
             std::getline(std::cin, cmd);
             if(cmd == "quit") code = 0;
@@ -148,31 +148,43 @@ inline void epp_cli(){
                 //for(auto token:tokens){std::cout<<token.format()<<std::endl;}
                 east::astParser ast(tokens);
                 if(east::ValExprNode::is_it(ast) && !east::AssignStmtNode::is_it(ast)){
-                    east::ValExprNode* repl_node = ast.gen_exprNode();
+                    east::ValExprNode* repl_node = ast.gen_valExprNode();
                     cenv::Calculation calc(p.sset);
+                    cvisitor::visitor v;
                     //std::cout<<repl_node->to_string()<<std::endl;
-                    if(repl_node->addexpr != nullptr){
-                        cvisitor::visitor v;
+                    if(repl_node->addexpr != nullptr)
                         v.visitAddExpr(repl_node->addexpr);
-                        calc.ins = v.ins; calc.constpool = v.constpool;
-                        calc.run();
-                    }
-                    else if(repl_node->boolexpr != nullptr){
-                        cvisitor::visitor v;
+                    else if(repl_node->boolexpr != nullptr)
                         v.visitBoolExpr(repl_node->boolexpr);
-                        calc.ins = v.ins; calc.constpool = v.constpool;
-                        calc.run();
-                    }
-                    else if(repl_node->listexpr != nullptr){
-                        cvisitor::visitor v;
+                    else if(repl_node->listexpr != nullptr)
                         v.visitListExpr(repl_node->listexpr);
-                        calc.ins = v.ins; calc.constpool = v.constpool;
-                        calc.run();
+                    calc.ins = v.ins; calc.constpool = v.constpool;
+                    calc.run();
+                    if (calc.isArray()){
+                        if (calc.result[0].first == "__STRING__"){
+                            for (int i = 0; i < calc.result.size(); i++){
+                                std::cout << calc.constpool[calc.result[i].second];
+                            }
+                        }
+                        else if (calc.result[0].first == "__CHAR__"){
+                            for (int i = 0; i < calc.result.size(); i++){
+                                std::cout << calc.constpool[calc.result[i].second];
+                            }
+                        }
+                        else{
+                            for (int i = 0; i < calc.result.size(); i++){
+                                std::cout << calc.result[i].second;
+                            }
+                        }
                     }
-                    if(calc.result[0].first == "__STRING__")
-                        std::cout<<calc.constpool[calc.result[0].second];
-                    else
-                        std::cout<<calc.result[0].second;
+                    else{
+                        if (calc.result[0].first == "__STRING__")
+                            std::cout << calc.constpool[calc.result[0].second];
+                        else if (calc.result[0].first == "__CHAR__")
+                            std::cout << calc.constpool[calc.result[0].second];
+                        else
+                            std::cout << calc.result[0].second;
+                    }
                     std::cout<<std::endl;
                 }
                 else{
