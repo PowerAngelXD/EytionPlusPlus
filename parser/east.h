@@ -475,7 +475,8 @@ namespace east{
          */
         epplex::Token* peek(int pos_ = 0);
 
-        ValExprNode* gen_exprNode();
+        WholeExprNode* gen_wholeExprNode();
+        ValExprNode* gen_valExprNode();
         AddOpNode* gen_addOpNode();
         MulOpNode* gen_mulOpNode();
         CmpOpNode* gen_cmpOpNode();

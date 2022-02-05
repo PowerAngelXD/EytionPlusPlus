@@ -136,6 +136,23 @@ void parser::Parser::parse(){
                     if(temp.second.getType() != type) throw epperr::Epperr("TypeError", "A value of a different type cannot be assigned to this variable",
                                                                                 stat.stmts[index]->assignstmt->iden->idens[0]->line,
                                                                                 stat.stmts[index]->assignstmt->iden->idens[0]->column);
+                    if(temp.second.isArray()){
+                        if(type == "__INT__")
+                            for(int i = 0; i<temp.second.len; i++)
+                                sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal((int)calc.result[i].second, i);
+                        else if(type == "__DECI__")
+                            for(int i = 0; i<temp.second.len; i++)
+                                sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal((float)calc.result[i].second, i);
+                        else if(type == "__BOOL__")
+                            for(int i = 0; i<temp.second.len; i++)
+                                sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal((bool)calc.result[i].second, i);
+                        else if(type == "__STRING__")
+                            for(int i = 0; i<temp.second.len; i++)
+                                sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal(calc.constpool[(int)calc.result[i].second], i, false);
+                        else if(type == "__CHAR__")
+                            for(int i = 0; i<temp.second.len; i++)
+                                sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal(calc.constpool[(int)calc.result[i].second], i, true);
+                    }
                     else{
                         if(type == "__INT__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val((int)calc.result[0].second);
                         else if(type == "__DECI__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.result[0].second);
