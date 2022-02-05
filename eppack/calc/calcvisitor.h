@@ -23,7 +23,10 @@ namespace cvisitor{
 
         void visitNumber(epplex::Token* token);
         void visitString(epplex::Token* token);
+        void visitAssign(epplex::Token* token);
         void visitChar(epplex::Token* token);
+        void visitWholeExprNode(east::WholeExprNode* node);
+        void visitAssignExpr(east::AssignExprNode* node);
         void visitIden(east::IdentifierNode* node);
         void visitTpof(east::TypeOfExprNode* node);
         void visitInput(east::InputExprNode* node);
