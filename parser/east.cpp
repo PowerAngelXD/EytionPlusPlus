@@ -16,6 +16,7 @@ east::WholeExprNode* east::astParser::gen_wholeExprNode(){
         east::WholeExprNode* node = new east::WholeExprNode;
         if(east::AssignExprNode::is_it(*this)) node->assignexpr = gen_assignExprNode();
         else if(east::ValExprNode::is_it(*this)) node->valexpr = gen_valExprNode();
+        return node;
     }
     else throw epperr::Epperr("SyntaxErrror", "Unknown type of the expr!", tg[pos].line, tg[pos].column);
 }
@@ -316,6 +317,7 @@ east::StmtNode* east::astParser::gen_stmtNode(){
         else if(east::BreakStmtNode::is_it(*this)) node->brkstmt = gen_brkStmtNode();
         else if(east::WhileStmtNode::is_it(*this)) node->whilestmt = gen_whileStmtNode();
         else if(east::RepeatStmtNode::is_it(*this)) node->reptstmt = gen_reptStmtNode();
+        else if(east::ForEachStmtNode::is_it(*this)) node->foreachstmt = gen_foreachStmtNode();
         return node;
     }
     else throw epperr::Epperr("SyntaxError", "Unknown type of the stmt!", tg[pos].line, tg[pos].column);
@@ -439,6 +441,29 @@ east::BreakStmtNode* east::astParser::gen_brkStmtNode(){
         return node;
     }
     else throw epperr::Epperr("SyntaxError", "It is not a proper Break statement format", tg[pos].line, tg[pos].column);
+}
+east::ForEachStmtNode* east::astParser::gen_foreachStmtNode(){
+    if(east::ForEachStmtNode::is_it(*this)){
+        east::ForEachStmtNode* node = new east::ForEachStmtNode;
+        node->mark = token();
+        if(peek()->content == "(") node->left = token();
+        else throw epperr::Epperr("SyntaxError", "Expect '('", tg[pos].line, tg[pos].column);
+        if(peek()->content == "var") node->var_mark = token();
+        else throw epperr::Epperr("SyntaxError", "Expect keyword: 'var'", tg[pos].line, tg[pos].column);
+        if(peek()->type == "__IDENTIFIER__") node->iden = token();
+        else throw epperr::Epperr("SyntaxError", "Expect an identifier", tg[pos].line, tg[pos].column);
+        if(peek()->content == ":") node->mh = token();
+        else throw epperr::Epperr("SyntaxError", "Expect ':'", tg[pos].line, tg[pos].column);
+        if(peek()->type == "__IDENTIFIER__") node->ariden = gen_valExprNode();
+        else throw epperr::Epperr("SyntaxError", "Expect an identifier", tg[pos].line, tg[pos].column);
+        if(peek()->content == ")") node->right = token();
+        else throw epperr::Epperr("SyntaxError", "Expect ')'", tg[pos].line, tg[pos].column);
+        if(east::BlockStmtNode::is_it(*this)) node->body = gen_blockStmtNode();
+        else if(east::StmtNode::is_it(*this)) node->stc = gen_stmtNode();
+        else throw epperr::Epperr("SyntaxError", "There is at least one statement under the if statement", tg[pos].line, tg[pos].column);
+        return node;
+    }
+    else throw epperr::Epperr("SyntaxError", "It is not a proper For_each statement format", tg[pos].line, tg[pos].column);
 }
 east::WhileStmtNode* east::astParser::gen_whileStmtNode(){
     if(east::WhileStmtNode::is_it(*this)){
@@ -798,12 +823,13 @@ std::string east::StmtNode::to_string(){
     else if(brkstmt != nullptr) return "stmt_node: {" + this->brkstmt->to_string() + "}";
     else if(whilestmt != nullptr) return "stmt_node: {" + this->whilestmt->to_string() + "}";
     else if(reptstmt != nullptr) return "stmt_node: {" + this->reptstmt->to_string() + "}";
+    else if(foreachstmt != nullptr) return "stmt_node: {" + this->foreachstmt->to_string() + "}";
     else return "__NULL__";
 }
 bool east::StmtNode::is_it(east::astParser ap){
     return east::OutStmtNode::is_it(ap) || east::VorcStmtNode::is_it(ap) || east::AssignStmtNode::is_it(ap) || east::DeleteStmtNode::is_it(ap)
             || east::BlockStmtNode::is_it(ap) || east::IfStmtNode::is_it(ap) || east::RepeatStmtNode::is_it(ap) || east::WhileStmtNode::is_it(ap)
-            || east::BreakStmtNode::is_it(ap) || east::ElseStmtNode::is_it(ap) || east::ElseifStmtNode::is_it(ap);
+            || east::BreakStmtNode::is_it(ap) || east::ElseStmtNode::is_it(ap) || east::ElseifStmtNode::is_it(ap) || east::ForEachStmtNode::is_it(ap);
 }
 //
 
@@ -938,5 +964,14 @@ std::string east::BreakStmtNode::to_string(){
 }
 bool east::BreakStmtNode::is_it(east::astParser ap){
     return ap.peek()->content == "break";
+}
+//
+
+//for_each stmrt node
+std::string east::ForEachStmtNode::to_string(){
+    return "for_each_stmt_node: {" + mark->simply_format() + ", " + iden->simply_format() + ", " + ariden->to_string() + ", " + body->to_string() + "}";
+}
+bool east::ForEachStmtNode::is_it(east::astParser ap){
+    return ap.peek()->content == "for_each";
 }
 //

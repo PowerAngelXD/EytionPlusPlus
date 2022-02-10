@@ -33,6 +33,7 @@ namespace cenv{
         int len = 1;
     public:
         Calculation(scope::ScopeSet sset_);
+        Calculation()=default;
 
         std::vector<calc_ins> ins;
         std::vector<calc_unit> env;

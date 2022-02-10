@@ -418,6 +418,24 @@ namespace east{
         static bool is_it(astParser ap);
     };
 
+    class ForEachStmtNode{
+    public:
+        epplex::Token* mark; // for_each
+        epplex::Token* left;
+        epplex::Token* var_mark;
+        epplex::Token* iden;
+        epplex::Token* mh;
+        ValExprNode* ariden;
+        epplex::Token* right;
+        BlockStmtNode* body = nullptr;
+        StmtNode* stc = nullptr;
+
+        std::string tag = "__OTHER__";
+
+        std::string to_string();
+        static bool is_it(astParser ap);
+    };
+
     class ForStmtNode{
     public:
 
@@ -436,6 +454,7 @@ namespace east{
         WhileStmtNode* whilestmt = nullptr;
         RepeatStmtNode* reptstmt = nullptr;
         ElseStmtNode* elsestmt = nullptr;
+        ForEachStmtNode* foreachstmt = nullptr;
 
         std::string tag = "__OTHER__";
 
@@ -506,6 +525,7 @@ namespace east{
         ElseifStmtNode* gen_elifStmtNode();
         ElseStmtNode* gen_elseStmtNode();
         BreakStmtNode* gen_brkStmtNode();
+        ForEachStmtNode* gen_foreachStmtNode();
         WhileStmtNode* gen_whileStmtNode();
         RepeatStmtNode* gen_reptStmtNode();
         BlockStmtNode* gen_blockStmtNode();

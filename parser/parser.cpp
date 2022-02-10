@@ -319,5 +319,65 @@ void parser::Parser::parse(){
             }
             else _if_control = -1;
         }
+        else if(stat.stmts[index]->foreachstmt != nullptr){
+            cenv::Calculation calc;
+            auto name = stat.stmts[index]->foreachstmt->iden->content;
+            if (stat.stmts[index]->foreachstmt->ariden->addexpr != nullptr){
+                if (stat.stmts[index]->foreachstmt->ariden->addexpr->muls[0]->prims[0]->iden != nullptr)
+                    calc = _calc(*stat.stmts[index]->foreachstmt->ariden, sset);
+            }
+            if(!calc.isArray()) throw epperr::Epperr("TypeError", "Cannot traverse an object that is not an array", 
+                stat.stmts[index]->foreachstmt->ariden->addexpr->muls[0]->prims[0]->iden->idens[0]->line,
+                stat.stmts[index]->foreachstmt->ariden->addexpr->muls[0]->prims[0]->iden->idens[0]->column);
+            try{
+                int i = 0;
+                while (i < calc.result.size()){
+                    i += 1;
+                    parser::Parser stc_p;
+                    if (stat.stmts[index]->foreachstmt->stc != nullptr){
+                        east::StatNode _stat;
+                        _stat.stmts.push_back(stat.stmts[index]->foreachstmt->stc);
+                        this->sset.next();
+                        this->sset.newScope("__epp_foreachTemp_scope__");
+                        this->sset.scope_pool[this->sset.getDeep()].new_var(name, var::Value(false, false, calc.result[0].first));
+                        if(calc.result[0].first == "__INT__")
+                            sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val((int)calc.result[i-1].second);
+                        else if(calc.result[0].first == "__DECI__")
+                            sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.result[i-1].second);
+                        else if(calc.result[0].first == "__BOOL__")
+                            sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val((bool)calc.result[i-1].second);
+                        else if(calc.result[0].first == "__STRING__")
+                            sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.constpool[(int)calc.result[i-1].second], false);
+                        else if(calc.result[0].first == "__CHAR__")
+                            sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.constpool[(int)calc.result[i-1].second], true);
+                        stc_p.stat = _stat;
+                        stc_p.sset = sset;
+                        stc_p.parse();
+                    }
+                    else{
+                        stc_p.stat = *stat.stmts[index]->foreachstmt->body->body;
+                        this->sset.next();
+                        this->sset.newScope("__epp_foreachTemp_scope__");
+                        this->sset.scope_pool[this->sset.getDeep()].new_var(name, var::Value(false, false, calc.result[0].first));
+                        if(calc.result[0].first == "__INT__")
+                            sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val((int)calc.result[i-1].second);
+                        else if(calc.result[0].first == "__DECI__")
+                            sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.result[i-1].second);
+                        else if(calc.result[0].first == "__BOOL__")
+                            sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val((bool)calc.result[i-1].second);
+                        else if(calc.result[0].first == "__STRING__")
+                            sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.constpool[(int)calc.result[i-1].second], false);
+                        else if(calc.result[0].first == "__CHAR__")
+                            sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.constpool[(int)calc.result[i-1].second], true);
+                        stc_p.sset = this->sset;
+                        stc_p.parse();
+                        this->sset.remove();
+                    }
+                    sset = stc_p.sset;
+                }
+            }
+            catch (...){
+            }
+        }
     }
 }
