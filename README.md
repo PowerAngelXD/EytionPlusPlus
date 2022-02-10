@@ -83,6 +83,13 @@ while(index < len(a)){
     index=index+1;
 }
 ```
+> For_each
+```go
+var str_list = ["hello!", "Eytion", "plusplus"];
+for_each(var s: str_list){
+    out "content: " + s + "\n";
+}
+```
 > Break
 ```go
 var a=[1,6,2,5];

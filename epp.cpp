@@ -17,7 +17,7 @@
 #include "lexer/eplex.h"
 #include "parser/parser.h"
 #include "eppack/error/epperr.h"
-#define EPP_DEBUG
+//#define EPP_DEBUG
 
 #ifdef _WIN32
 void getAllFile(std::string path, std::vector<std::string>& files){
@@ -43,7 +43,7 @@ inline void epp_cli(){
     int code = 10;
     std::string cmd;
     char work_path[256];
-    std::wcout<<L"Eytion++ ["<<__DATE__<<"]\nCopyright (c) PowerAngelXd\nNow version: 0.1.7\nyou can type 'help' to get 'Eytion++Cli & Eytion++Grammar' help document\n"<<std::endl;
+    std::wcout<<L"Eytion++ ["<<__DATE__<<"]\nCopyright (c) PowerAngelXd\nNow version: 0.1.9\nyou can type 'help' to get 'Eytion++Cli & Eytion++Grammar' help document\n"<<std::endl;
     while(true){
         if(code == 0) break;
         try{
@@ -100,7 +100,8 @@ inline void epp_cli(){
                                    "elsestmt ::= 'else' blockstmt\n"
                                    "whilestmt ::= 'while' '(' boolexpr ')' blockstmt|stmt\n"
                                    "repeatstmt ::= 'repeat' '(' addexpr ')' blockstmt|stmt\n"
-                                   "breakstmt ::= 'break' ';'";
+                                   "breakstmt ::= 'break' ';'\n"
+                                   "for_each_stmt ::= 'for_each' '(' 'var' identifier ':' identifier ')' blockstmt";
                 std::cout<<help<<std::endl;
             }
             else if(cmd.find("run") == 0){
@@ -210,7 +211,7 @@ inline void epp_cli(){
 int main(int argc, char *argv[]){
     std::string cmd;
     if(argc >= 2){
-        if(strcmp(argv[1], "-v")==0 || strcmp(argv[1], "-version")==0) std::cout<<"version => dev-0.1.7"<<std::endl;
+        if(strcmp(argv[1], "-v")==0 || strcmp(argv[1], "-version")==0) std::cout<<"version => dev-0.1.9"<<std::endl;
         else if(strcmp(argv[1], "-r")==0 || strcmp(argv[1], "-run")==0){
             std::ifstream file(argv[2]);
             std::size_t index = ((std::string)argv[2]).find(".epp", ((std::string)argv[2]).size() - ((std::string)".epp").size()); // file suffix check

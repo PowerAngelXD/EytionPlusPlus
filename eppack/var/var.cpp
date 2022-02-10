@@ -254,7 +254,7 @@ int scope::Scope::findI(std::string target){
 scope::ScopeSet::ScopeSet(){
     var::Value epp_version(false, true, "__STRING__");
     var::Value epp_build_time(false, true, "__STRING__");
-    epp_version.set_val((std::string)"dev-0.1.7", false);
+    epp_version.set_val((std::string)"dev-0.1.9", false);
     epp_build_time.set_val((std::string)__DATE__, false);
     this->newScope("__epp_global_scope__");
     this->scope_pool[0].identifier_table.push_back("epp_version");

@@ -17,3 +17,5 @@ ifstmt ::= 'if' '(' boolexpr ')' blockstmt|stmt
 elsestmt ::= 'else' blockstmt
 whilestmt ::= 'while' '(' boolexpr ')' blockstmt|stmt
 repeatstmt ::= 'repeat' '(' addexpr ')' blockstmt|stmt
+breakstmt ::= 'break' ';'
+for_each_stmt ::= 'for_each' '(' 'var' identifier ':' identifier ')' blockstmt
