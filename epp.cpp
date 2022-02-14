@@ -17,7 +17,7 @@
 #include "lexer/eplex.h"
 #include "parser/parser.h"
 #include "eppack/error/epperr.h"
-//#define EPP_DEBUG
+#define EPP_DEBUG
 
 #ifdef _WIN32
 void getAllFile(std::string path, std::vector<std::string>& files){
@@ -43,11 +43,11 @@ inline void epp_cli(){
     int code = 10;
     std::string cmd;
     char work_path[256];
-    std::wcout<<L"Eytion++ ["<<__DATE__<<"]\nCopyright (c) PowerAngelXd\nNow version: 0.1.9\nyou can type 'help' to get 'Eytion++Cli & Eytion++Grammar' help document\n"<<std::endl;
+    std::wcout<<L"Eytion++ [ Build Time:"<<__DATE__<<" "<<__TIME__<<"]\nCopyright (c) PowerAngelXd\nNow version: 0.1.9\nyou can type 'help' to get 'Eytion++Cli & Eytion++Grammar' help document\n"<<std::endl;
     while(true){
         if(code == 0) break;
         try{
-            getcwd(work_path, 256); std::cout<<"\033[33m"<<work_path<<"\033[0m";
+            getcwd(work_path, 256); std::cout<<"[Epp Cli]"<<work_path;
             std::cout<<"> ";
             std::getline(std::cin, cmd);
             if(cmd == "quit") code = 0;
@@ -190,7 +190,9 @@ inline void epp_cli(){
                 }
                 else{
                     east::StatNode* node = ast.gen_statNode();
-                    //std::cout<<node->to_string()<<std::endl;
+                    std::ofstream file("debug/ast/ast.east");
+                    file<<node->to_string()<<std::endl;
+                    file.close();
                     p.stat = *node;
                     p.parse();
                 }
