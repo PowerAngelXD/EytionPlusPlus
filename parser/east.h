@@ -275,9 +275,12 @@ namespace east{
         // var v = 1;
         // const c = "hey";
         // var list = [1,2,3,4];
+        // var a:string = "dasd";
     public:
         epplex::Token* mark;
         epplex::Token* iden;
+        epplex::Token* type_exp=nullptr;
+        epplex::Token* type=nullptr;
         epplex::Token* equ;
         ValExprNode* value;
         epplex::Token* end;
@@ -336,19 +339,14 @@ namespace east{
     };
 
     class AreaStmtNode{
-        /*  area a{
-         *      var b="hello ";
-         *      var c="world!";
-         *      out a+b;
-         *  }
-         *  out a.b+a.c;
-         *  act a;
-         *  ---OutPut---
-         *  hello world!
-         *  hello world!
-         */
     public:
+        epplex::Token* mark;
+        epplex::Token* iden;
+        BlockStmtNode* body;
+        std::string tag = "__OTHER__";
 
+        std::string to_string();
+        static bool is_it(astParser ap);
     };
 
     class IfStmtNode{
@@ -455,6 +453,7 @@ namespace east{
         RepeatStmtNode* reptstmt = nullptr;
         ElseStmtNode* elsestmt = nullptr;
         ForEachStmtNode* foreachstmt = nullptr;
+        AreaStmtNode* areastmt = nullptr;
 
         std::string tag = "__OTHER__";
 
@@ -529,5 +528,6 @@ namespace east{
         WhileStmtNode* gen_whileStmtNode();
         RepeatStmtNode* gen_reptStmtNode();
         BlockStmtNode* gen_blockStmtNode();
+        AreaStmtNode* gen_areaStmtNode();
     };
 }

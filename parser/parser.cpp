@@ -49,6 +49,18 @@ void parser::Parser::parse(){
             auto expr = stat.stmts[index]->vorcstmt->value;
             cenv::Calculation calc = _calc(*expr, sset);
 
+            //type checker
+            auto type = stat.stmts[index]->vorcstmt->type;
+            if(type == nullptr);
+            else{
+                if(type->content == "int" && calc.result[0].first == "__INT__");
+                else if(type->content == "string" && calc.result[0].first == "__STRING__");
+                else if(type->content == "deci" && calc.result[0].first == "__DECI__");
+                else if(type->content == "bool" && calc.result[0].first == "__BOOL__");
+                else if(type->content == "char" && calc.result[0].first == "__CHAR__");
+                else throw epperr::Epperr("TypeError", "The pre type at the time of declaration does not match the actual incoming type", type->line, type->column);
+            }
+            //
             if(calc.isArray()){
                 var::Value val(true, false);
                 if(sset.findInAllScope(name)) throw epperr::Epperr("NameError", "duplicate identifier '" + name + "'!", val.line, val.column);
@@ -378,6 +390,10 @@ void parser::Parser::parse(){
             }
             catch (...){
             }
+        }
+        else if(stat.stmts[index]->areastmt != nullptr){
+            auto users = scope::UserScope(stat.stmts[index]->areastmt->iden->content, *stat.stmts[index]->areastmt->body->body);
+            
         }
     }
 }

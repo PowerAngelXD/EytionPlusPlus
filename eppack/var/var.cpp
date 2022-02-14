@@ -251,6 +251,8 @@ int scope::Scope::findI(std::string target){
     return -1;
 }
 
+scope::UserScope::UserScope(std::string name_, east::StatNode stat_): scope::Scope(name_), stat(stat_){}
+
 scope::ScopeSet::ScopeSet(){
     var::Value epp_version(false, true, "__STRING__");
     var::Value epp_build_time(false, true, "__STRING__");
@@ -301,5 +303,18 @@ void scope::ScopeSet::newScope(std::string name){
 }
 int scope::ScopeSet::getDeep() {
     return deep_count;
+}
+
+bool scope::ScopeSet::findInUScope(std::string name){
+    for(auto s: user_scope_pool){
+        if(s.name == name) return true;
+    }
+    return false;
+}
+int scope::ScopeSet::findInUScopeI(std::string name){
+    for(int i=0; i<user_scope_pool.size(); i++){
+        if(user_scope_pool[i].name == name) return i;
+    }
+    return -1;
 }
 //

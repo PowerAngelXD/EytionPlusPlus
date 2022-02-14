@@ -21,6 +21,7 @@ namespace parser{
     public:
         east::StatNode stat;
         scope::ScopeSet sset;
+        scope::ScopeSet user_sset; // User defined sset
 
         void parse();
     };

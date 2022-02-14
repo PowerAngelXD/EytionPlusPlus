@@ -72,8 +72,8 @@ namespace var{
 
 namespace scope{
     class Scope{
-        std::string name;
     public:
+        std::string name;
         std::vector<std::pair<std::string, var::Value>> vars;
         std::vector<std::string> identifier_table;
         Scope(std::string name_);
@@ -93,17 +93,57 @@ namespace scope{
         int findI(std::string target);
     };
 
+    class UserScope: public Scope{
+    public:
+        std::string name;
+        east::StatNode stat;
+        UserScope(std::string name_, east::StatNode stat_);
+    };
+
     class ScopeSet{
         int deep_count = 0;
     public:
         std::vector<Scope> scope_pool;
+        std::vector<UserScope> user_scope_pool;
         ScopeSet();
+
+        /**
+         * @brief Find out whether the specified identifier is within this scope and all parent scopes of this scope
+         * @param name target identifier's name
+         * @return bool
+         */
         bool findInAllScope(std::string name);
+        /**
+         * @brief Find the specified identifier and return the index of the scope
+         * @param name target identifier's name
+         * @return int 
+         */
         int findInAllScopeI(std::string name);
         void next();
         void back();
         void remove();
+        /**
+         * @brief Create a new scope
+         * 
+         * @param name scope name
+         */
         void newScope(std::string name);
         int getDeep();
+
+        /**
+         * @brief A scope with the specified name was found in the user scope pool
+         * 
+         * @param name target scope's name
+         * @return true 
+         * @return false 
+         */
+        bool findInUScope(std::string name);
+        /**
+         * @brief A scope with the specified name was found in the user scope pool, And return the index
+         * 
+         * @param name 
+         * @return int index
+         */
+        int findInUScopeI(std::string name);
     };
 }
