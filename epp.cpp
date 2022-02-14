@@ -92,7 +92,7 @@ inline void epp_cli(){
                                    "\n"
                                    "stmt ::= outstmt|vorcstmt|assignstmt|deletestmt|blockstmt|ifstmt|whilestmt|repeatstmt|breakstmt\n"
                                    "outstmt ::= 'out' expr ';'\n"
-                                   "vorcstmt ::= 'var'|'const' identifier '=' expr ';'\n"
+                                   "vorcstmt ::= 'var'|'const' identifier (':' type) '=' expr ';'\n"
                                    "assignstmt ::= identifier '=' expr ';'\n"
                                    "deletestmt ::= 'delete' identifier ';'\n"
                                    "blockstmt ::= '{' (stmt)* '}'\n"

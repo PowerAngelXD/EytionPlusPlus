@@ -32,6 +32,8 @@ var b="world";
 out a+b;
 a="helloworld!";
 out a;
+var c:string = "yes"; #You can also write that
+out c;
 ```
 > Constant
 ```go

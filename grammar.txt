@@ -9,7 +9,7 @@ input ::= 'input' '(' string ')'
 
 stmt ::= outstmt|vorcstmt|assignstmt|deletestmt|blockstmt|ifstmt|whilestmt|repeatstmt
 outstmt ::= 'out' expr ';'
-vorcstmt ::= 'var'|'const' identifier '=' expr ';'
+vorcstmt ::= 'var'|'const' identifier (':' type) '=' expr ';'
 assignstmt ::= identifier '=' expr ';'
 deletestmt ::= 'delete' identifier ';'
 blockstmt ::= '{' (stmt)* '}'
