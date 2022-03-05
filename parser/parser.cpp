@@ -332,15 +332,14 @@ void parser::Parser::parse(){
             else _if_control = -1;
         }
         else if(stat.stmts[index]->foreachstmt != nullptr){
-            cenv::Calculation calc;
+            std::vector<cenv::calc_unit> list;
             auto name = stat.stmts[index]->foreachstmt->iden->content;
-            if (stat.stmts[index]->foreachstmt->ariden->addexpr != nullptr){
-                if (stat.stmts[index]->foreachstmt->ariden->addexpr->muls[0]->prims[0]->iden != nullptr)
-                    calc = _calc(*stat.stmts[index]->foreachstmt->ariden, sset);
-            }
-            if(!calc.isArray()) throw epperr::Epperr("TypeError", "Cannot traverse an object that is not an array", 
+            cenv::Calculation calc = _calc(*stat.stmts[index]->foreachstmt->ariden, sset);
+            if(calc.isArray());
+            else if(!calc.isArray()) throw epperr::Epperr("TypeError", "Cannot traverse an object that is not an array", 
                 stat.stmts[index]->foreachstmt->ariden->addexpr->muls[0]->prims[0]->iden->idens[0]->line,
                 stat.stmts[index]->foreachstmt->ariden->addexpr->muls[0]->prims[0]->iden->idens[0]->column);
+            else list = calc.result;
             try{
                 int i = 0;
                 while (i < calc.result.size()){
@@ -349,8 +348,6 @@ void parser::Parser::parse(){
                     if (stat.stmts[index]->foreachstmt->stc != nullptr){
                         east::StatNode _stat;
                         _stat.stmts.push_back(stat.stmts[index]->foreachstmt->stc);
-                        this->sset.next();
-                        this->sset.newScope("__epp_foreachTemp_scope__");
                         this->sset.scope_pool[this->sset.getDeep()].new_var(name, var::Value(false, false, calc.result[0].first));
                         if(calc.result[0].first == "__INT__")
                             sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val((int)calc.result[i-1].second);

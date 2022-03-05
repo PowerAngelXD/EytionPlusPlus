@@ -460,7 +460,7 @@ east::ForEachStmtNode* east::astParser::gen_foreachStmtNode(){
         else throw epperr::Epperr("SyntaxError", "Expect an identifier", tg[pos].line, tg[pos].column);
         if(peek()->content == ":") node->mh = token();
         else throw epperr::Epperr("SyntaxError", "Expect ':'", tg[pos].line, tg[pos].column);
-        if(peek()->type == "__IDENTIFIER__") node->ariden = gen_valExprNode();
+        if(peek()->type == "__IDENTIFIER__" || east::ListExprNode::is_it(*this)) node->ariden = gen_valExprNode();
         else throw epperr::Epperr("SyntaxError", "Expect an identifier", tg[pos].line, tg[pos].column);
         if(peek()->content == ")") node->right = token();
         else throw epperr::Epperr("SyntaxError", "Expect ')'", tg[pos].line, tg[pos].column);
@@ -710,6 +710,14 @@ bool east::MulExprNode::is_it(east::astParser ap){
     return east::PrimExprNode::is_it(ap);
 }
 //
+
+//selfiad expr node
+std::string east::SelfIaD::to_string(){
+
+}
+bool east::SelfIaD::is_it(east::astParser ap){
+
+}
 
 //add expr node
 std::string east::AddExprNode::to_string(){
@@ -989,7 +997,7 @@ bool east::BreakStmtNode::is_it(east::astParser ap){
 
 //for_each stmt node
 std::string east::ForEachStmtNode::to_string(){
-    return "for_each_stmt_node: {" + mark->simply_format() + ", " + iden->simply_format() + ", " + ariden->to_string() + ", " + body->to_string() + "}";
+    return "for_each_stmt_node: {" + mark->simply_format() + ", " + iden->simply_format() + ", " + ariden->to_string() + ", " + (this->stc!=nullptr?stc->to_string():body->to_string()) + "}";
 }
 bool east::ForEachStmtNode::is_it(east::astParser ap){
     return ap.peek()->content == "for_each";

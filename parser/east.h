@@ -39,6 +39,18 @@ namespace east{
         static bool is_it(astParser ap);
     };
 
+    class SelfIaD{
+        //i++ / ++i;
+    public:
+        IdentifierNode* iden;
+        epplex::Token* op;
+        std::string tag = "__CALC__";
+        bool isFront = false;
+
+        std::string to_string();
+        static bool is_it(astParser ap);
+    };
+
     class WholeExprNode{
     public:
         AssignExprNode* assignexpr = nullptr;
