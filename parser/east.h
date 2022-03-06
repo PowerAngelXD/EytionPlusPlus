@@ -39,7 +39,7 @@ namespace east{
         static bool is_it(astParser ap);
     };
 
-    class SelfIaD{
+    class SelfIaDExprNode{
         //i++ / ++i;
     public:
         IdentifierNode* iden;
@@ -246,6 +246,7 @@ namespace east{
         InputExprNode* input = nullptr;
         TypeToExprNode* typeto = nullptr;
         LenExprNode* glen = nullptr;
+        SelfIaDExprNode* siad = nullptr;
         epplex::Token* left = nullptr;
         FuncCallExprNode* fcall = nullptr;
         AddExprNode* addexpr = nullptr; // use '()'
@@ -522,6 +523,7 @@ namespace east{
         TypeOfExprNode* gen_tpofExprNode();
         InputExprNode* gen_inputExprNode();
         FuncCallExprNode* gen_fcallExprNode();
+        SelfIaDExprNode* gen_siadExprNode();
         FuncDefineExprNode* gen_fdefExprNode();
         LenExprNode* gen_lenExprNode();
         TypeToExprNode* gen_tytExprNode();

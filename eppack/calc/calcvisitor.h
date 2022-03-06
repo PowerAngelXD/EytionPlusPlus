@@ -28,6 +28,7 @@ namespace cvisitor{
         void visitWholeExprNode(east::WholeExprNode* node);
         void visitAssignExpr(east::AssignExprNode* node);
         void visitIden(east::IdentifierNode* node);
+        void visitSiad(east::SelfIaDExprNode* node);
         void visitTpof(east::TypeOfExprNode* node);
         void visitInput(east::InputExprNode* node);
         void visitTypeTo(east::TypeToExprNode* node);

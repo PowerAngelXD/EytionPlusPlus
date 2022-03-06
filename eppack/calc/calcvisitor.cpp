@@ -46,6 +46,21 @@ void cvisitor::visitor::visitChar(epplex::Token* token){
     constpool.push_back(ch_s);
     ins.push_back({"__PUSH__", cenv::calc_unit("__CHAR__", constpool.size()-1), "__NULL__", token->line, token->column});
 }
+void cvisitor::visitor::visitSiad(east::SelfIaDExprNode* node){
+    visitIden(node->iden);
+    if(node->op->content == "++"){
+        if(node->isFront)
+            ins.push_back({"__SIADADD_FRONT__", cenv::calc_unit("__NULL__", 0.0), node->iden->idens[0]->content, node->iden->idens[0]->line, node->iden->idens[0]->column});
+        else
+            ins.push_back({"__SIADADD__", cenv::calc_unit("__NULL__", 0.0), node->iden->idens[0]->content, node->iden->idens[0]->line, node->iden->idens[0]->column});
+    }
+    else{
+        if(node->isFront)
+            ins.push_back({"__SIADSUB_FRONT__", cenv::calc_unit("__NULL__", 0.0), node->iden->idens[0]->content, node->iden->idens[0]->line, node->iden->idens[0]->column});
+        else
+            ins.push_back({"__SIADSUB__", cenv::calc_unit("__NULL__", 0.0), node->iden->idens[0]->content, node->iden->idens[0]->line, node->iden->idens[0]->column});
+    }
+}
 void cvisitor::visitor::visitTpof(east::TypeOfExprNode* node){
     if(node->expr->addexpr != nullptr) visitAddExpr(node->expr->addexpr);
     else if(node->expr->boolexpr != nullptr) visitBoolExpr(node->expr->boolexpr);
@@ -122,6 +137,7 @@ void cvisitor::visitor::visitPrimExpr(east::PrimExprNode* node){
     else if(node->input != nullptr) visitInput(node->input);
     else if(node->glen != nullptr) visitLen(node->glen);
     else if(node->typeto != nullptr) visitTypeTo(node->typeto);
+    else if(node->siad != nullptr) visitSiad(node->siad);
 }
 void cvisitor::visitor::visitMulExpr(east::MulExprNode* node){
     visitPrimExpr(node->prims[0]);

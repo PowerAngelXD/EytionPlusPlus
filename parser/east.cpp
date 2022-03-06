@@ -81,6 +81,7 @@ east::PrimExprNode* east::astParser::gen_primExprNode(){
     if(east::PrimExprNode::is_it(*this)){
         east::PrimExprNode* node = new east::PrimExprNode;
         if(east::FuncCallExprNode::is_it(*this)) node->fcall = gen_fcallExprNode();
+        else if(east::SelfIaDExprNode::is_it(*this)) node->siad = gen_siadExprNode();
         else if(peek()->type == "__IDENTIFIER__") node->iden = gen_identifierNode();
         else if(peek()->type == "__NUMBER__") node->number = token();
         else if(peek()->type == "__STRING__") node->str = token();
@@ -102,6 +103,21 @@ east::PrimExprNode* east::astParser::gen_primExprNode(){
             if(peek()->content == ")") node->right = token();
             else throw epperr::Epperr("SyntaxErrror", "Expect ')'!", tg[pos].line, tg[pos].column);
         }
+        return node;
+    }
+    else throw epperr::Epperr("SyntaxErrror", "Unknown type of the expr!", tg[pos].line, tg[pos].column);
+}
+east::SelfIaDExprNode* east::astParser::gen_siadExprNode(){
+    if(east::SelfIaDExprNode::is_it(*this)){
+        east::SelfIaDExprNode* node = new east::SelfIaDExprNode;
+        if(peek()->content == "++" || peek()->content == "--") {
+            node->op = token();
+            node->isFront = true;
+        }
+        else node->iden = gen_identifierNode();
+        if(node->isFront == true && peek()->type == "__IDENTIFIER__") node->iden = gen_identifierNode();
+        else if(peek()->content == "++" || peek()->content == "--") node->op = token();
+        else throw epperr::Epperr("SyntaxErrror", "Expect '++', '--' or an identifier!", tg[pos].line, tg[pos].column);;
         return node;
     }
     else throw epperr::Epperr("SyntaxErrror", "Unknown type of the expr!", tg[pos].line, tg[pos].column);
@@ -544,7 +560,7 @@ std::string east::IdentifierNode::getIdenType(){
     return this->type;
 }
 bool east::IdentifierNode::is_it(east::astParser ap){
-    return ap.peek()->type == "__IDENTIFIER__";
+    return ap.peek()->type == "__IDENTIFIER__" && (ap.peek(1)->content != "++" || ap.peek(1)->content != "--");
 }
 //
 
@@ -614,12 +630,15 @@ std::string east::PrimExprNode::to_string(){
         return "prim_expr(TYPETO): {" + this->typeto->to_string() + "}";
     else if(fcall != nullptr)
         return "prim_expr(FUNC_CALL): {" + this->fcall->to_string() + "}";
+    else if(siad != nullptr)
+        return "prim_expr(FUNC_CALL): {" + this->siad->to_string() + "}";
     else return "__NULL__";
 }
 bool east::PrimExprNode::is_it(east::astParser ap){
     return ap.peek()->type == "__IDENTIFIER__" || ap.peek()->type == "__NUMBER__" || ap.peek()->type == "__STRING__"||
-           ap.peek()->type == "__CHAR__"|| ap.peek()->content == "(" || ap.peek()->content == "typeof"
-           ||ap.peek()->content == "true"||ap.peek()->content == "false"|| ap.peek()->type == "__BIFIDEN__" || east::FuncCallExprNode::is_it(ap);
+           ap.peek()->type == "__CHAR__"|| ap.peek()->content == "(" || ap.peek()->content == "typeof" ||
+           ap.peek()->content == "true"||ap.peek()->content == "false"|| ap.peek()->type == "__BIFIDEN__" || east::FuncCallExprNode::is_it(ap) ||
+           east::SelfIaDExprNode::is_it(ap);
 }
 //
 
@@ -712,11 +731,19 @@ bool east::MulExprNode::is_it(east::astParser ap){
 //
 
 //selfiad expr node
-std::string east::SelfIaD::to_string(){
-
+std::string east::SelfIaDExprNode::to_string(){
+    return "selfiad_expr: {" + this->op->simply_format() + ", " + this->iden->to_string() + "}";
 }
-bool east::SelfIaD::is_it(east::astParser ap){
-
+bool east::SelfIaDExprNode::is_it(east::astParser ap){
+    if(ap.peek()->content == "++" || ap.peek()->content == "--") return true;
+    else if(east::IdentifierNode::is_it(ap)){
+        int temp = ap.pos;
+        ap.gen_identifierNode();
+        if(ap.peek()->content == "++" || ap.peek()->content == "--") {ap.pos = temp; return true;}
+        else {ap.pos = temp; return false;}
+        return false;
+    }
+    return false;
 }
 
 //add expr node

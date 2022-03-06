@@ -31,6 +31,80 @@ void cenv::Calculation::run(){
         else if(ins[i].instr == "__PUSHI__") {
             push(ins[i].unit);
         }
+        else if(ins[i].instr == "__SIADADD__") {
+            auto original = pop();
+            if(original.first == "__INT__"){
+                push(original);
+                if(sset.scope_pool[sset.findInAllScopeI(ins[i].para)].find(ins[i].para)){
+                    this->sset.scope_pool[sset.findInAllScopeI(ins[i].para)].assign(ins[i].para, var::Value(false, false, "__INT__", (int)(original.second + 1)));
+                }
+                else throw epperr::Epperr("NameError", "Unable to find identifier named: '" + ins[i].para + "'", ins[i].line, ins[i].column);
+            }
+            else if(original.first == "__DECI__"){
+                push(original);
+                if(sset.scope_pool[sset.findInAllScopeI(ins[i].para)].find(ins[i].para)){
+                    this->sset.scope_pool[sset.findInAllScopeI(ins[i].para)].assign(ins[i].para, var::Value(false, false, "__DECI__", (float)(original.second + 1)));
+                }
+                else throw epperr::Epperr("NameError", "Unable to find identifier named: '" + ins[i].para + "'", ins[i].line, ins[i].column);
+            }
+            else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '++'", ins[i].line, ins[i].column);
+        }
+        else if(ins[i].instr == "__SIADSUB__") {
+            auto original = pop();
+            if(original.first == "__INT__"){
+                push(original);
+                if(sset.scope_pool[sset.findInAllScopeI(ins[i].para)].find(ins[i].para)){
+                    this->sset.scope_pool[sset.findInAllScopeI(ins[i].para)].assign(ins[i].para, var::Value(false, false, "__INT__", (int)(original.second - 1)));
+                }
+                else throw epperr::Epperr("NameError", "Unable to find identifier named: '" + ins[i].para + "'", ins[i].line, ins[i].column);
+            }
+            else if(original.first == "__DECI__"){
+                push(original);
+                if(sset.scope_pool[sset.findInAllScopeI(ins[i].para)].find(ins[i].para)){
+                    this->sset.scope_pool[sset.findInAllScopeI(ins[i].para)].assign(ins[i].para, var::Value(false, false, "__DECI__", (float)(original.second - 1)));
+                }
+                else throw epperr::Epperr("NameError", "Unable to find identifier named: '" + ins[i].para + "'", ins[i].line, ins[i].column);
+            }
+            else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '++'", ins[i].line, ins[i].column);
+        }
+        else if(ins[i].instr == "__SIADSUB_FRONT__") {
+            auto original = pop();
+            original.second -= 1;
+            if(original.first == "__INT__"){
+                push(original);
+                if(sset.scope_pool[sset.findInAllScopeI(ins[i].para)].find(ins[i].para)){
+                    this->sset.scope_pool[sset.findInAllScopeI(ins[i].para)].assign(ins[i].para, var::Value(false, false, "__INT__", (int)(original.second)));
+                }
+                else throw epperr::Epperr("NameError", "Unable to find identifier named: '" + ins[i].para + "'", ins[i].line, ins[i].column);
+            }
+            else if(original.first == "__DECI__"){
+                push(original);
+                if(sset.scope_pool[sset.findInAllScopeI(ins[i].para)].find(ins[i].para)){
+                    this->sset.scope_pool[sset.findInAllScopeI(ins[i].para)].assign(ins[i].para, var::Value(false, false, "__DECI__", (float)(original.second)));
+                }
+                else throw epperr::Epperr("NameError", "Unable to find identifier named: '" + ins[i].para + "'", ins[i].line, ins[i].column);
+            }
+            else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '++'", ins[i].line, ins[i].column);
+        }
+        else if(ins[i].instr == "__SIADADD_FRONT__") {
+            auto original = pop();
+            original.second += 1;
+            if(original.first == "__INT__"){
+                push(original);
+                if(sset.scope_pool[sset.findInAllScopeI(ins[i].para)].find(ins[i].para)){
+                    this->sset.scope_pool[sset.findInAllScopeI(ins[i].para)].assign(ins[i].para, var::Value(false, false, "__INT__", (int)(original.second)));
+                }
+                else throw epperr::Epperr("NameError", "Unable to find identifier named: '" + ins[i].para + "'", ins[i].line, ins[i].column);
+            }
+            else if(original.first == "__DECI__"){
+                push(original);
+                if(sset.scope_pool[sset.findInAllScopeI(ins[i].para)].find(ins[i].para)){
+                    this->sset.scope_pool[sset.findInAllScopeI(ins[i].para)].assign(ins[i].para, var::Value(false, false, "__DECI__", (float)(original.second)));
+                }
+                else throw epperr::Epperr("NameError", "Unable to find identifier named: '" + ins[i].para + "'", ins[i].line, ins[i].column);
+            }
+            else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '++'", ins[i].line, ins[i].column);
+        }
         else if(ins[i].instr == "__TYT__") {
             auto original = pop();
             auto target_type = ins[i].para;
