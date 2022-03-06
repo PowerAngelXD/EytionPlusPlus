@@ -18,7 +18,7 @@
 #include "parser/parser.h"
 #include "eppack/error/epperr.h"
 #include "eppack/tools/configloader.h"
-#define EPP_DEBUG
+//#define EPP_DEBUG
 
 #ifdef _WIN32
 void getAllFile(std::string path, std::vector<std::string>& files){
