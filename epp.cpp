@@ -89,6 +89,10 @@ inline void epp_cli(){
                 parser::Parser _p;
                 p = _p;
             }
+            else if(cmd == "redcfg"){
+                loader = configloader::Loader("resource/config/common.ecfg");
+                std::cout<<"\033[42;37mThe configuration file was successfully reloaded!"<<"\033[0m"<<std::endl;
+            }
             else if(cmd == "help"){
                 std::string help = "Eytion++ Cli Help Dcoument\n"
                                    "Commands:\n"
@@ -231,7 +235,8 @@ inline void epp_cli(){
             std::cout<<"Eytion++ Error:  "<<e<<std::endl;
         }
         catch(epperr::Epperr eppe){
-            std::cout<<eppe.what()<<std::endl;
+            if(loader.getData().cli_errorhighlight == true) std::cout<<"\033[41;37m";
+            std::cout<<eppe.what()<<"\033[0m"<<std::endl;
         }
     }
 }
