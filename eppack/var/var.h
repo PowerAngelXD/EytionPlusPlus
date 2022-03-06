@@ -32,6 +32,11 @@ namespace var{
         int len = 1;
         Value(bool is_arr, bool is_con);
         Value(bool is_arr, bool is_con, std::string _type);
+        Value(bool is_arr, bool is_con, std::string _type, int val);
+        Value(bool is_arr, bool is_con, std::string _type, float val);
+        Value(bool is_arr, bool is_con, std::string _type, std::string s, bool ischar);
+        Value(bool is_arr, bool is_con, std::string _type, bool val);
+        Value(bool is_arr, bool is_con, std::string _type, efunc::Efunction val);
         int val_int();
         std::vector<int> val_int_array();
         float val_deci();
@@ -81,6 +86,7 @@ namespace scope{
          * @brief create a new variable
          * */
         void new_var(std::string name, var::Value val);
+
         /**
          * @brief get the name of the scope
          * */
@@ -91,6 +97,7 @@ namespace scope{
          * */
         bool find(std::string target);
         int findI(std::string target);
+        void assign(std::string name, var::Value value);
     };
 
     class UserScope: public Scope{

@@ -3,6 +3,24 @@
 //var
 var::Value::Value(bool is_arr, bool is_con) : is_array(is_arr), is_const(is_con) {}
 var::Value::Value(bool is_arr, bool is_con, std::string _type) : is_array(is_arr), is_const(is_con), type(_type) {}
+var::Value::Value(bool is_arr, bool is_con, std::string _type, int val) : is_array(is_arr), is_const(is_con), type(_type) {
+    int_val.push_back(val);
+}
+var::Value::Value(bool is_arr, bool is_con, std::string _type, float val) : is_array(is_arr), is_const(is_con), type(_type) {
+    deci_val.push_back(val);
+}
+var::Value::Value(bool is_arr, bool is_con, std::string _type, std::string s, bool ischar) : is_array(is_arr), is_const(is_con), type(_type) {
+    if(ischar)
+        ch_val.push_back(s);
+    else
+        str_val.push_back(s);
+}
+var::Value::Value(bool is_arr, bool is_con, std::string _type, bool val) : is_array(is_arr), is_const(is_con), type(_type) {
+    bool_val.push_back(val);
+}
+var::Value::Value(bool is_arr, bool is_con, std::string _type, efunc::Efunction val) : is_array(is_arr), is_const(is_con), type(_type) {
+    func_val.push_back(val);
+}
 bool var::Value::isArray(){
     return is_array;
 }
@@ -250,13 +268,17 @@ int scope::Scope::findI(std::string target){
     }
     return -1;
 }
+void scope::Scope::assign(std::string name, var::Value value){
+    vars.erase(vars.begin() + findI(name));
+    vars.push_back(std::pair<std::string ,var::Value>(name, value));
+}
 
 scope::UserScope::UserScope(std::string name_, east::StatNode stat_): scope::Scope(name_), stat(stat_){}
 
 scope::ScopeSet::ScopeSet(){
     var::Value epp_version(false, true, "__STRING__");
     var::Value epp_build_time(false, true, "__STRING__");
-    epp_version.set_val((std::string)"dev-0.1.9", false);
+    epp_version.set_val((std::string)"dev-0.2.0", false);
     epp_build_time.set_val((std::string)__DATE__, false);
     this->newScope("__epp_global_scope__");
     this->scope_pool[0].identifier_table.push_back("epp_version");
