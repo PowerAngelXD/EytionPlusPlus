@@ -17,7 +17,8 @@
 #include "lexer/eplex.h"
 #include "parser/parser.h"
 #include "eppack/error/epperr.h"
-//#define EPP_DEBUG
+#include "eppack/tools/configloader.h"
+#define EPP_DEBUG
 
 #ifdef _WIN32
 void getAllFile(std::string path, std::vector<std::string>& files){
@@ -35,6 +36,7 @@ void getAllFile(std::string path, std::vector<std::string>& files){
 #endif
 
 parser::Parser p;
+configloader::Loader loader("resource/config/common.ecfg");
 #ifdef EPP_DEBUG
 int main(){
 #else
@@ -47,10 +49,26 @@ inline void epp_cli(){
     while(true){
         if(code == 0) break;
         try{
-            getcwd(work_path, 256); std::cout<<"[Epp Cli]"<<work_path;
+            getcwd(work_path, 256); 
+            if(loader.getData().cli_nameshow == true){
+                std::cout<<"[Epp Cli]";
+            }
+            if(loader.getData().cli_workspace == true){
+                std::cout<<work_path;
+            }
             std::cout<<"> ";
             std::getline(std::cin, cmd);
-            if(cmd == "exit" || cmd == ":e") code = 0;
+            if(cmd == "exit" || cmd == ":e") {
+                if(loader.getData().cli_exittip == true){
+                    std::cout<<"Do you really want to quit this program? (you can turn off the 'cli-exittip' option in the configuration file and don't see this prompt again)"<<std::endl;
+                    std::cout<<"yes[y/other keys]   no[n/N]"<<std::endl;
+                    std::cout<<"> ";
+                    char k = getchar();
+                    if(k == 'n' || k == 'N');
+                    else code = 0;
+                }
+                else code = 0;
+            }
             else if(cmd == "ls"){
                 #ifdef _WIN32
                 std::vector<std::string> files;
@@ -207,6 +225,9 @@ inline void epp_cli(){
             }
         }
         catch(char const* e){
+            std::cout<<"Eytion++ Error:  "<<e<<std::endl;
+        }
+        catch(std::string e){
             std::cout<<"Eytion++ Error:  "<<e<<std::endl;
         }
         catch(epperr::Epperr eppe){
