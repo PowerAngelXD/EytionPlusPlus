@@ -1,6 +1,7 @@
 addop ::= '+'|'-'
 mulop ::= '/'|'*'|'%'
-primexpr ::= number|identifier|string|char|boolconst|typeof|input
+siadexpr ::= (identifier) '++' | '--' (identifier)
+primexpr ::= number|identifier|string|char|boolconst|typeof|input|siadexpr
 mulexpr ::= primexpr (mulop primexpr)*
 addexpr ::= addexpr (addop addexpr)*
 expr ::= addexpr | boolexpr | listexpr

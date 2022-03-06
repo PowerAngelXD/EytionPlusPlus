@@ -1,18 +1,17 @@
 # Eytion++
 ![](eppp.png)
-### Introduce
+# Introduce
 Eytion++ is developed by PowerAgnelXD based on the original project Eytion, \
 which can be regarded as an enhanced version of Eytion, \
 and has some more practical functions than Eytion
 
-### License
+# License
 This project uses the MIT open source license
 
-### Install
-If you are a linux system, you can get the latest compilation through action \
-If your system is Windows, you can get the compilation through release
+# Install
+You can get the latest compilation through the "action" above the project
 
-### Build
+# Build
 After you download the source code package of this project, go to the inside of the downloaded folder\
 after setting the working directory of the console to that directory, \
 You can get the compilation by the following command:
@@ -20,7 +19,10 @@ You can get the compilation by the following command:
 cmake --build build
 ```
 
-### Example
+# Grammar
+[Grammar introduce](grammar.txt)
+
+# Example
 > HelloWorld
 ```go
 out "hello world!";
@@ -82,7 +84,7 @@ var a=[1,6,2,5];
 var index = 0;
 while(index < len(a)){
     out str(a[index]) + "\n";
-    index=index+1;
+    index = ++index;
 }
 ```
 > For_each
