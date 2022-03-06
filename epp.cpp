@@ -17,7 +17,7 @@
 #include "lexer/eplex.h"
 #include "parser/parser.h"
 #include "eppack/error/epperr.h"
-#define EPP_DEBUG
+//#define EPP_DEBUG
 
 #ifdef _WIN32
 void getAllFile(std::string path, std::vector<std::string>& files){
@@ -43,14 +43,14 @@ inline void epp_cli(){
     int code = 10;
     std::string cmd;
     char work_path[256];
-    std::wcout<<L"Eytion++ [ Build Time:"<<__DATE__<<" "<<__TIME__<<"]\nCopyright (c) PowerAngelXd\nNow version: 0.1.9\nyou can type 'help' to get 'Eytion++Cli & Eytion++Grammar' help document\n"<<std::endl;
+    std::wcout<<L"Eytion++ [ Build Time:"<<__DATE__<<" "<<__TIME__<<"]\nCopyright (c) PowerAngelXd\nNow version: 0.2.0\nyou can type 'help' to get 'Eytion++Cli & Eytion++Grammar' help document\n"<<std::endl;
     while(true){
         if(code == 0) break;
         try{
             getcwd(work_path, 256); std::cout<<"[Epp Cli]"<<work_path;
             std::cout<<"> ";
             std::getline(std::cin, cmd);
-            if(cmd == "quit") code = 0;
+            if(cmd == "exit" || cmd == ":e") code = 0;
             else if(cmd == "ls"){
                 #ifdef _WIN32
                 std::vector<std::string> files;
@@ -74,7 +74,7 @@ inline void epp_cli(){
             else if(cmd == "help"){
                 std::string help = "Eytion++ Cli Help Dcoument\n"
                                    "Commands:\n"
-                                   "quit               Exit the Eytion++ Cli\n"
+                                   "exit/:e            Exit the Eytion++ Cli\n"
                                    "envc               Reset the Eytion++Runtime Environment\n"
                                    "help               View Eytion++ HelpDocument\n"
                                    "run <file>         Run a epp-file named 'file'\n"
@@ -142,11 +142,15 @@ inline void epp_cli(){
                 chdir(cut.c_str());
             }
             else {
+                std::ofstream tfile("debug/tokens/tokens.edebug");
                 std::stringstream ss(cmd);
                 epplex::Lexer lexer(ss);
                 //std::cout<<ss.str()<<std::endl;
                 auto tokens = lexer.getTokenGroup();
-                //for(auto token:tokens){std::cout<<token.format()<<std::endl;}
+                std::vector<std::string> tg_msg;
+                for(auto token:tokens){tg_msg.push_back(token.format());}
+                for(auto msg:tg_msg){tfile<<msg<<std::endl;}
+                tfile.close();
                 east::astParser ast(tokens);
                 if(east::ValExprNode::is_it(ast) && !east::AssignStmtNode::is_it(ast)){
                     east::ValExprNode* repl_node = ast.gen_valExprNode();
@@ -161,6 +165,7 @@ inline void epp_cli(){
                         v.visitListExpr(repl_node->listexpr);
                     calc.ins = v.ins; calc.constpool = v.constpool;
                     calc.run();
+                    p.sset = calc.sset;
                     if (calc.isArray()){
                         if (calc.result[0].first == "__STRING__"){
                             for (int i = 0; i < calc.result.size(); i++){
@@ -190,9 +195,9 @@ inline void epp_cli(){
                 }
                 else{
                     east::StatNode* node = ast.gen_statNode();
-                    std::ofstream file("debug/ast/ast.east");
-                    file<<node->to_string()<<std::endl;
-                    file.close();
+                    std::ofstream afile("debug/ast/ast.edebug");
+                    afile<<node->to_string()<<std::endl;
+                    afile.close();
                     p.stat = *node;
                     p.parse();
                 }
@@ -213,7 +218,7 @@ inline void epp_cli(){
 int main(int argc, char *argv[]){
     std::string cmd;
     if(argc >= 2){
-        if(strcmp(argv[1], "-v")==0 || strcmp(argv[1], "-version")==0) std::cout<<"version => dev-0.1.9"<<std::endl;
+        if(strcmp(argv[1], "-v")==0 || strcmp(argv[1], "-version")==0) std::cout<<"version => dev-0.2.0"<<std::endl;
         else if(strcmp(argv[1], "-r")==0 || strcmp(argv[1], "-run")==0){
             std::ifstream file(argv[2]);
             std::size_t index = ((std::string)argv[2]).find(".epp", ((std::string)argv[2]).size() - ((std::string)".epp").size()); // file suffix check
