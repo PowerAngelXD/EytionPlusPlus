@@ -11,6 +11,7 @@ inline cenv::Calculation _calc(east::ValExprNode node, scope::ScopeSet sset) {
         v.visitListExpr(node.listexpr);
     calc.ins = v.ins; calc.constpool = v.constpool;
     calc.run();
+    sset = calc.sset;
     return calc;
 }
 
@@ -166,11 +167,11 @@ void parser::Parser::parse(){
                                 sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal(calc.constpool[(int)calc.result[i].second], i, true);
                     }
                     else{
-                        if(type == "__INT__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val((int)calc.result[0].second);
-                        else if(type == "__DECI__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.result[0].second);
-                        else if(type == "__STRING__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.constpool[(int)calc.result[0].second], false);
-                        else if(type == "__CHAR__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.constpool[(int)calc.result[0].second], true);
-                        else if(type == "__BOOL__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val((bool)calc.result[0].second);
+                        if(type == "__INT__") sset.scope_pool[sset.findInAllScopeI(name)].assign(name, var::Value(false, false, "__INT__", ((int)calc.result[0].second)));
+                        else if(type == "__DECI__") sset.scope_pool[sset.findInAllScopeI(name)].assign(name, var::Value(false, false, "__DECI__", (calc.result[0].second)));
+                        else if(type == "__STRING__") sset.scope_pool[sset.findInAllScopeI(name)].assign(name, var::Value(false, false, "__STRING__", calc.constpool[(int)calc.result[0].second], false));
+                        else if(type == "__CHAR__") sset.scope_pool[sset.findInAllScopeI(name)].assign(name, var::Value(false, false, "__CHAR__", calc.constpool[(int)calc.result[0].second], true));
+                        else if(type == "__BOOL__") sset.scope_pool[sset.findInAllScopeI(name)].assign(name, var::Value(false, false, "__BOOL__", ((bool)calc.result[0].second)));
                     }
                 }
             }
