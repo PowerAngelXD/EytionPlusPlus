@@ -130,7 +130,8 @@ if(int(i) == 12)
 # Config File
 Typically, the format of Epp's configuration file is: ". ecfg"\
 Now, this section will introduce you to the configuration system in EppCli\
-Generally speaking, the default name of EPP's configuration file is ***common.ecfg*** it should be in the folder: resource\config\
+Generally speaking, the default name of EPP's configuration file is ***common.ecfg*** it should be in the folder: \
+`resource\config\` \
 Here are the names of several configuration items and their purposes:
 |name|purpose|value|
 |:--:|:--:|:--:|
@@ -138,6 +139,8 @@ Here are the names of several configuration items and their purposes:
 |cli-nameshow|Display the word eppcli under the cursor of eppcli: "EppCli"|true/false|
 |cli-workspace|Displays the current working path|true/false|
 |cli-errorhighlight|Whether to highlight errors in EPP (not for errors in eppcli)|true/false|
+|debug-echoast|Output AST of running program|true/false|
+|debug-echotokeng|Output TokenGroup of running program|true/false|
 
 When you modify the configuration file and need to re apply and load it, you should enter the following code in eppcli:
 ```bash
