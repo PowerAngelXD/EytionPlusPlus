@@ -18,7 +18,7 @@
 #include "parser/parser.h"
 #include "eppack/error/epperr.h"
 #include "eppack/tools/configloader.h"
-//#define EPP_DEBUG
+#define EPP_DEBUG
 
 #ifdef _WIN32
 void getAllFile(std::string path, std::vector<std::string>& files){
@@ -174,9 +174,18 @@ inline void epp_cli(){
                 for(auto token:tokens){tg_msg.push_back(token.format());}
                 for(auto msg:tg_msg){tfile<<msg<<std::endl;}
                 tfile.close();
+                if(loader.getData().debug_echotokeng == true) {
+                    std::cout<<"DebugMode: TokenGroups\n";
+                    for(auto token:tokens){std::cout<<token.format()<<",";}
+                    std::cout<<std::endl;
+                }
                 east::astParser ast(tokens);
                 if(east::ValExprNode::is_it(ast) && !east::AssignStmtNode::is_it(ast)){
                     east::ValExprNode* repl_node = ast.gen_valExprNode();
+                    if(loader.getData().debug_echoast == true){
+                        std::cout<<"DebugMode: Ast\n";
+                        std::cout<<repl_node->to_string()<<std::endl;
+                    }
                     cenv::Calculation calc(p.sset);
                     cvisitor::visitor v;
                     //std::cout<<repl_node->to_string()<<std::endl;
@@ -218,6 +227,10 @@ inline void epp_cli(){
                 }
                 else{
                     east::StatNode* node = ast.gen_statNode();
+                    if(loader.getData().debug_echoast == true){
+                        std::cout<<"DebugMode: Ast\n";
+                        std::cout<<node->to_string()<<std::endl;
+                    }
                     std::ofstream afile("debug/ast/ast.edebug");
                     afile<<node->to_string()<<std::endl;
                     afile.close();
@@ -237,6 +250,10 @@ inline void epp_cli(){
         catch(epperr::Epperr eppe){
             if(loader.getData().cli_errorhighlight == true) std::cout<<"\033[41;37m";
             std::cout<<eppe.what()<<"\033[0m"<<std::endl;
+        }
+        catch(epperr::EppClierr eppce){
+            if(loader.getData().cli_errorhighlight == true) std::cout<<"\033[41;37m";
+            std::cout<<eppce.what()<<"\033[0m"<<std::endl;
         }
     }
 }

@@ -40,7 +40,9 @@ configloader::Loader::Loader(std::string path){
         else if(term.first == "cli-exittip") data.cli_exittip = string2bool(term.second);
         else if(term.first == "cli-errorhighlight") data.cli_errorhighlight = string2bool(term.second);
         else if(term.first == "cli-nameshow") data.cli_nameshow = string2bool(term.second);
-        else throw (std::string)("'" + term.first + "'Is not a valid configuration item");
+        else if(term.first == "debug-echoast") data.debug_echoast = string2bool(term.second);
+        else if(term.first == "debug-echotokeng") data.debug_echotokeng = string2bool(term.second);
+        else {std::cout<<"\033[31mEpp Cli Load Error: The configuration contains an invalid item"<<"\033[0m"<<std::endl; exit(0);}
     }
 }
 

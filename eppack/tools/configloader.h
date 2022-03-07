@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include "../error/epperr.h"
 
 namespace configloader{
     std::vector<std::string> spliter(const std::string &str, const std::string &pattern);
@@ -11,6 +12,7 @@ namespace configloader{
 
     struct configData{
         bool cli_workspace, cli_nameshow, cli_exittip, cli_errorhighlight;
+        bool debug_echoast, debug_echotokeng;
     };
 
     class Loader{
