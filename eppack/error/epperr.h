@@ -20,4 +20,12 @@ namespace epperr{
         ~Epperr();
         virtual const char* what();
     };
+    
+    class EppClierr : public std::exception{
+        std::string message;
+    public:
+        EppClierr(std::string content);
+        ~EppClierr();
+        virtual const char* what();
+    };
 }

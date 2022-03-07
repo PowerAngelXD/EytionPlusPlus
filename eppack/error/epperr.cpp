@@ -9,3 +9,13 @@ epperr::Epperr::~Epperr() throw() {}
 const char* epperr::Epperr::what(){
     return message.c_str();
 }
+
+
+epperr::EppClierr::EppClierr(std::string content){
+    message = (std::string)("\nEytion++CLI encountered an exception while running:\n" +  content + "\n");
+}
+epperr::EppClierr::~EppClierr() throw() {}
+
+const char* epperr::EppClierr::what(){
+    return message.c_str();
+}
