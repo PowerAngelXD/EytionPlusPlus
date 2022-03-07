@@ -129,8 +129,7 @@ if(int(i) == 12)
 
 # Config File
 Typically, the format of Epp's configuration file is: ". ecfg"\
-Now, this section will introduce you to the configuration system in EppCli\
-Generally speaking, the default name of EPP's configuration file is ***common.ecfg*** it should be in the folder: \
+Now, this section will introduce you to the configuration system in EppCli Generally speaking, the default name of EPP's configuration file is ***common.ecfg*** it should be in the folder: \
 `resource\config\` \
 Here are the names of several configuration items and their purposes:
 |name|purpose|value|
