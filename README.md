@@ -71,7 +71,7 @@ else{
 ```
 > Repeat
 ```go
-var a=["a","cb",fgh","err"];
+var a=["a","cb","fgh","err"];
 var index = 0;
 repeat(len(a)){
     out a[index];
