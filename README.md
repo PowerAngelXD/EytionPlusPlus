@@ -9,7 +9,9 @@ and has some more practical functions than Eytion
 This project uses the MIT open source license
 
 # Install
-You can get the latest compilation through the "action" above the project
+You have two ways to get E++:
+1. Download the latest compilation from the "action" column above (the versions here are still under debugging and unstable)
+2. Get the latest release version through the "release" column on the right. The application packages released here are generally complete and stable (for pure use, it is recommended to download this way)
 
 # Build
 After you download the source code package of this project, go to the inside of the downloaded folder\
