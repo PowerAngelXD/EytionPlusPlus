@@ -1,6 +1,6 @@
 #include "parser.h"
 
-inline cenv::Calculation _calc(east::ValExprNode node, scope::ScopeSet sset) {
+inline cenv::Calculation _calc(east::ValExprNode node, var::ScopeSet sset) {
     cenv::Calculation calc(sset);
     cvisitor::visitor v;
     if(node.addexpr != nullptr)
@@ -76,23 +76,23 @@ void parser::Parser::parse(){
                 }
                 if(calc.result[0].first == "__INT__"){
                     for(int i=0; i<calc.result.size(); i++) val.arr_addVal((int)calc.result[i].second);
-                    val.len = val.val_int_array().size();
+                    val.len = val.getValueOfIntArray().size();
                 }
                 if(calc.result[0].first == "__STRING__"){
                     for(int i=0; i<calc.result.size(); i++) val.arr_addVal(calc.constpool[(int)calc.result[i].second], false);
-                    val.len = val.val_string_array().size();
+                    val.len = val.getValueOfStringArray().size();
                 }
                 if(calc.result[0].first == "__DECI__"){
                     for(int i=0; i<calc.result.size(); i++) val.arr_addVal((float)calc.result[i].second);
-                    val.len = val.val_deci_array().size();
+                    val.len = val.getValueOfDecimalArray().size();
                 }
                 if(calc.result[0].first == "__BOOL__"){
                     for(int i=0; i<calc.result.size(); i++) val.arr_addVal((bool)calc.result[i].second);
-                    val.len = val.val_bool_array().size();
+                    val.len = val.getValueOfBoolArray().size();
                 }
                 if(calc.result[0].first == "__CHAR__"){
                     for(int i=0; i<calc.result.size(); i++) val.arr_addVal(calc.constpool[(int)calc.result[i].second], true);
-                    val.len = val.val_char_array().size();
+                    val.len = val.getValueOfCharArray().size();
                 }
                 sset.scope_pool[sset.getDeep()].identifier_table.emplace_back(name);
                 sset.scope_pool[sset.getDeep()].vars.emplace_back(name, val);
@@ -390,7 +390,7 @@ void parser::Parser::parse(){
             }
         }
         else if(stat.stmts[index]->areastmt != nullptr){
-            auto users = scope::UserScope(stat.stmts[index]->areastmt->iden->content, *stat.stmts[index]->areastmt->body->body);
+            auto users = var::UserScope(stat.stmts[index]->areastmt->iden->content, *stat.stmts[index]->areastmt->body->body);
             
         }
     }

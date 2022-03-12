@@ -20,8 +20,8 @@ namespace parser{
         int _if_control = -1;
     public:
         east::StatNode stat;
-        scope::ScopeSet sset;
-        scope::ScopeSet user_sset; // User defined sset
+        var::ScopeSet sset;
+        var::ScopeSet user_sset; // User defined sset
 
         void parse();
     };

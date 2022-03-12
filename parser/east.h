@@ -448,8 +448,45 @@ namespace east{
     };
 
     class ForStmtNode{
+        // for(var a=0; a < 10; a++/a=a+2){}
     public:
+        epplex::Token* mark;
+        epplex::Token* left;
+        epplex::Token* var_mark = nullptr;
+        IdentifierNode* iden;
+        epplex::Token* eq;
+        ValExprNode* val;
 
+        epplex::Token* separate_sym1;
+
+        BoolExprNode* cond;
+
+        epplex::Token* separate_sym2;
+
+        AssignStmtNode* dostc_assign = nullptr;
+        SelfIaDExprNode* dostc_siad = nullptr;
+
+        epplex::Token* right;
+        BlockStmtNode* body=nullptr;
+        StmtNode* stc=nullptr;
+
+        std::string tag = "__OTHER__";
+
+        std::string to_string();
+        static bool is_it(astParser ap);
+    };
+
+    class DeferStmtNode{
+    public:
+        epplex::Token* mark;
+        StmtNode* stc=nullptr;
+        BlockStmtNode* body=nullptr;
+        epplex::Token* end=nullptr;
+
+        std::string tag = "__OTHER__";
+
+        std::string to_string();
+        static bool is_it(astParser ap);
     };
 
     class StmtNode{
