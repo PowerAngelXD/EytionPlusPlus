@@ -15,6 +15,8 @@
 #include "../function/func.h"
 
 namespace var{
+    class UserScope;
+
     class Value{
         std::vector<int> int_val;
         std::vector<float> deci_val;
@@ -22,6 +24,8 @@ namespace var{
         std::vector<std::string> str_val;
         std::vector<bool> bool_val;
         std::vector<efunc::Efunction> func_val;
+        std::vector<UserScope> us_val;
+        std::vector<Value> val_val;
 
         bool is_array = false;
         bool is_const = false;
@@ -37,18 +41,22 @@ namespace var{
         Value(bool is_arr, bool is_con, std::string _type, std::string s, bool ischar);
         Value(bool is_arr, bool is_con, std::string _type, bool val);
         Value(bool is_arr, bool is_con, std::string _type, efunc::Efunction val);
-        int val_int();
-        std::vector<int> val_int_array();
-        float val_deci();
-        std::vector<float> val_deci_array();
-        std::string val_char();
-        std::vector<std::string> val_char_array();
-        std::string val_string();
-        std::vector<std::string> val_string_array();
-        bool val_bool();
-        std::vector<bool> val_bool_array();
-        efunc::Efunction val_func();
-        std::vector<efunc::Efunction> val_func_array();
+        Value(bool is_arr, bool is_can, std::string _type, UserScope val);
+        Value(bool is_arr, bool is_can, std::string _type, Value val);
+        int getValueOfInt();
+        std::vector<int>getValueOfIntArray();
+        float getValueOfDecimal();
+        std::vector<float> getValueOfDecimalArray();
+        std::string getValueOfChar();
+        std::vector<std::string> getValueOfCharArray();
+        std::string getValueOfString();
+        std::vector<std::string> getValueOfStringArray();
+        bool getValueOfBool();
+        std::vector<bool> getValueOfBoolArray();
+        efunc::Efunction getValueOfFunc();
+        std::vector<efunc::Efunction> getValueOfFuncArray();
+        UserScope getValueOfUScope();
+        std::vector<UserScope> getValueOfUScopeArray();
 
         bool isArray();
         bool isConst();
@@ -59,6 +67,7 @@ namespace var{
         void set_val(float val);
         void set_val(bool val);
         void set_val(efunc::Efunction val);
+        void set_val(UserScope val);
         void set_lc(int line_, int col_);
 
         void arr_setVal(int val, int pos);
@@ -66,16 +75,16 @@ namespace var{
         void arr_setVal(std::string val, int pos, bool is_ch);
         void arr_setVal(bool val, int pos);
         void arr_setVal(efunc::Efunction val, int pos);
+        void arr_setVal(UserScope val, int pos);
 
         void arr_addVal(int val);
         void arr_addVal(float val);
         void arr_addVal(std::string val, bool is_ch);
         void arr_addVal(bool val);
         void arr_addVal(efunc::Efunction val);
+        void arr_addVal(UserScope val);
     };
-}
 
-namespace scope{
     class Scope{
     public:
         std::string name;

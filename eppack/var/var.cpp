@@ -33,84 +33,84 @@ bool var::Value::isFunc(){
 std::string var::Value::getType(){
     return type;
 }
-int var::Value::val_int(){
+int var::Value::getValueOfInt(){
     if(type == "__INT__"){
         if(!is_array) return int_val[0];
         else throw epperr::Epperr("TypeError", "Cannot call the value of a non-array variable as an array", line, column);
     }
     else throw epperr::Epperr("TypeError", "The type of the variable is not Integer", line, column);
 }
-std::vector<int> var::Value::val_int_array(){
+std::vector<int> var::Value::getValueOfIntArray(){
     if(type == "__INT__"){
         if(is_array) return int_val;
         else throw epperr::Epperr("TypeError", "Cannot call the value of a array variable as an non-array", line, column);
     }
     else throw epperr::Epperr("TypeError", "The type of the variable is not Integer(array)", line, column);
 }
-float var::Value::val_deci(){
+float var::Value::getValueOfDecimal(){
     if(type == "__DECI__"){
         if(!is_array) return deci_val[0];
         else throw epperr::Epperr("TypeError", "Cannot call the value of a non-array variable as an array", line, column);
     }
     else throw epperr::Epperr("TypeError", "The type of the variable is not Decimal", line, column);
 }
-std::vector<float> var::Value::val_deci_array(){
+std::vector<float> var::Value::getValueOfDecimalArray(){
     if(type == "__DECI__"){
         if(is_array) return deci_val;
         else throw epperr::Epperr("TypeError", "Cannot call the value of a array variable as an non-array", line, column);
     }
     else throw epperr::Epperr("TypeError", "The type of the variable is not Decimal(array)", line, column);
 }
-std::string var::Value::val_char(){
+std::string var::Value::getValueOfChar(){
     if(type == "__CHAR__"){
         if(!is_array) return ch_val[0];
         else throw epperr::Epperr("TypeError", "Cannot call the value of a non-array variable as an array", line, column);
     }
     else throw epperr::Epperr("TypeError", "The type of the variable is not Char", line, column);
 }
-std::vector<std::string> var::Value::val_char_array(){
+std::vector<std::string> var::Value::getValueOfCharArray(){
     if(type == "__CHAR__"){
         if(is_array) return ch_val;
         else throw epperr::Epperr("TypeError", "Cannot call the value of a array variable as an non-array", line, column);
     }
     else throw epperr::Epperr("TypeError", "The type of the variable is not Char(array)", line, column);
 }
-std::string var::Value::val_string(){
+std::string var::Value::getValueOfString(){
     if(type == "__STRING__"){
         if(!is_array) return str_val[0];
         else throw epperr::Epperr("TypeError", "Cannot call the value of a non-array variable as an array", line, column);
     }
     else throw epperr::Epperr("TypeError", "The type of the variable is not String", line, column);
 }
-std::vector<std::string> var::Value::val_string_array(){
+std::vector<std::string> var::Value::getValueOfStringArray(){
     if(type == "__STRING__"){
         if(is_array) return str_val;
         else throw epperr::Epperr("TypeError", "Cannot call the value of a array variable as an non-array", line, column);
     }
     else throw epperr::Epperr("TypeError", "The type of the variable is not String(array)", line, column);
 }
-bool var::Value::val_bool(){
+bool var::Value::getValueOfBool(){
     if(type == "__BOOL__"){
         if(!is_array) return bool_val[0];
         else throw epperr::Epperr("TypeError", "Cannot call the value of a non-array variable as an array", line, column);
     }
     else throw epperr::Epperr("TypeError", "The type of the variable is not Bool", line, column);
 }
-std::vector<bool> var::Value::val_bool_array(){
+std::vector<bool> var::Value::getValueOfBoolArray(){
     if(type == "__BOOL__"){
         if(is_array) return bool_val;
         else throw epperr::Epperr("TypeError", "Cannot call the value of a array variable as an non-array", line, column);
     }
     else throw epperr::Epperr("TypeError", "The type of the variable is not Bool(array)", line, column);
 }
-efunc::Efunction var::Value::val_func(){
+efunc::Efunction var::Value::getValueOfFunc(){
     if(type == "__FUNC__"){
         if(!is_array) return func_val[0];
         else throw epperr::Epperr("TypeError", "Cannot call the value of a non-array variable as an array", line, column);
     }
     else throw epperr::Epperr("TypeError", "The type of the variable is not Function", line, column);
 }
-std::vector<efunc::Efunction> var::Value::val_func_array(){
+std::vector<efunc::Efunction> var::Value::getValueOfFuncArray(){
     if(type == "__FUNC__"){
         if(is_array) return func_val;
         else throw epperr::Epperr("TypeError", "Cannot call the value of a non-array variable as an array", line, column);
@@ -248,45 +248,40 @@ void var::Value::set_lc(int line_, int col_){
 //
 
 //scope
-scope::Scope::Scope(std::string name_) : name(name_){}
-void scope::Scope::new_var(std::string name, var::Value val){
+var::Scope::Scope(std::string name_) : name(name_){}
+void var::Scope::new_var(std::string name, var::Value val){
     vars.push_back(std::pair<std::string, var::Value>(name, val));
     identifier_table.push_back(name);
 }
-std::string scope::Scope::get_name(){
+std::string var::Scope::get_name(){
     return name;
 }
-bool scope::Scope::find(std::string target){
+bool var::Scope::find(std::string target){
     for(int i = 0; i < vars.size(); i++){
         if(vars[i].first == target) return true;
     }
     return false;
 }
-int scope::Scope::findI(std::string target){
+int var::Scope::findI(std::string target){
     for(int i = 0; i < vars.size(); i++){
         if(vars[i].first == target) return i;
     }
     return -1;
 }
-void scope::Scope::assign(std::string name, var::Value value){
+void var::Scope::assign(std::string name, var::Value value){
     vars.erase(vars.begin() + findI(name));
     vars.push_back(std::pair<std::string ,var::Value>(name, value));
 }
 
-scope::UserScope::UserScope(std::string name_, east::StatNode stat_): scope::Scope(name_), stat(stat_){}
+var::UserScope::UserScope(std::string name_, east::StatNode stat_): var::Scope(name_), stat(stat_){}
 
-scope::ScopeSet::ScopeSet(){
-    var::Value epp_version(false, true, "__STRING__");
-    var::Value epp_build_time(false, true, "__STRING__");
-    epp_version.set_val((std::string)"dev-0.2.0", false);
-    epp_build_time.set_val((std::string)__DATE__, false);
+var::ScopeSet::ScopeSet(){
     this->newScope("__epp_global_scope__");
-    this->scope_pool[0].identifier_table.push_back("epp_version");
-    this->scope_pool[0].vars.push_back(std::pair<std::string, var::Value>("epp_version", epp_version));
-    this->scope_pool[0].identifier_table.push_back("epp_build_time");
-    this->scope_pool[0].vars.push_back(std::pair<std::string, var::Value>("epp_build_time", epp_build_time));
+    this->scope_pool[0].new_var("epp_version", var::Value(false, true, "__STRING__", "dev-0.2.0", false));
+    this->scope_pool[0].new_var("epp_btime", var::Value(false, true, "__STRING__", (std::string)__DATE__, false));
+    std::cout<<"size: "<<sizeof(this->scope_pool[0].vars[0].second);
 }
-bool scope::ScopeSet::findInAllScope(std::string name){
+bool var::ScopeSet::findInAllScope(std::string name){
     if(scope_pool[deep_count].find(name)) return true;
     else{
         int temp = deep_count;
@@ -297,7 +292,7 @@ bool scope::ScopeSet::findInAllScope(std::string name){
         return false;
     }
 }
-int scope::ScopeSet::findInAllScopeI(std::string name){
+int var::ScopeSet::findInAllScopeI(std::string name){
     if(scope_pool[deep_count].find(name)) return deep_count;
     else{
         int temp = deep_count;
@@ -308,32 +303,32 @@ int scope::ScopeSet::findInAllScopeI(std::string name){
         return -1;
     }
 };
-void scope::ScopeSet::next(){
+void var::ScopeSet::next(){
     deep_count += 1;
 }
-void scope::ScopeSet::back(){
+void var::ScopeSet::back(){
     if(deep_count == 0) deep_count = 0;
     else deep_count -= 1;
 }
-void scope::ScopeSet::remove(){
+void var::ScopeSet::remove(){
     if(scope_pool[scope_pool.size() - 1].get_name() == "__epp_global_scope__") return;
     else scope_pool.pop_back();
     back();
 }
-void scope::ScopeSet::newScope(std::string name){
+void var::ScopeSet::newScope(std::string name){
     scope_pool.push_back(Scope(name));
 }
-int scope::ScopeSet::getDeep() {
+int var::ScopeSet::getDeep() {
     return deep_count;
 }
 
-bool scope::ScopeSet::findInUScope(std::string name){
+bool var::ScopeSet::findInUScope(std::string name){
     for(auto s: user_scope_pool){
         if(s.name == name) return true;
     }
     return false;
 }
-int scope::ScopeSet::findInUScopeI(std::string name){
+int var::ScopeSet::findInUScopeI(std::string name){
     for(int i=0; i<user_scope_pool.size(); i++){
         if(user_scope_pool[i].name == name) return i;
     }

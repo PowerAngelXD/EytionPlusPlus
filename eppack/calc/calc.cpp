@@ -1,7 +1,7 @@
 #include <sstream>
 #include "calc.h"
 
-cenv::Calculation::Calculation(scope::ScopeSet sset_) : sset(sset_), is_array(false) {}
+cenv::Calculation::Calculation(var::ScopeSet sset_) : sset(sset_), is_array(false) {}
 
 void cenv::Calculation::push(cenv::calc_unit cu){
     if (env.size() <= env_top) {
@@ -201,35 +201,35 @@ void cenv::Calculation::run(){
                 if(temp.second.isArray()){
                     is_array = true;
                     if(temp.second.getType() == "__INT__")
-                        for(len = 0; len<temp.second.val_int_array().size(); len++)
-                            push(cenv::calc_unit("__INT__", temp.second.val_int_array()[len]));
+                        for(len = 0; len<temp.second.getValueOfIntArray().size(); len++)
+                            push(cenv::calc_unit("__INT__", temp.second.getValueOfIntArray()[len]));
                     else if(temp.second.getType() == "__DECI__")
-                        for(len = 0; len<temp.second.val_deci_array().size(); len++)
-                            push(cenv::calc_unit("__DECI__", temp.second.val_deci_array()[len]));
+                        for(len = 0; len<temp.second.getValueOfDecimalArray().size(); len++)
+                            push(cenv::calc_unit("__DECI__", temp.second.getValueOfDecimalArray()[len]));
                     else if(temp.second.getType() == "__BOOL__")
-                        for(len = 0; len<temp.second.val_bool_array().size(); len++)
-                            push(cenv::calc_unit("__BOOL__", temp.second.val_bool_array()[len]));
+                        for(len = 0; len<temp.second.getValueOfBoolArray().size(); len++)
+                            push(cenv::calc_unit("__BOOL__", temp.second.getValueOfBoolArray()[len]));
                     else if(temp.second.getType() == "__CHAR__")
-                        for(len = 0; len<temp.second.val_char_array().size(); len++) {
-                            constpool.push_back(temp.second.val_char_array()[len]);
+                        for(len = 0; len<temp.second.getValueOfCharArray().size(); len++) {
+                            constpool.push_back(temp.second.getValueOfCharArray()[len]);
                             push(cenv::calc_unit("__CHAR__", constpool.size()-1));
                         }
                     else if(temp.second.getType() == "__STRING__")
-                        for(len = 0; len<temp.second.val_string_array().size(); len++) {
-                            constpool.push_back(temp.second.val_string_array()[len]);
+                        for(len = 0; len<temp.second.getValueOfStringArray().size(); len++) {
+                            constpool.push_back(temp.second.getValueOfStringArray()[len]);
                             push(cenv::calc_unit("__STRING__", constpool.size()-1));
                         }
                 }
                 else{
-                    if(temp.second.getType() == "__INT__") push(cenv::calc_unit("__INT__", temp.second.val_int()));
-                    else if(temp.second.getType() == "__DECI__") push(cenv::calc_unit("__DECI__", temp.second.val_deci()));
-                    else if(temp.second.getType() == "__BOOL__") push(cenv::calc_unit("__BOOL__", temp.second.val_bool()));
+                    if(temp.second.getType() == "__INT__") push(cenv::calc_unit("__INT__", temp.second.getValueOfInt()));
+                    else if(temp.second.getType() == "__DECI__") push(cenv::calc_unit("__DECI__", temp.second.getValueOfDecimal()));
+                    else if(temp.second.getType() == "__BOOL__") push(cenv::calc_unit("__BOOL__", temp.second.getValueOfBool()));
                     else if(temp.second.getType() == "__CHAR__") {
-                        constpool.push_back(temp.second.val_char());
+                        constpool.push_back(temp.second.getValueOfChar());
                         push(cenv::calc_unit("__CHAR__", constpool.size()-1));
                     }
                     else if(temp.second.getType() == "__STRING__") {
-                        constpool.push_back(temp.second.val_string());
+                        constpool.push_back(temp.second.getValueOfString());
                         push(cenv::calc_unit("__STRING__", constpool.size()-1));
                     }
                 }
@@ -245,24 +245,24 @@ void cenv::Calculation::run(){
                 auto temp = sset.scope_pool[sset.findInAllScopeI(ins[i].para)].vars[sset.scope_pool[sset.findInAllScopeI(ins[i].para)].findI(ins[i].para)];
                 if(temp.second.getType() == "__INT__") {
                     if(index.second > temp.second.len-1) throw epperr::Epperr("ArrayError", "The referenced content is outside the bounds of the array", ins[i].line, ins[i].column);
-                    push(cenv::calc_unit("__INT__", temp.second.val_int_array()[index.second]));
+                    push(cenv::calc_unit("__INT__", temp.second.getValueOfIntArray()[index.second]));
                 }
                 else if(temp.second.getType() == "__DECI__") {
                     if(index.second > temp.second.len-1) throw epperr::Epperr("ArrayError", "The referenced content is outside the bounds of the array", ins[i].line, ins[i].column);
-                    push(cenv::calc_unit("__DECI__", temp.second.val_deci_array()[index.second]));
+                    push(cenv::calc_unit("__DECI__", temp.second.getValueOfDecimalArray()[index.second]));
                 }
                 else if(temp.second.getType() == "__BOOL__") {
                     if(index.second > temp.second.len-1) throw epperr::Epperr("ArrayError", "The referenced content is outside the bounds of the array", ins[i].line, ins[i].column);
-                    push(cenv::calc_unit("__BOOL__", temp.second.val_bool_array()[index.second]));
+                    push(cenv::calc_unit("__BOOL__", temp.second.getValueOfBoolArray()[index.second]));
                 }
                 else if(temp.second.getType() == "__CHAR__") {
                     if(index.second > temp.second.len-1) throw epperr::Epperr("ArrayError", "The referenced content is outside the bounds of the array", ins[i].line, ins[i].column);
-                    constpool.push_back(temp.second.val_char_array()[index.second]);
+                    constpool.push_back(temp.second.getValueOfCharArray()[index.second]);
                     push(cenv::calc_unit("__CHAR__", constpool.size()-1));
                 }
                 else if(temp.second.getType() == "__STRING__") {
                     if(index.second > temp.second.len-1) throw epperr::Epperr("ArrayError", "The referenced content is outside the bounds of the array", ins[i].line, ins[i].column);
-                    constpool.push_back(temp.second.val_string_array()[index.second]);
+                    constpool.push_back(temp.second.getValueOfStringArray()[index.second]);
                     push(cenv::calc_unit("__STRING__", constpool.size()-1));
                 }
             }

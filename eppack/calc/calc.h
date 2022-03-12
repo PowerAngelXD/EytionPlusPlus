@@ -31,9 +31,9 @@ namespace cenv{
         bool is_top = false;
         int len = 1;
     public:
-        scope::ScopeSet sset;
+        var::ScopeSet sset;
 
-        Calculation(scope::ScopeSet sset_);
+        Calculation(var::ScopeSet sset_);
         Calculation()=default;
 
         std::vector<calc_ins> ins;
