@@ -18,7 +18,7 @@
 #include "parser/parser.h"
 #include "eppack/error/epperr.h"
 #include "eppack/tools/configloader.h"
-//#define EPP_DEBUG
+#define EPP_DEBUG
 
 #ifdef _WIN32
 void getAllFile(std::string path, std::vector<std::string>& files){
@@ -84,6 +84,9 @@ inline void epp_cli(){
                 system("ls");
                 #endif
 
+            }
+            else if(cmd == "update"){
+                system("python resource/scripts/updater.py");
             }
             else if(cmd == "envc"){
                 parser::Parser _p;
