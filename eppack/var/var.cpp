@@ -21,6 +21,12 @@ var::Value::Value(bool is_arr, bool is_con, std::string _type, bool val) : is_ar
 var::Value::Value(bool is_arr, bool is_con, std::string _type, efunc::Efunction val) : is_array(is_arr), is_const(is_con), type(_type) {
     func_val.push_back(val);
 }
+var::Value::Value(bool is_arr, bool is_con, std::string _type, var::UserScope val) : is_array(is_arr), is_const(is_con), type(_type) {
+    us_val.push_back(val);
+}
+var::Value::Value(bool is_arr, bool is_con, std::string _type, var::Value val) : is_array(is_arr), is_const(is_con), type(_type) {
+    val_val.push_back(val);
+}
 bool var::Value::isArray(){
     return is_array;
 }
@@ -116,6 +122,34 @@ std::vector<efunc::Efunction> var::Value::getValueOfFuncArray(){
         else throw epperr::Epperr("TypeError", "Cannot call the value of a non-array variable as an array", line, column);
     }
     else throw epperr::Epperr("TypeError", "The type of the variable is not Function", line, column);
+}
+var::UserScope var::Value::getValueOfUScope(){
+    if(type == "__SCOPE__"){
+        if(!is_array) return us_val[0];
+        else throw epperr::Epperr("TypeError", "Cannot call the value of a array variable as an array", line, column);
+    }
+    else throw epperr::Epperr("TypeError", "The type of the variable is not Scope", line, column);
+}
+std::vector<var::UserScope> var::Value::getValueOfUScopeArray(){
+    if(type == "__SCOPE__"){
+        if(is_array) return us_val;
+        else throw epperr::Epperr("TypeError", "Cannot call the value of a non-array variable as an array", line, column);
+    }
+    else throw epperr::Epperr("TypeError", "The type of the variable is not Scope", line, column);
+}
+var::Value var::Value::getValueOfValue(){
+    if(type == "__SCOPE__"){
+        if(!is_array) return val_val[0];
+        else throw epperr::Epperr("TypeError", "Cannot call the value of a array variable as an array", line, column);
+    }
+    else throw epperr::Epperr("TypeError", "The type of the variable is not Scope", line, column);
+}
+std::vector<var::Value> var::Value::getValueOfValueArray(){
+    if(type == "__SCOPE__"){
+        if(is_array) return val_val;
+        else throw epperr::Epperr("TypeError", "Cannot call the value of a non-array variable as an array", line, column);
+    }
+    else throw epperr::Epperr("TypeError", "The type of the variable is not Scope", line, column);
 }
 
 void var::Value::set_val(int val){
@@ -279,7 +313,6 @@ var::ScopeSet::ScopeSet(){
     this->newScope("__epp_global_scope__");
     this->scope_pool[0].new_var("epp_version", var::Value(false, true, "__STRING__", "dev-0.2.0", false));
     this->scope_pool[0].new_var("epp_btime", var::Value(false, true, "__STRING__", (std::string)__DATE__, false));
-    std::cout<<"size: "<<sizeof(this->scope_pool[0].vars[0].second);
 }
 bool var::ScopeSet::findInAllScope(std::string name){
     if(scope_pool[deep_count].find(name)) return true;

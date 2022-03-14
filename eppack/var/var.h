@@ -41,8 +41,8 @@ namespace var{
         Value(bool is_arr, bool is_con, std::string _type, std::string s, bool ischar);
         Value(bool is_arr, bool is_con, std::string _type, bool val);
         Value(bool is_arr, bool is_con, std::string _type, efunc::Efunction val);
-        Value(bool is_arr, bool is_can, std::string _type, UserScope val);
-        Value(bool is_arr, bool is_can, std::string _type, Value val);
+        Value(bool is_arr, bool is_con, std::string _type, UserScope val);
+        Value(bool is_arr, bool is_con, std::string _type, Value val);
         int getValueOfInt();
         std::vector<int>getValueOfIntArray();
         float getValueOfDecimal();
@@ -57,6 +57,8 @@ namespace var{
         std::vector<efunc::Efunction> getValueOfFuncArray();
         UserScope getValueOfUScope();
         std::vector<UserScope> getValueOfUScopeArray();
+        Value getValueOfValue();
+        std::vector<Value> getValueOfValueArray();
 
         bool isArray();
         bool isConst();
