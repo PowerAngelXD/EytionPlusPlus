@@ -114,7 +114,7 @@ void parser::Parser::parse(){
                 else if(calc.result[0].first == "__BOOL__") val.set_val((bool)calc.result[0].second);
                 else if(calc.result[0].first == "__STRING__") val.set_val(calc.constpool[(int)calc.result[0].second], false);
                 else if(calc.result[0].first == "__CHAR__") val.set_val(calc.constpool[(int)calc.result[0].second], true);
-                else{std::cout<<"none"<<std::endl;}
+                else{throw epperr::Epperr("TypeError", "Is not a valid type!", val.line, val.column);}
                 sset.scope_pool[sset.getDeep()].identifier_table.emplace_back(name);
                 sset.scope_pool[sset.getDeep()].vars.emplace_back(name, val);
             }
@@ -207,10 +207,12 @@ void parser::Parser::parse(){
                     stc_p.parse();
                 }
                 else{
-                    parser::Parser stc_p;
                     stc_p.stat = *stat.stmts[index]->ifstmt->body->body;
-                    stc_p.sset = sset;
+                    this->sset.next();
+                    this->sset.newScope("__epp_ifTemp_scope__");
+                    stc_p.sset = this->sset;
                     stc_p.parse();
+                    this->sset.remove();
                 }
                 sset = stc_p.sset;
                 _if_control = 1;
@@ -298,10 +300,12 @@ void parser::Parser::parse(){
                     stc_p.parse();
                 }
                 else{
-                    parser::Parser stc_p;
                     stc_p.stat = *stat.stmts[index]->elifstmt->body->body;
-                    stc_p.sset = sset;
+                    this->sset.next();
+                    this->sset.newScope("__epp_elifTemp_scope__");
+                    stc_p.sset = this->sset;
                     stc_p.parse();
+                    this->sset.remove();
                 }
                 sset = stc_p.sset;
                 _if_control = 1;
@@ -323,10 +327,12 @@ void parser::Parser::parse(){
                     stc_p.parse();
                 }
                 else{
-                    parser::Parser stc_p;
                     stc_p.stat = *stat.stmts[index]->elsestmt->body->body;
-                    stc_p.sset = sset;
+                    this->sset.next();
+                    this->sset.newScope("__epp_elifTemp_scope__");
+                    stc_p.sset = this->sset;
                     stc_p.parse();
+                    this->sset.remove();
                 }
                 sset = stc_p.sset;
             }
