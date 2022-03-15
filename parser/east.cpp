@@ -82,15 +82,16 @@ east::PrimExprNode* east::astParser::gen_primExprNode(){
         east::PrimExprNode* node = new east::PrimExprNode;
         if(east::FuncCallExprNode::is_it(*this)) node->fcall = gen_fcallExprNode();
         else if(east::SelfIaDExprNode::is_it(*this)) node->siad = gen_siadExprNode();
+        else if(east::PrintoLnExprNode::is_it(*this)) node->poln = gen_polnExprNode();
+        else if(east::TypeOfExprNode::is_it(*this)) node->tpof = gen_tpofExprNode();
+        else if(east::InputExprNode::is_it(*this)) node->input = gen_inputExprNode();
+        else if(east::TypeToExprNode::is_it(*this)) node->typeto = gen_tytExprNode();
+        else if(east::LenExprNode::is_it(*this)) node->glen = gen_lenExprNode();
         else if(peek()->type == "__IDENTIFIER__") node->iden = gen_identifierNode();
         else if(peek()->type == "__NUMBER__") node->number = token();
         else if(peek()->type == "__STRING__") node->str = token();
         else if(peek()->type == "__CHAR__") node->ch = token();
         else if(peek()->content == "true" || peek()->content == "false") node->boolconst = token();
-        else if(east::TypeOfExprNode::is_it(*this)) node->tpof = gen_tpofExprNode();
-        else if(east::InputExprNode::is_it(*this)) node->input = gen_inputExprNode();
-        else if(east::TypeToExprNode::is_it(*this)) node->typeto = gen_tytExprNode();
-        else if(east::LenExprNode::is_it(*this)) node->glen = gen_lenExprNode();
         else if(peek()->content == "(") {
             node->left = token();
             if(east::AddExprNode::is_it(*this)){
@@ -169,6 +170,20 @@ east::TypeOfExprNode* east::astParser::gen_tpofExprNode(){
 east::LenExprNode* east::astParser::gen_lenExprNode(){
     if(east::LenExprNode::is_it(*this)){
         east::LenExprNode* node = new east::LenExprNode;
+        node->mark = token();
+        if(peek()->content == "(") token();
+        else throw epperr::Epperr("SyntaxErrror", "Expect '('!", tg[pos].line, tg[pos].column);
+        if(east::ValExprNode::is_it(*this)) node->expr = gen_valExprNode();
+        else throw epperr::Epperr("SyntaxErrror", "Unknown type of the expr!", tg[pos].line, tg[pos].column);
+        if(peek()->content == ")") token();
+        else throw epperr::Epperr("SyntaxErrror", "Expect ')'!", tg[pos].line, tg[pos].column);
+        return node;
+    }
+    else throw epperr::Epperr("SyntaxErrror", "Unknown type of the expr!", tg[pos].line, tg[pos].column);
+}
+east::PrintoLnExprNode* east::astParser::gen_polnExprNode(){
+    if(east::PrintoLnExprNode::is_it(*this)){
+        east::PrintoLnExprNode* node = new east::PrintoLnExprNode;
         node->mark = token();
         if(peek()->content == "(") token();
         else throw epperr::Epperr("SyntaxErrror", "Expect '('!", tg[pos].line, tg[pos].column);
@@ -631,14 +646,16 @@ std::string east::PrimExprNode::to_string(){
     else if(fcall != nullptr)
         return "prim_expr(FUNC_CALL): {" + this->fcall->to_string() + "}";
     else if(siad != nullptr)
-        return "prim_expr(FUNC_CALL): {" + this->siad->to_string() + "}";
+        return "prim_expr(SIAD): {" + this->siad->to_string() + "}";
+    else if(poln != nullptr)
+        return "prim_expr(PRINT/LN): {" + this->poln->to_string() + "}";
     else return "__NULL__";
 }
 bool east::PrimExprNode::is_it(east::astParser ap){
     return ap.peek()->type == "__IDENTIFIER__" || ap.peek()->type == "__NUMBER__" || ap.peek()->type == "__STRING__"||
            ap.peek()->type == "__CHAR__"|| ap.peek()->content == "(" || ap.peek()->content == "typeof" ||
            ap.peek()->content == "true"||ap.peek()->content == "false"|| ap.peek()->type == "__BIFIDEN__" || east::FuncCallExprNode::is_it(ap) ||
-           east::SelfIaDExprNode::is_it(ap);
+           east::SelfIaDExprNode::is_it(ap) || east::PrintoLnExprNode::is_it(ap);
 }
 //
 
@@ -793,6 +810,15 @@ std::string east::TypeToExprNode::to_string(){
 }
 bool east::TypeToExprNode::is_it(east::astParser ap){
     return ap.peek()->content == "str" || ap.peek()->content == "int" || ap.peek()->content == "deci"  || ap.peek()->content == "bool";
+}
+//
+
+//printoln expr node
+std::string east::PrintoLnExprNode::to_string(){
+    return "print/ln_expr: {" + mark->simply_format() + ", " + expr->to_string() + "}";
+}
+bool east::PrintoLnExprNode::is_it(east::astParser ap){
+    return ap.peek()->content == "print" || ap.peek()->content == "println";
 }
 //
 

@@ -32,6 +32,7 @@ namespace cvisitor{
         void visitTpof(east::TypeOfExprNode* node);
         void visitInput(east::InputExprNode* node);
         void visitTypeTo(east::TypeToExprNode* node);
+        void visitPrintoLn(east::PrintoLnExprNode* node);
         void visitLen(east::LenExprNode* node);
         void visitAddOp(east::AddOpNode* node);
         void visitMulOp(east::MulOpNode* node);

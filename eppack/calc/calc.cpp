@@ -195,6 +195,75 @@ void cenv::Calculation::run(){
                 else throw epperr::Epperr("TypeError", "Types other than String cannot be used here", ins[i].line, ins[i].column);
             }
         }
+        else if(ins[i].instr == "__PRINT__") {
+            if(ins[i].para == "NOLINE"){
+                auto content = pop();
+                if(is_array){
+                    is_array = false;
+                    for(int i = 0; i < len;i++) {
+                        if (env[i].first == "__INT__" || env[i].first == "__DECI__")
+                            std::cout << env[i].second << std::endl;
+                        else if (env[i].first == "__BOOL__"){
+                            if (env[i].second == 0)
+                                std::cout << "true" << std::endl;
+                            else
+                                std::cout << "false" << std::endl;
+                        }
+                        else if (env[i].first == "__STRING__" || env[i].first == "__CHAR__")
+                            std::cout << constpool[(int)env[i].second] << std::endl;
+                        push(content);
+                    }
+                }
+                else{
+                    if(content.first == "__INT__" || content.first == "__DECI__"){
+                        std::cout<<content.second<<std::endl;
+                    }
+                    else if(content.first == "__BOOL__"){
+                        if(content.second == 0)
+                            std::cout<<"true"<<std::endl;
+                        else
+                            std::cout<<"false"<<std::endl;
+                    }
+                    else if(content.first == "__STRING__" || content.first == "__CHAR__"){
+                        std::cout<<constpool[(int)content.second]<<std::endl;
+                    }
+                    push(content);
+                }
+            }
+            else{
+                auto content = pop();
+                if(is_array){
+                    is_array = false;
+                    for(int i = 0; i < len - 1;i++) {
+                        if (env[i].first == "__INT__" || env[i].first == "__DECI__")
+                            std::cout << env[i].second << std::endl;
+                        else if (env[i].first == "__BOOL__"){
+                            if (env[i].second == 0)
+                                std::cout << "true" << std::endl;
+                            else
+                                std::cout << "false" << std::endl;
+                        }
+                        else if (env[i].first == "__STRING__" || env[i].first == "__CHAR__")
+                            std::cout << constpool[(int)env[i].second] << std::endl;
+                        pop();
+                    }
+                }
+                else{
+                    if(content.first == "__INT__" || content.first == "__DECI__")
+                        std::cout<<content.second<<std::endl;
+                    else if(content.first == "__BOOL__"){
+                        if(content.second == 0)
+                            std::cout<<"true"<<std::endl;
+                        else
+                            std::cout<<"false"<<std::endl;
+                    }
+                    else if(content.first == "__STRING__" || content.first == "__CHAR__")
+                        std::cout<<constpool[(int)content.second]<<std::endl;
+                    push(content);
+                }
+                std::cout<<std::endl;
+            }
+        }
         else if(ins[i].instr == "__POP__") {
             if(sset.findInAllScope(ins[i].para)){
                 auto temp = sset.scope_pool[sset.findInAllScopeI(ins[i].para)].vars[sset.scope_pool[sset.findInAllScopeI(ins[i].para)].findI(ins[i].para)];
