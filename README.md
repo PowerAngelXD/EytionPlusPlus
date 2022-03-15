@@ -127,6 +127,10 @@ out len(list);
 var i=input() # type: __STRING__
 if(int(i) == 12)
     out "yes!";
+
+# print/println
+var a=print(123)
+out a;
 ```
 
 # Config File
