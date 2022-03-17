@@ -248,6 +248,9 @@ void parser::Parser::parse(){
                     if(calc.result[0].second == 0) break;
                 }
             }
+            catch(excphandling::Excp e){
+                std::cout<<e.excpTitle<<"\n"<<e.excpContent<<std::endl;
+            }
             catch(...){}
         }
         else if(stat.stmts[index]->reptstmt != nullptr){
@@ -278,6 +281,9 @@ void parser::Parser::parse(){
                     }
                     sset = stc_p.sset;
                 }
+            }
+            catch(excphandling::Excp e){
+                std::cout<<e.excpTitle<<"\n"<<e.excpContent<<std::endl;
             }
             catch(...){}
         }
@@ -391,6 +397,9 @@ void parser::Parser::parse(){
                     }
                     sset = stc_p.sset;
                 }
+            }
+            catch(excphandling::Excp e){
+                std::cout<<e.excpTitle<<"\n"<<e.excpContent<<std::endl;
             }
             catch (...){
             }

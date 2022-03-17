@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include "../eppack/calc/calc.h"
 #include "../eppack/calc/calcvisitor.h"
+#include "../eppack/excphg/excphg.h"
 
 namespace parser{
     class Parser{

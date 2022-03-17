@@ -245,6 +245,19 @@ namespace east{
         static bool is_it(astParser ap);
     };
 
+    class BifNode{
+    public:
+        LenExprNode* len=nullptr;
+        TypeOfExprNode* typef=nullptr;
+        TypeToExprNode* tyt=nullptr;
+        PrintoLnExprNode* print=nullptr;
+        InputExprNode* input=nullptr;
+        std::string tag = "__CALC__";
+
+        std::string to_string();
+        static bool is_it(astParser ap);
+    };
+
     class PrimExprNode{
     public:
         epplex::Token* number = nullptr;
@@ -503,6 +516,10 @@ namespace east{
         std::string to_string();
         static bool is_it(astParser ap);
     };
+
+    class TryStmtNode{};
+
+    class CatchStmtNode{};
 
     class StmtNode{
     public:
