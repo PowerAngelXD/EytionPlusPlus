@@ -147,12 +147,12 @@ void cvisitor::visitor::visitPrimExpr(east::PrimExprNode* node){
     else if(node->ch != nullptr) visitChar(node->ch);
     else if(node->iden != nullptr) visitIden(node->iden);
     else if(node->addexpr != nullptr) visitAddExpr(node->addexpr);
-    else if(node->tpof != nullptr) visitTpof(node->tpof);
-    else if(node->input != nullptr) visitInput(node->input);
-    else if(node->glen != nullptr) visitLen(node->glen);
-    else if(node->typeto != nullptr) visitTypeTo(node->typeto);
+    else if(node->bif->typef != nullptr) visitTpof(node->bif->typef);
+    else if(node->bif->input != nullptr) visitInput(node->bif->input);
+    else if(node->bif->len != nullptr) visitLen(node->bif->len);
+    else if(node->bif->tyt != nullptr) visitTypeTo(node->bif->tyt);
     else if(node->siad != nullptr) visitSiad(node->siad);
-    else if(node->poln != nullptr) visitPrintoLn(node->poln);
+    else if(node->bif->print != nullptr) visitPrintoLn(node->bif->print);
 }
 void cvisitor::visitor::visitMulExpr(east::MulExprNode* node){
     visitPrimExpr(node->prims[0]);

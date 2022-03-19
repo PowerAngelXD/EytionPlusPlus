@@ -452,7 +452,7 @@ void cenv::Calculation::run(){
         std::string firstType;
         for(int i = 0; i < env.size(); i++){
             if(i==0) firstType = env[i].first;
-            if(env[i].first != firstType) throw epperr::Epperr("TypeError", "Cannot use inconsistent types in lists!", ins[i].line, ins[i].column);
+            if(env[i].first != firstType) throw epperr::Epperr("TypeError", "Cannot use inconsistent types in lists!", ins[i].line, ins[i].column); // check type
             result.push_back(env[i]);
         }
     }
