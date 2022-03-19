@@ -77,16 +77,24 @@ east::AssignExprNode* east::astParser::gen_assignExprNode(){
     }
     else throw epperr::Epperr("SyntaxError", "It is not a proper Assign statement format", tg[pos].line, tg[pos].column);
 }
+east::BifNode* east::astParser::gen_bifNode(){
+    if(east::BifNode::is_it(*this)){
+        east::BifNode* node = new east::BifNode;
+        if(east::LenExprNode::is_it(*this)) node->len = gen_lenExprNode();
+        else if(east::TypeOfExprNode::is_it(*this)) node->typef = gen_tpofExprNode();
+        else if(east::TypeToExprNode::is_it(*this)) node->tyt = gen_tytExprNode();
+        else if(east::InputExprNode::is_it(*this)) node->input = gen_inputExprNode();
+        else if(east::PrintoLnExprNode::is_it(*this)) node->print = gen_polnExprNode();
+        return node;
+    }
+    else throw epperr::Epperr("SyntaxErrror", "Non existent built-in function", tg[pos].line, tg[pos].column);
+}
 east::PrimExprNode* east::astParser::gen_primExprNode(){
     if(east::PrimExprNode::is_it(*this)){
         east::PrimExprNode* node = new east::PrimExprNode;
         if(east::FuncCallExprNode::is_it(*this)) node->fcall = gen_fcallExprNode();
         else if(east::SelfIaDExprNode::is_it(*this)) node->siad = gen_siadExprNode();
-        else if(east::PrintoLnExprNode::is_it(*this)) node->poln = gen_polnExprNode();
-        else if(east::TypeOfExprNode::is_it(*this)) node->tpof = gen_tpofExprNode();
-        else if(east::InputExprNode::is_it(*this)) node->input = gen_inputExprNode();
-        else if(east::TypeToExprNode::is_it(*this)) node->typeto = gen_tytExprNode();
-        else if(east::LenExprNode::is_it(*this)) node->glen = gen_lenExprNode();
+        else if(east::BifNode::is_it(*this)) node->bif= gen_bifNode();
         else if(peek()->type == "__IDENTIFIER__") node->iden = gen_identifierNode();
         else if(peek()->type == "__NUMBER__") node->number = token();
         else if(peek()->type == "__STRING__") node->str = token();
@@ -337,7 +345,8 @@ east::StatNode* east::astParser::gen_statNode(){
 east::StmtNode* east::astParser::gen_stmtNode(){
     if(east::StmtNode::is_it(*this)){
         east::StmtNode* node = new east::StmtNode;
-        if(east::OutStmtNode::is_it(*this)) node->outstmt = gen_outStmtNode();
+        if(east::ExprStmtNode::is_it(*this)) node->exprstmt = gen_exprStmtNode();
+        else if(east::OutStmtNode::is_it(*this)) node->outstmt = gen_outStmtNode();
         else if(east::VorcStmtNode::is_it(*this)) node->vorcstmt = gen_vorcStmtNode();
         else if(east::AssignStmtNode::is_it(*this)) node->assignstmt = gen_assignStmtNode();
         else if(east::DeleteStmtNode::is_it(*this)) node->deletestmt = gen_delStmtNode();
@@ -353,6 +362,19 @@ east::StmtNode* east::astParser::gen_stmtNode(){
         return node;
     }
     else throw epperr::Epperr("SyntaxError", "Unknown type of the stmt!", tg[pos].line, tg[pos].column);
+}
+east::ExprStmtNode* east::astParser::gen_exprStmtNode(){
+    if(east::ExprStmtNode::is_it(*this)){
+        east::ExprStmtNode* node = new east::ExprStmtNode;
+        if(east::BifNode::is_it(*this)) node->expr = gen_valExprNode();
+        else if(east::SelfIaDExprNode::is_it(*this)) node->expr = gen_valExprNode();
+        else if(east::FuncCallExprNode::is_it(*this)) node->expr = gen_valExprNode();
+        else throw epperr::Epperr("SyntaxError", "It is not a proper statement format", tg[pos].line, tg[pos].column);
+        if(peek()->content == ";") node->end = token();
+        else throw epperr::Epperr("SyntaxError", "Expect ';'", tg[pos].line, tg[pos].column);
+        return node;
+    }
+    else throw epperr::Epperr("SyntaxError", "It is not a proper Expression statement format", tg[pos].line, tg[pos].column);
 }
 east::OutStmtNode* east::astParser::gen_outStmtNode(){
     if(east::OutStmtNode::is_it(*this)){
@@ -619,6 +641,20 @@ bool east::ValExprNode::is_it(east::astParser ap){
 }
 //
 
+//bifnode
+std::string east::BifNode::to_string(){
+    if(this->len != nullptr) return "bif_node: {" + this->len->to_string() + "}";
+    else if(this->print != nullptr) return "bif_node: {" + this->print->to_string() + "}";
+    else if(this->tyt != nullptr) return "bif_node: {" + this->tyt->to_string() + "}";
+    else if(this->typef != nullptr) return "bif_node: {" + this->typef->to_string() + "}";
+    else if(this->input != nullptr) return "bif_node: {" + this->input->to_string() + "}";
+    else throw epperr::Epperr("SyntaxError", "Unknown type of the expr!", 0, 0);
+}
+bool east::BifNode::is_it(east::astParser ap){
+    return LenExprNode::is_it(ap) || PrintoLnExprNode::is_it(ap) || TypeToExprNode::is_it(ap) || TypeOfExprNode::is_it(ap) || InputExprNode::is_it(ap);
+}
+//
+
 //prim node
 std::string east::PrimExprNode::to_string(){
     if(number != nullptr)
@@ -635,27 +671,19 @@ std::string east::PrimExprNode::to_string(){
         return "prim_expr(ADDEXPR): {" + this->addexpr->to_string() + "}";
     else if(boolexpr != nullptr)
         return "prim_expr(BOOLEXPR): {" + this->boolexpr->to_string() + "}";
-    else if(tpof != nullptr)
-        return "prim_expr(TPOF): {" + this->tpof->to_string() + "}";
-    else if(input != nullptr)
-        return "prim_expr(INPUT): {" + this->input->to_string() + "}";
-    else if(glen != nullptr)
-        return "prim_expr(LEN): {" + this->glen->to_string() + "}";
-    else if(typeto != nullptr)
-        return "prim_expr(TYPETO): {" + this->typeto->to_string() + "}";
+    else if(bif != nullptr)
+        return "prim_expr(TPOF): {" + this->bif->to_string() + "}";
     else if(fcall != nullptr)
         return "prim_expr(FUNC_CALL): {" + this->fcall->to_string() + "}";
     else if(siad != nullptr)
         return "prim_expr(SIAD): {" + this->siad->to_string() + "}";
-    else if(poln != nullptr)
-        return "prim_expr(PRINT/LN): {" + this->poln->to_string() + "}";
     else return "__NULL__";
 }
 bool east::PrimExprNode::is_it(east::astParser ap){
     return ap.peek()->type == "__IDENTIFIER__" || ap.peek()->type == "__NUMBER__" || ap.peek()->type == "__STRING__"||
-           ap.peek()->type == "__CHAR__"|| ap.peek()->content == "(" || ap.peek()->content == "typeof" ||
+           ap.peek()->type == "__CHAR__"|| ap.peek()->content == "(" || east::BifNode::is_it(ap) || 
            ap.peek()->content == "true"||ap.peek()->content == "false"|| ap.peek()->type == "__BIFIDEN__" || east::FuncCallExprNode::is_it(ap) ||
-           east::SelfIaDExprNode::is_it(ap) || east::PrintoLnExprNode::is_it(ap);
+           east::SelfIaDExprNode::is_it(ap);
 }
 //
 
@@ -904,13 +932,14 @@ std::string east::StmtNode::to_string(){
     else if(reptstmt != nullptr) return "stmt_node: {" + this->reptstmt->to_string() + "}";
     else if(foreachstmt != nullptr) return "stmt_node: {" + this->foreachstmt->to_string() + "}";
     else if(areastmt != nullptr) return "stmt_node: {" + this->areastmt->to_string() + "}";
+    else if(exprstmt != nullptr) return "stmt_node: {" + this->exprstmt->to_string() + "}";
     else return "__NULL__";
 }
 bool east::StmtNode::is_it(east::astParser ap){
     return east::OutStmtNode::is_it(ap) || east::VorcStmtNode::is_it(ap) || east::AssignStmtNode::is_it(ap) || east::DeleteStmtNode::is_it(ap)
             || east::BlockStmtNode::is_it(ap) || east::IfStmtNode::is_it(ap) || east::RepeatStmtNode::is_it(ap) || east::WhileStmtNode::is_it(ap)
             || east::BreakStmtNode::is_it(ap) || east::ElseStmtNode::is_it(ap) || east::ElseifStmtNode::is_it(ap) || east::ForEachStmtNode::is_it(ap)
-            || east::AreaStmtNode::is_it(ap);
+            || east::AreaStmtNode::is_it(ap) || east::ExprStmtNode::is_it(ap);
 }
 //
 
@@ -1063,5 +1092,14 @@ std::string east::AreaStmtNode::to_string(){
 }
 bool east::AreaStmtNode::is_it(east::astParser ap){
     return ap.peek()->content == "area";
+}
+//
+
+//expr stmt node
+std::string east::ExprStmtNode::to_string(){
+    return "expr_stmt: {" + this->expr->to_string() + "}";
+}
+bool east::ExprStmtNode::is_it(east::astParser ap){
+    return SelfIaDExprNode::is_it(ap) || FuncCallExprNode::is_it(ap) || BifNode::is_it(ap);
 }
 //

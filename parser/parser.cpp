@@ -408,5 +408,8 @@ void parser::Parser::parse(){
             auto users = var::UserScope(stat.stmts[index]->areastmt->iden->content, *stat.stmts[index]->areastmt->body->body);
             
         }
+        else if(stat.stmts[index]->exprstmt != nullptr){
+            cenv::Calculation calc = _calc(*stat.stmts[index]->exprstmt->expr, sset);
+        }
     }
 }

@@ -265,11 +265,7 @@ namespace east{
         IdentifierNode* iden = nullptr;
         epplex::Token* str = nullptr;
         epplex::Token* ch = nullptr;
-        TypeOfExprNode* tpof = nullptr;
-        InputExprNode* input = nullptr;
-        TypeToExprNode* typeto = nullptr;
-        PrintoLnExprNode* poln = nullptr;
-        LenExprNode* glen = nullptr;
+        BifNode* bif = nullptr;
         SelfIaDExprNode* siad = nullptr;
         epplex::Token* left = nullptr;
         FuncCallExprNode* fcall = nullptr;
@@ -296,9 +292,16 @@ namespace east{
         static bool is_it(astParser ap);
     };
 
-    class ExprStmt{
+    class ExprStmtNode{
     public:
-        
+        ValExprNode* expr;
+
+        epplex::Token* end;
+
+        std::string tag = "__CALC__";
+
+        std::string to_string();
+        static bool is_it(astParser ap);
     };
 
     class OutStmtNode{
@@ -536,6 +539,7 @@ namespace east{
         ElseStmtNode* elsestmt = nullptr;
         ForEachStmtNode* foreachstmt = nullptr;
         AreaStmtNode* areastmt = nullptr;
+        ExprStmtNode* exprstmt = nullptr;
 
         std::string tag = "__OTHER__";
 
@@ -597,6 +601,7 @@ namespace east{
         FuncDefineExprNode* gen_fdefExprNode();
         LenExprNode* gen_lenExprNode();
         TypeToExprNode* gen_tytExprNode();
+        BifNode* gen_bifNode();
 
         StmtNode* gen_stmtNode();
         StatNode* gen_statNode();
@@ -613,5 +618,6 @@ namespace east{
         RepeatStmtNode* gen_reptStmtNode();
         BlockStmtNode* gen_blockStmtNode();
         AreaStmtNode* gen_areaStmtNode();
+        ExprStmtNode* gen_exprStmtNode();
     };
 }
