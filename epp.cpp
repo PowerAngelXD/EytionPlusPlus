@@ -45,7 +45,7 @@ inline void epp_cli(){
     int code = 10;
     std::string cmd;
     char work_path[256];
-    std::wcout<<L"Eytion++ [ Build Time:"<<__DATE__<<" "<<__TIME__<<"]\nCopyright (c) PowerAngelXd\nNow version: 0.2.2\nyou can type 'help' to get 'Eytion++Cli & Eytion++Grammar' help document\n"<<std::endl;
+    std::wcout<<L"Eytion++ [ Build Time:"<<__DATE__<<" "<<__TIME__<<"]\nCopyright (c) PowerAngelXd\nNow version: 0.2.4\nyou can type 'help' to get 'Eytion++Cli & Eytion++Grammar' help document\n"<<std::endl;
     while(true){
         if(code == 0) break;
         try{
@@ -183,7 +183,7 @@ inline void epp_cli(){
                     std::cout<<std::endl;
                 }
                 east::astParser ast(tokens);
-                if(east::ValExprNode::is_it(ast) && !east::AssignStmtNode::is_it(ast)){
+                if(east::ValExprNode::is_it(ast) && !east::AssignStmtNode::is_it(ast) && cmd[cmd.size() - 1] != ';'){
                     east::ValExprNode* repl_node = ast.gen_valExprNode();
                     if(loader.getData().debug_echoast == true){
                         std::cout<<"DebugMode: Ast\n";
@@ -265,7 +265,7 @@ inline void epp_cli(){
 int main(int argc, char *argv[]){
     std::string cmd;
     if(argc >= 2){
-        if(strcmp(argv[1], "-v")==0 || strcmp(argv[1], "-version")==0) std::cout<<"version => dev-0.2.2"<<std::endl;
+        if(strcmp(argv[1], "-v")==0 || strcmp(argv[1], "-version")==0) std::cout<<"version => dev-0.2.4"<<std::endl;
         else if(strcmp(argv[1], "-r")==0 || strcmp(argv[1], "-run")==0){
             std::ifstream file(argv[2]);
             std::size_t index = ((std::string)argv[2]).find(".epp", ((std::string)argv[2]).size() - ((std::string)".epp").size()); // file suffix check
