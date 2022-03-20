@@ -284,7 +284,7 @@ void var::Value::set_lc(int line_, int col_){
 //scope
 var::Scope::Scope(std::string name_) : name(name_){}
 void var::Scope::new_var(std::string name, var::Value val){
-    vars.push_back(std::pair<std::string, var::Value>(name, val));
+    vars.push_back(varUnit(name, val));
     identifier_table.push_back(name);
 }
 std::string var::Scope::get_name(){
@@ -311,7 +311,7 @@ var::UserScope::UserScope(std::string name_, east::StatNode stat_): var::Scope(n
 
 var::ScopeSet::ScopeSet(){
     this->newScope("__epp_global_scope__");
-    this->scope_pool[0].new_var("epp_version", var::Value(false, true, "__STRING__", "dev-0.2.4", false));
+    this->scope_pool[0].new_var("epp_version", var::Value(false, true, "__STRING__", "dev-0.2.5", false));
     this->scope_pool[0].new_var("epp_btime", var::Value(false, true, "__STRING__", (std::string)__DATE__, false));
 }
 bool var::ScopeSet::findInAllScope(std::string name){

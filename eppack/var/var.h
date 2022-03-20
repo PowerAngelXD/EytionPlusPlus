@@ -89,8 +89,9 @@ namespace var{
 
     class Scope{
     public:
+        typedef std::pair<std::string, var::Value> varUnit;
         std::string name;
-        std::vector<std::pair<std::string, var::Value>> vars;
+        std::vector<varUnit> vars;
         std::vector<std::string> identifier_table;
         Scope(std::string name_);
         /**
@@ -163,5 +164,39 @@ namespace var{
          * @return int index
          */
         int findInUScopeI(std::string name);
+
+        // Latest convenience function:
+
+        /**
+         * @brief Gets the variable with the specified name
+         * 
+         * @param name target variable name
+         * @return Target object
+         */
+        Scope::varUnit getTargetVar(std::string name);
+
+        /**
+         * @brief Gets the scope of the variable with the specified name
+         * 
+         * @param name target name
+         * @return Scope 
+         */
+        Scope getTargetVarArea(std::string name);
+
+        /**
+         * @brief Assign a value to the target variable
+         * 
+         * @param target target name
+         * @param val value
+         */
+        void assignValue(std::string target, var::Value val);
+
+        /**
+         * @brief Create a variable
+         * 
+         * @param name target name
+         * @param val value
+         */
+        void createVariable(std::string name, var::Value val);
     };
 }
