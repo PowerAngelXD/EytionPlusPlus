@@ -24,6 +24,21 @@ namespace parser{
         var::ScopeSet sset;
         var::ScopeSet user_sset; // User defined sset
 
+        void parse_OutStmt(east::OutStmtNode* stmt);
+        void parse_VorcStmt(east::VorcStmtNode* stmt);
+        void parse_AssignStmt(east::AssignStmtNode* stmt);
+        void parse_ExprStmt(east::ExprStmtNode* stmt);
+        void parse_DeleteStmt(east::DeleteStmtNode* stmt);
+        void parse_BlockStmt(east::BlockStmtNode* stmt);
+        void parse_IfStmt(east::IfStmtNode* stmt);
+        void parse_ElseIfStmt(east::ElseifStmtNode* stmt);
+        void parse_ElseStmt(east::ElseStmtNode* stmt);
+        void parse_BreakStmt(east::BreakStmtNode* stmt);
+        void parse_WhileStmt(east::WhileStmtNode* stmt);
+        void parse_RepeatStmt(east::RepeatStmtNode* stmt);
+        void parse_ForEachStmt(east::ForEachStmtNode* stmt);
+        void parse_ForStmt(east::ForStmtNode* stmt);
+
         void parse();
     };
 }

@@ -15,6 +15,16 @@ inline cenv::Calculation _calc(east::ValExprNode node, var::ScopeSet sset) {
     return calc;
 }
 
+inline cenv::Calculation _calc(east::BoolExprNode node, var::ScopeSet sset) {
+    cenv::Calculation calc(sset);
+    cvisitor::visitor v;
+    v.visitBoolExpr(&node);
+    calc.ins = v.ins; calc.constpool = v.constpool;
+    calc.run();
+    sset = calc.sset;
+    return calc;
+}
+
 void parser::Parser::parse(){
     for(int index = 0; index < stat.stmts.size(); index++){
         if(stat.stmts[index]->outstmt != nullptr){
@@ -344,6 +354,9 @@ void parser::Parser::parse(){
             }
             else _if_control = -1;
         }
+        else if(stat.stmts[index]->forstmt != nullptr){
+            //TODO: UPDATE FOR STMT!
+        }
         else if(stat.stmts[index]->foreachstmt != nullptr){
             std::vector<cenv::calc_unit> list;
             auto name = stat.stmts[index]->foreachstmt->iden->content;
@@ -410,6 +423,7 @@ void parser::Parser::parse(){
         }
         else if(stat.stmts[index]->exprstmt != nullptr){
             cenv::Calculation calc = _calc(*stat.stmts[index]->exprstmt->expr, sset);
+            this->sset = calc.sset;
         }
     }
 }
