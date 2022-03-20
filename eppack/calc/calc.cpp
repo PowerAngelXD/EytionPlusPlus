@@ -202,30 +202,30 @@ void cenv::Calculation::run(){
                     is_array = false;
                     for(int i = 0; i < len;i++) {
                         if (env[i].first == "__INT__" || env[i].first == "__DECI__")
-                            std::cout << env[i].second << std::endl;
+                            std::cout << env[i].second;
                         else if (env[i].first == "__BOOL__"){
                             if (env[i].second == 0)
-                                std::cout << "true" << std::endl;
+                                std::cout << "true";
                             else
-                                std::cout << "false" << std::endl;
+                                std::cout << "false";
                         }
                         else if (env[i].first == "__STRING__" || env[i].first == "__CHAR__")
-                            std::cout << constpool[(int)env[i].second] << std::endl;
+                            std::cout << constpool[(int)env[i].second];
                         push(content);
                     }
                 }
                 else{
                     if(content.first == "__INT__" || content.first == "__DECI__"){
-                        std::cout<<content.second<<std::endl;
+                        std::cout<<content.second;
                     }
                     else if(content.first == "__BOOL__"){
                         if(content.second == 0)
-                            std::cout<<"true"<<std::endl;
+                            std::cout<<"true";
                         else
-                            std::cout<<"false"<<std::endl;
+                            std::cout<<"false";
                     }
                     else if(content.first == "__STRING__" || content.first == "__CHAR__"){
-                        std::cout<<constpool[(int)content.second]<<std::endl;
+                        std::cout<<constpool[(int)content.second];
                     }
                     push(content);
                 }
@@ -261,7 +261,6 @@ void cenv::Calculation::run(){
                         std::cout<<constpool[(int)content.second]<<std::endl;
                     push(content);
                 }
-                std::cout<<std::endl;
             }
         }
         else if(ins[i].instr == "__POP__") {
