@@ -343,7 +343,7 @@ namespace east{
         IdentifierNode* iden;
         epplex::Token* equ;
         ValExprNode* val;
-        epplex::Token* end;
+        epplex::Token* end = nullptr;
         std::string tag = "__OTHER__";
 
         std::string to_string();
@@ -484,7 +484,7 @@ namespace east{
     public:
         epplex::Token* mark;
         epplex::Token* left;
-        epplex::Token* var_mark = nullptr;
+        epplex::Token* var_mark=nullptr;
         IdentifierNode* iden;
         epplex::Token* eq;
         ValExprNode* val;
@@ -539,6 +539,7 @@ namespace east{
         ElseStmtNode* elsestmt = nullptr;
         ForEachStmtNode* foreachstmt = nullptr;
         AreaStmtNode* areastmt = nullptr;
+        ForStmtNode* forstmt = nullptr;
         ExprStmtNode* exprstmt = nullptr;
 
         std::string tag = "__OTHER__";
@@ -607,7 +608,7 @@ namespace east{
         StatNode* gen_statNode();
         OutStmtNode* gen_outStmtNode();
         VorcStmtNode* gen_vorcStmtNode();
-        AssignStmtNode* gen_assignStmtNode();
+        AssignStmtNode* gen_assignStmtNode(bool asexpr = false);
         DeleteStmtNode* gen_delStmtNode();
         IfStmtNode* gen_ifStmtNode();
         ElseifStmtNode* gen_elifStmtNode();
@@ -618,6 +619,7 @@ namespace east{
         RepeatStmtNode* gen_reptStmtNode();
         BlockStmtNode* gen_blockStmtNode();
         AreaStmtNode* gen_areaStmtNode();
+        ForStmtNode* gen_forStmtNode();
         ExprStmtNode* gen_exprStmtNode();
     };
 }

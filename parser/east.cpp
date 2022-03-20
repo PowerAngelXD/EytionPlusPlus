@@ -358,6 +358,7 @@ east::StmtNode* east::astParser::gen_stmtNode(){
         else if(east::WhileStmtNode::is_it(*this)) node->whilestmt = gen_whileStmtNode();
         else if(east::RepeatStmtNode::is_it(*this)) node->reptstmt = gen_reptStmtNode();
         else if(east::ForEachStmtNode::is_it(*this)) node->foreachstmt = gen_foreachStmtNode();
+        else if(east::ForStmtNode::is_it(*this)) node->forstmt = gen_forStmtNode();
         else if(east::AreaStmtNode::is_it(*this)) node->areastmt = gen_areaStmtNode();
         return node;
     }
@@ -410,15 +411,18 @@ east::VorcStmtNode* east::astParser::gen_vorcStmtNode(){
     }
     else throw epperr::Epperr("SyntaxError", "It is not a proper Define-variable or Define-constant statement format", tg[pos].line, tg[pos].column);
 }
-east::AssignStmtNode* east::astParser::gen_assignStmtNode(){
+east::AssignStmtNode* east::astParser::gen_assignStmtNode(bool asexpr){
     if(east::AssignStmtNode::is_it(*this)){
         east::AssignStmtNode* node = new east::AssignStmtNode;
         node->iden = gen_identifierNode();
         if(peek()->content == "=") node->equ = token();
         else throw epperr::Epperr("SyntaxError", "Expect '='!", tg[pos].line, tg[pos].column);
         node->val = gen_valExprNode();
-        if(peek()->content == ";") node->end = token();
-        else throw epperr::Epperr("SyntaxError", "Expect ';'", tg[pos].line, tg[pos].column);
+        if(asexpr == true);
+        else{
+            if(peek()->content == ";") node->end = token();
+            else throw epperr::Epperr("SyntaxError", "Expect ';'", tg[pos].line, tg[pos].column);
+        }
         return node;
     }
     else throw epperr::Epperr("SyntaxError", "It is not a proper Assign statement format", tg[pos].line, tg[pos].column);
@@ -570,6 +574,37 @@ east::RepeatStmtNode* east::astParser::gen_reptStmtNode(){
     }
     else throw epperr::Epperr("SyntaxError", "It is not a proper Repeat statement format", tg[pos].line, tg[pos].column);
 }
+east::ForStmtNode* east::astParser::gen_forStmtNode(){
+    if(east::ForStmtNode::is_it(*this)){
+        east::ForStmtNode* node = new east::ForStmtNode;
+        node->mark = token();
+        if(peek()->content == "(") node->left = token();
+        else throw epperr::Epperr("SyntaxError", "Expect '('", tg[pos].line, tg[pos].column);
+        if(peek()->content == "var") node->var_mark = token();
+        if(peek()->type == "__IDENTIFIER__") node->iden = gen_identifierNode();
+        else throw epperr::Epperr("SyntaxError", "Expect an identifier", tg[pos].line, tg[pos].column);
+        if(peek()->content == "=") node->eq = token();
+        else throw epperr::Epperr("SyntaxError", "Expect '='", tg[pos].line, tg[pos].column);
+        if(east::ValExprNode::is_it(*this)) node->val = gen_valExprNode();
+        else throw epperr::Epperr("SyntaxError", "Expect a value", tg[pos].line, tg[pos].column);
+        if(peek()->content == ";") node->separate_sym1 = token();
+        else throw epperr::Epperr("SyntaxError", "Expect ';'", tg[pos].line, tg[pos].column);
+        if(east::BoolExprNode::is_it(*this)) node->cond = gen_boolExprNode();
+        else throw epperr::Epperr("SyntaxError", "Expect a boolean expression", tg[pos].line, tg[pos].column);
+        if(peek()->content == ";") node->separate_sym2 = token();
+        else throw epperr::Epperr("SyntaxError", "Expect ';'", tg[pos].line, tg[pos].column);
+        if(east::AssignStmtNode::is_it(*this)) node->dostc_assign = gen_assignStmtNode(true);
+        else if(east::SelfIaDExprNode::is_it(*this)) node->dostc_siad = gen_siadExprNode();
+        else throw epperr::Epperr("SyntaxError", "Expect a sentence!", tg[pos].line, tg[pos].column);
+        if(peek()->content == ")") node->right = token();
+        else throw epperr::Epperr("SyntaxError", "Expect ')'", tg[pos].line, tg[pos].column);
+        if(east::StmtNode::is_it(*this)) node->stc = gen_stmtNode();
+        else if(east::BlockStmtNode::is_it(*this)) node->body = gen_blockStmtNode();
+        else throw epperr::Epperr("SyntaxError", "Expect a statement", tg[pos].line, tg[pos].column);
+        return node;
+    }
+    else throw epperr::Epperr("SyntaxError", "It is not a proper For statement format", tg[pos].line, tg[pos].column);
+}
 
 //
 
@@ -622,6 +657,7 @@ std::string east::WholeExprNode::to_string(){
         return "whole_expr: {" + assignexpr->to_string() + "}";
     else if(this->valexpr != nullptr)
         return "whole_expr: {" + valexpr->to_string() + "}";
+    else return "null";
 }
 bool east::WholeExprNode::is_it(east::astParser ap){
     return east::AssignExprNode::is_it(ap) ||east::ValExprNode::is_it(ap);
@@ -672,7 +708,7 @@ std::string east::PrimExprNode::to_string(){
     else if(boolexpr != nullptr)
         return "prim_expr(BOOLEXPR): {" + this->boolexpr->to_string() + "}";
     else if(bif != nullptr)
-        return "prim_expr(TPOF): {" + this->bif->to_string() + "}";
+        return "prim_expr(BIF): {" + this->bif->to_string() + "}";
     else if(fcall != nullptr)
         return "prim_expr(FUNC_CALL): {" + this->fcall->to_string() + "}";
     else if(siad != nullptr)
@@ -932,6 +968,7 @@ std::string east::StmtNode::to_string(){
     else if(reptstmt != nullptr) return "stmt_node: {" + this->reptstmt->to_string() + "}";
     else if(foreachstmt != nullptr) return "stmt_node: {" + this->foreachstmt->to_string() + "}";
     else if(areastmt != nullptr) return "stmt_node: {" + this->areastmt->to_string() + "}";
+    else if(forstmt != nullptr) return "stmt_node: {" + this->forstmt->to_string() + "}";
     else if(exprstmt != nullptr) return "stmt_node: {" + this->exprstmt->to_string() + "}";
     else return "__NULL__";
 }
@@ -939,7 +976,7 @@ bool east::StmtNode::is_it(east::astParser ap){
     return east::OutStmtNode::is_it(ap) || east::VorcStmtNode::is_it(ap) || east::AssignStmtNode::is_it(ap) || east::DeleteStmtNode::is_it(ap)
             || east::BlockStmtNode::is_it(ap) || east::IfStmtNode::is_it(ap) || east::RepeatStmtNode::is_it(ap) || east::WhileStmtNode::is_it(ap)
             || east::BreakStmtNode::is_it(ap) || east::ElseStmtNode::is_it(ap) || east::ElseifStmtNode::is_it(ap) || east::ForEachStmtNode::is_it(ap)
-            || east::AreaStmtNode::is_it(ap) || east::ExprStmtNode::is_it(ap);
+            || east::AreaStmtNode::is_it(ap) || east::ExprStmtNode::is_it(ap) || east::ForStmtNode::is_it(ap);
 }
 //
 
@@ -977,7 +1014,7 @@ bool east::VorcStmtNode::is_it(east::astParser ap){
 
 //assign stmt node
 std::string east::AssignStmtNode::to_string(){
-    return "assign_stmt: {[" + iden->to_string() + "]" + this->equ->simply_format() + ", " + this->val->to_string() + ", " + this->end->simply_format() + "}";
+    return "assign_stmt: {[" + iden->to_string() + "]" + this->equ->simply_format() + ", " + this->val->to_string() + ", " + (this->end == nullptr?"(null)":this->end->simply_format()) + "}";
 }
 bool east::AssignStmtNode::is_it(east::astParser ap){
     if(east::IdentifierNode::is_it(ap)){
@@ -1101,5 +1138,17 @@ std::string east::ExprStmtNode::to_string(){
 }
 bool east::ExprStmtNode::is_it(east::astParser ap){
     return SelfIaDExprNode::is_it(ap) || FuncCallExprNode::is_it(ap) || BifNode::is_it(ap);
+}
+//
+
+//for stmt node
+std::string east::ForStmtNode::to_string(){
+    if(this->dostc_assign != nullptr)
+        return "for_stmt: {" + this->mark->simply_format() + ", " + this->iden->to_string() + ", " + this->val->to_string() + ", " + this->cond->to_string() + ", " + dostc_assign->to_string() + "}";
+    else
+        return "for_stmt: {" + this->mark->simply_format() + ", " + this->iden->to_string() + ", " + this->val->to_string() + ", " + this->cond->to_string() + ", " + dostc_siad->to_string() + "}";
+}
+bool east::ForStmtNode::is_it(east::astParser ap){
+    return ap.peek()->content == "for";
 }
 //
