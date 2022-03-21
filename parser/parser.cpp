@@ -25,35 +25,43 @@ inline cenv::Calculation _calc(east::BoolExprNode node, var::ScopeSet sset) {
     return calc;
 }
 
+
+//-------------------//
+
+void parser::Parser::parse_OutStmt(east::OutStmtNode* stmt){
+    cenv::Calculation calc = _calc(*stmt->content, this->sset);
+    if (calc.isArray()){
+        if (calc.result[0].first == "__STRING__"){
+            for (int i = 0; i < calc.result.size(); i++){
+                std::cout << calc.constpool[calc.result[i].second];
+            }
+        }
+        else if (calc.result[0].first == "__CHAR__"){
+            for (int i = 0; i < calc.result.size(); i++){
+                std::cout << calc.constpool[calc.result[i].second];
+            }
+        }
+        else{
+            for (int i = 0; i < calc.result.size(); i++){
+                std::cout << calc.result[i].second;
+            }
+        }
+    }
+    else
+    {
+        if (calc.result[0].first == "__STRING__")
+            std::cout << calc.constpool[calc.result[0].second];
+        else if (calc.result[0].first == "__CHAR__")
+            std::cout << calc.constpool[calc.result[0].second];
+        else
+            std::cout << calc.result[0].second;
+    }
+}
+
 void parser::Parser::parse(){
     for(int index = 0; index < stat.stmts.size(); index++){
         if(stat.stmts[index]->outstmt != nullptr){
-            cenv::Calculation calc = _calc(*stat.stmts[index]->outstmt->content, this->sset);
-            if(calc.isArray()){
-                if(calc.result[0].first == "__STRING__") {
-                    for(int i = 0; i < calc.result.size(); i++) {
-                        std::cout << calc.constpool[calc.result[i].second];
-                    }
-                }
-                else if(calc.result[0].first == "__CHAR__") {
-                    for(int i = 0; i < calc.result.size(); i++) {
-                        std::cout << calc.constpool[calc.result[i].second];
-                    }
-                }
-                else {
-                    for(int i = 0; i < calc.result.size(); i++) {
-                        std::cout << calc.result[i].second;
-                    }
-                }
-            }
-            else{
-                if(calc.result[0].first == "__STRING__")
-                    std::cout<<calc.constpool[calc.result[0].second];
-                else if(calc.result[0].first == "__CHAR__")
-                    std::cout<<calc.constpool[calc.result[0].second];
-                else
-                    std::cout<<calc.result[0].second;
-            }
+            parse_OutStmt(stat.stmts[index]->outstmt);
         }
         else if(stat.stmts[index]->vorcstmt != nullptr){
             auto name = stat.stmts[index]->vorcstmt->iden->content;
@@ -177,11 +185,11 @@ void parser::Parser::parse(){
                                 sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal(calc.constpool[(int)calc.result[i].second], i, true);
                     }
                     else{
-                        if(type == "__INT__") sset.scope_pool[sset.findInAllScopeI(name)].assign(name, var::Value(false, false, "__INT__", ((int)calc.result[0].second)));
-                        else if(type == "__DECI__") sset.scope_pool[sset.findInAllScopeI(name)].assign(name, var::Value(false, false, "__DECI__", (calc.result[0].second)));
-                        else if(type == "__STRING__") sset.scope_pool[sset.findInAllScopeI(name)].assign(name, var::Value(false, false, "__STRING__", calc.constpool[(int)calc.result[0].second], false));
-                        else if(type == "__CHAR__") sset.scope_pool[sset.findInAllScopeI(name)].assign(name, var::Value(false, false, "__CHAR__", calc.constpool[(int)calc.result[0].second], true));
-                        else if(type == "__BOOL__") sset.scope_pool[sset.findInAllScopeI(name)].assign(name, var::Value(false, false, "__BOOL__", ((bool)calc.result[0].second)));
+                        if(type == "__INT__") sset.assignValue(name, var::Value(false, false, "__INT__", ((int)calc.result[0].second)));
+                        else if(type == "__DECI__") sset.assignValue(name, var::Value(false, false, "__DECI__", (calc.result[0].second)));
+                        else if(type == "__STRING__") sset.assignValue(name, var::Value(false, false, "__STRING__", calc.constpool[(int)calc.result[0].second], false));
+                        else if(type == "__CHAR__") sset.assignValue(name, var::Value(false, false, "__CHAR__", calc.constpool[(int)calc.result[0].second], true));
+                        else if(type == "__BOOL__") sset.assignValue(name, var::Value(false, false, "__BOOL__", ((bool)calc.result[0].second)));
                     }
                 }
             }
