@@ -18,7 +18,9 @@
 #include "parser/parser.h"
 #include "eppack/error/epperr.h"
 #include "eppack/tools/configloader.h"
+#ifdef _WIN32
 #include "eppack/global/elib.h"
+#endif
 //#define EPP_DEBUG
 
 #ifdef _WIN32
@@ -46,7 +48,6 @@ inline void epp_cli(){
     int code = 10;
     std::string cmd;
     char work_path[256];
-    color::colprint("hello", color::ColorSet::Blue, color::ColorSet::Green);
     std::wcout<<L"Eytion++ [ Build Time:"<<__DATE__<<" "<<__TIME__<<"]\nCopyright (c) PowerAngelXd\nNow version: 0.2.5\nyou can type 'help' to get 'Eytion++Cli & Eytion++Grammar' help document\n"<<std::endl;
     while(true){
         if(code == 0) break;
