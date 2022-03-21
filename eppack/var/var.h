@@ -176,14 +176,6 @@ namespace var{
         Scope::varUnit getTargetVar(std::string name);
 
         /**
-         * @brief Gets the scope of the variable with the specified name
-         * 
-         * @param name target name
-         * @return Scope 
-         */
-        Scope getTargetVarArea(std::string name);
-
-        /**
          * @brief Assign a value to the target variable
          * 
          * @param target target name

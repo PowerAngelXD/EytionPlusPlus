@@ -367,4 +367,14 @@ int var::ScopeSet::findInUScopeI(std::string name){
     }
     return -1;
 }
+
+var::Scope::varUnit var::ScopeSet::getTargetVar(std::string name){
+    return this->scope_pool[this->findInAllScopeI(name)].vars[this->scope_pool[this->findInAllScopeI(name)].findI(name)];
+}
+void var::ScopeSet::assignValue(std::string target, var::Value val){
+    this->scope_pool[this->findInAllScopeI(target)].assign(target, val);
+}
+void var::ScopeSet::createVariable(std::string name, var::Value val){
+    this->scope_pool[getDeep()].new_var(name, val);
+}
 //
