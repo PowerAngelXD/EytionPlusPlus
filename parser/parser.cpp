@@ -58,6 +58,18 @@ void parser::Parser::parse_OutStmt(east::OutStmtNode* stmt){
     }
 }
 
+void parser::Parser::parse_VorcStmt(east::VorcStmtNode* stmt){
+    auto name = stmt->iden->content;
+    if(stmt->mark->content == "var"){
+    // create variable
+        auto calc = _calc(*stmt->value, sset);
+        //sset.createVariable(name, var::Value(false, false, "__INT__", calc.result[0])));
+    }
+    else{
+
+    }
+}
+
 void parser::Parser::parse(){
     for(int index = 0; index < stat.stmts.size(); index++){
         if(stat.stmts[index]->outstmt != nullptr){
@@ -185,11 +197,11 @@ void parser::Parser::parse(){
                                 sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal(calc.constpool[(int)calc.result[i].second], i, true);
                     }
                     else{
-                        if(type == "__INT__") sset.assignValue(name, var::Value(false, false, "__INT__", ((int)calc.result[0].second)));
-                        else if(type == "__DECI__") sset.assignValue(name, var::Value(false, false, "__DECI__", (calc.result[0].second)));
-                        else if(type == "__STRING__") sset.assignValue(name, var::Value(false, false, "__STRING__", calc.constpool[(int)calc.result[0].second], false));
-                        else if(type == "__CHAR__") sset.assignValue(name, var::Value(false, false, "__CHAR__", calc.constpool[(int)calc.result[0].second], true));
-                        else if(type == "__BOOL__") sset.assignValue(name, var::Value(false, false, "__BOOL__", ((bool)calc.result[0].second)));
+                        if(type == "__INT__") sset.assignValue(name, var::Value(false, false,((int)calc.result[0].second)));
+                        else if(type == "__DECI__") sset.assignValue(name, var::Value(false, false, (calc.result[0].second)));
+                        else if(type == "__STRING__") sset.assignValue(name, var::Value(false, false, calc.constpool[(int)calc.result[0].second], false));
+                        else if(type == "__CHAR__") sset.assignValue(name, var::Value(false, false, calc.constpool[(int)calc.result[0].second], true));
+                        else if(type == "__BOOL__") sset.assignValue(name, var::Value(false, false, ((bool)calc.result[0].second)));
                     }
                 }
             }

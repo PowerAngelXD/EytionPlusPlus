@@ -3,28 +3,38 @@
 //var
 var::Value::Value(bool is_arr, bool is_con) : is_array(is_arr), is_const(is_con) {}
 var::Value::Value(bool is_arr, bool is_con, std::string _type) : is_array(is_arr), is_const(is_con), type(_type) {}
-var::Value::Value(bool is_arr, bool is_con, std::string _type, int val) : is_array(is_arr), is_const(is_con), type(_type) {
+var::Value::Value(bool is_arr, bool is_con, int val) : is_array(is_arr), is_const(is_con) {
+    type = "__INT__";
     int_val.push_back(val);
 }
-var::Value::Value(bool is_arr, bool is_con, std::string _type, float val) : is_array(is_arr), is_const(is_con), type(_type) {
+var::Value::Value(bool is_arr, bool is_con, float val) : is_array(is_arr), is_const(is_con) {
+    type = "__DECI__";
     deci_val.push_back(val);
 }
-var::Value::Value(bool is_arr, bool is_con, std::string _type, std::string s, bool ischar) : is_array(is_arr), is_const(is_con), type(_type) {
-    if(ischar)
+var::Value::Value(bool is_arr, bool is_con, std::string s, bool ischar) : is_array(is_arr), is_const(is_con) {
+    if(ischar){
+        type = "__CHAR__";
         ch_val.push_back(s);
-    else
+    }
+    else{
+        type = "__STRING__";
         str_val.push_back(s);
+    }
 }
-var::Value::Value(bool is_arr, bool is_con, std::string _type, bool val) : is_array(is_arr), is_const(is_con), type(_type) {
+var::Value::Value(bool is_arr, bool is_con, bool val) : is_array(is_arr), is_const(is_con) {
+    type = "__BOOL__";
     bool_val.push_back(val);
 }
-var::Value::Value(bool is_arr, bool is_con, std::string _type, efunc::Efunction val) : is_array(is_arr), is_const(is_con), type(_type) {
+var::Value::Value(bool is_arr, bool is_con, efunc::Efunction val) : is_array(is_arr), is_const(is_con) {
+    type = "__FUNC__";
     func_val.push_back(val);
 }
-var::Value::Value(bool is_arr, bool is_con, std::string _type, var::UserScope val) : is_array(is_arr), is_const(is_con), type(_type) {
+var::Value::Value(bool is_arr, bool is_con, var::UserScope val) : is_array(is_arr), is_const(is_con) {
+    type = "__SCOP__";
     us_val.push_back(val);
 }
-var::Value::Value(bool is_arr, bool is_con, std::string _type, var::Value val) : is_array(is_arr), is_const(is_con), type(_type) {
+var::Value::Value(bool is_arr, bool is_con, var::Value val) : is_array(is_arr), is_const(is_con) {
+    type = "__VAL__";
     val_val.push_back(val);
 }
 bool var::Value::isArray(){
@@ -311,8 +321,8 @@ var::UserScope::UserScope(std::string name_, east::StatNode stat_): var::Scope(n
 
 var::ScopeSet::ScopeSet(){
     this->newScope("__epp_global_scope__");
-    this->scope_pool[0].new_var("epp_version", var::Value(false, true, "__STRING__", "dev-0.2.5", false));
-    this->scope_pool[0].new_var("epp_btime", var::Value(false, true, "__STRING__", (std::string)__DATE__, false));
+    this->scope_pool[0].new_var("epp_version", var::Value(false, true, "dev-0.2.5", false));
+    this->scope_pool[0].new_var("epp_btime", var::Value(false, true, (std::string)__DATE__, false));
 }
 bool var::ScopeSet::findInAllScope(std::string name){
     if(scope_pool[deep_count].find(name)) return true;
