@@ -3,7 +3,7 @@
 #include <functional>
 #include <stdio.h>
 #ifdef _WIN32
-#include <Windows.h>
+#include <windows.h>
 
 namespace color{
     enum ColorSet{
