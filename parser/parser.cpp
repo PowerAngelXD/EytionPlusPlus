@@ -60,10 +60,17 @@ void parser::Parser::parse_OutStmt(east::OutStmtNode* stmt){
 
 void parser::Parser::parse_VorcStmt(east::VorcStmtNode* stmt){
     auto name = stmt->iden->content;
+    // Check for duplicate variables / constants
+    if(sset.findInAllScope(name)) throw epperr::Epperr("NameError", "duplicate identifier '" + name + "'!", stmt->iden->line, stmt->iden->column);
     if(stmt->mark->content == "var"){
     // create variable
         auto calc = _calc(*stmt->value, sset);
-        //sset.createVariable(name, var::Value(false, false, "__INT__", calc.result[0])));
+        if(calc.isArray()){
+            
+        }
+        else{
+            sset.createVariable(name, var::Value(false, false, calc.result[0].second));
+        }
     }
     else{
 
