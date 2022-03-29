@@ -36,6 +36,7 @@ namespace var{
         int len = 1;
         Value(bool is_arr, bool is_con);
         Value(bool is_arr, bool is_con, std::string _type);
+        // init value
         Value(bool is_arr, bool is_con, int val);
         Value(bool is_arr, bool is_con, float val);
         Value(bool is_arr, bool is_con, std::string s, bool ischar);
@@ -43,6 +44,15 @@ namespace var{
         Value(bool is_arr, bool is_con, efunc::Efunction val);
         Value(bool is_arr, bool is_con, UserScope val);
         Value(bool is_arr, bool is_con, Value val);
+        // init list
+        Value(bool is_arr, bool is_con, std::vector<int> val);
+        Value(bool is_arr, bool is_con, std::vector<float> val);
+        Value(bool is_arr, bool is_con, std::vector<std::string> s, bool ischar);
+        Value(bool is_arr, bool is_con, std::vector<bool> val);
+        Value(bool is_arr, bool is_con, std::vector<efunc::Efunction> val);
+        Value(bool is_arr, bool is_con, std::vector<UserScope> val);
+        Value(bool is_arr, bool is_con, std::vector<Value> val);
+
         int getValueOfInt();
         std::vector<int>getValueOfIntArray();
         float getValueOfDecimal();
