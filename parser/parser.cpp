@@ -60,16 +60,64 @@ void parser::Parser::parse_OutStmt(east::OutStmtNode* stmt){
 
 void parser::Parser::parse_VorcStmt(east::VorcStmtNode* stmt){
     auto name = stmt->iden->content;
+    auto calc = _calc(*stmt->value, sset);
+    //type checker
+    auto type = stmt->type;
+    if(type == nullptr);
+    else{
+        if(type->content == "int" && calc.result[0].first == "__INT__");
+        else if(type->content == "string" && calc.result[0].first == "__STRING__");
+        else if(type->content == "deci" && calc.result[0].first == "__DECI__");
+        else if(type->content == "bool" && calc.result[0].first == "__BOOL__");
+        else if(type->content == "char" && calc.result[0].first == "__CHAR__");
+        else throw epperr::Epperr("TypeError", "The pre type at the time of declaration does not match the actual incoming type", type->line, type->column);
+    }
     // Check for duplicate variables / constants
     if(sset.findInAllScope(name)) throw epperr::Epperr("NameError", "duplicate identifier '" + name + "'!", stmt->iden->line, stmt->iden->column);
-    if(stmt->mark->content == "var"){
+    if(stmt->mark->content == "var" || stmt->mark->content == "const"){
     // create variable
-        auto calc = _calc(*stmt->value, sset);
         if(calc.isArray()){
-            
+            if(calc.result[0].first == "__INT__"){
+                std::vector<int> list;
+                for(int i = 0; i < calc.result.size(); i++)
+                    list.push_back(calc.result[i].second);
+                sset.createVariable(name, var::Value(true, stmt->mark->content == "const"?true:false, list));
+            }
+            else if(calc.result[0].first == "__DECI__"){
+                std::vector<float> list;
+                for(int i = 0; i < calc.result.size(); i++)
+                    list.push_back(calc.result[i].second);
+                sset.createVariable(name, var::Value(true, stmt->mark->content == "const"?true:false, list));
+            }
+            else if(calc.result[0].first == "__STRING__"){
+                std::vector<std::string> list;
+                for(int i = 0; i < calc.result.size(); i++)
+                    list.push_back(calc.constpool[calc.result[i].second]);
+                sset.createVariable(name, var::Value(true, stmt->mark->content == "const"?true:false, list, false));
+            }
+            else if(calc.result[0].first == "__CHAR__"){
+                std::vector<std::string> list;
+                for(int i = 0; i < calc.result.size(); i++)
+                    list.push_back(calc.constpool[calc.result[i].second]);
+                sset.createVariable(name, var::Value(true, stmt->mark->content == "const"?true:false, list, true));
+            }
+            else if(calc.result[0].first == "__BOOL__"){
+                std::vector<bool> list;
+                for(int i = 0; i < calc.result.size(); i++)
+                    list.push_back(calc.result[i].second);
+                sset.createVariable(name, var::Value(true, stmt->mark->content == "const"?true:false, list));
+            }
         }
         else{
-            sset.createVariable(name, var::Value(false, false, calc.result[0].second));
+            if(calc.result[0].first == "__STRING__")
+                sset.createVariable(name, var::Value(false, stmt->mark->content == "const"?true:false, 
+                calc.constpool[calc.result[0].second], false));
+            else if(calc.result[0].first == "__CHAR__")
+                sset.createVariable(name, var::Value(false, stmt->mark->content == "const"?true:false, 
+                calc.constpool[calc.result[0].second], false));
+            else
+                sset.createVariable(name, var::Value(false, stmt->mark->content == "const"?true:false, 
+                calc.result[0].second));
         }
     }
     else{
@@ -83,78 +131,7 @@ void parser::Parser::parse(){
             parse_OutStmt(stat.stmts[index]->outstmt);
         }
         else if(stat.stmts[index]->vorcstmt != nullptr){
-            auto name = stat.stmts[index]->vorcstmt->iden->content;
-            auto expr = stat.stmts[index]->vorcstmt->value;
-            cenv::Calculation calc = _calc(*expr, sset);
-
-            //type checker
-            auto type = stat.stmts[index]->vorcstmt->type;
-            if(type == nullptr);
-            else{
-                if(type->content == "int" && calc.result[0].first == "__INT__");
-                else if(type->content == "string" && calc.result[0].first == "__STRING__");
-                else if(type->content == "deci" && calc.result[0].first == "__DECI__");
-                else if(type->content == "bool" && calc.result[0].first == "__BOOL__");
-                else if(type->content == "char" && calc.result[0].first == "__CHAR__");
-                else throw epperr::Epperr("TypeError", "The pre type at the time of declaration does not match the actual incoming type", type->line, type->column);
-            }
-            //
-            if(calc.isArray()){
-                var::Value val(true, false);
-                if(sset.findInAllScope(name)) throw epperr::Epperr("NameError", "duplicate identifier '" + name + "'!", val.line, val.column);
-                val.set_lc(stat.stmts[index]->vorcstmt->mark->line, stat.stmts[index]->vorcstmt->mark->column);
-                if(stat.stmts[index]->vorcstmt->mark->content == "const") {
-                    var::Value _val(true, true);
-                    val = _val;
-                }
-                else {
-                    var::Value _val(true, false);
-                    val = _val;
-                }
-                if(calc.result[0].first == "__INT__"){
-                    for(int i=0; i<calc.result.size(); i++) val.arr_addVal((int)calc.result[i].second);
-                    val.len = val.getValueOfIntArray().size();
-                }
-                if(calc.result[0].first == "__STRING__"){
-                    for(int i=0; i<calc.result.size(); i++) val.arr_addVal(calc.constpool[(int)calc.result[i].second], false);
-                    val.len = val.getValueOfStringArray().size();
-                }
-                if(calc.result[0].first == "__DECI__"){
-                    for(int i=0; i<calc.result.size(); i++) val.arr_addVal((float)calc.result[i].second);
-                    val.len = val.getValueOfDecimalArray().size();
-                }
-                if(calc.result[0].first == "__BOOL__"){
-                    for(int i=0; i<calc.result.size(); i++) val.arr_addVal((bool)calc.result[i].second);
-                    val.len = val.getValueOfBoolArray().size();
-                }
-                if(calc.result[0].first == "__CHAR__"){
-                    for(int i=0; i<calc.result.size(); i++) val.arr_addVal(calc.constpool[(int)calc.result[i].second], true);
-                    val.len = val.getValueOfCharArray().size();
-                }
-                sset.scope_pool[sset.getDeep()].identifier_table.emplace_back(name);
-                sset.scope_pool[sset.getDeep()].vars.emplace_back(name, val);
-            }
-            else{
-                var::Value val(false, false);
-                if(sset.findInAllScope(name)) throw epperr::Epperr("NameError", "duplicate identifier '" + name + "'!", val.line, val.column);
-                val.set_lc(stat.stmts[index]->vorcstmt->mark->line, stat.stmts[index]->vorcstmt->mark->column);
-                if(stat.stmts[index]->vorcstmt->mark->content == "const") {
-                    var::Value _val(false, true);
-                    val = _val;
-                }
-                else {
-                    var::Value _val(false, false);
-                    val = _val;
-                }
-                if(calc.result[0].first == "__INT__") val.set_val((int)calc.result[0].second);
-                else if(calc.result[0].first == "__DECI__") val.set_val((float)calc.result[0].second);
-                else if(calc.result[0].first == "__BOOL__") val.set_val((bool)calc.result[0].second);
-                else if(calc.result[0].first == "__STRING__") val.set_val(calc.constpool[(int)calc.result[0].second], false);
-                else if(calc.result[0].first == "__CHAR__") val.set_val(calc.constpool[(int)calc.result[0].second], true);
-                else{throw epperr::Epperr("TypeError", "Is not a valid type!", val.line, val.column);}
-                sset.scope_pool[sset.getDeep()].identifier_table.emplace_back(name);
-                sset.scope_pool[sset.getDeep()].vars.emplace_back(name, val);
-            }
+            parse_VorcStmt(stat.stmts[index]->vorcstmt);
         }
         else if(stat.stmts[index]->assignstmt != nullptr){
             auto name = stat.stmts[index]->assignstmt->iden->idens[0]->content;
