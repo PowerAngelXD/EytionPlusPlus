@@ -23,6 +23,10 @@
 #endif
 //#define EPP_DEBUG
 
+// global define
+parser::Parser p;
+configloader::Loader loader("resource/config/common.ecfg");
+
 #ifdef _WIN32
 void getAllFile(std::string path, std::vector<std::string>& files){
     long hFile = 0;
@@ -38,8 +42,6 @@ void getAllFile(std::string path, std::vector<std::string>& files){
 }
 #endif
 
-parser::Parser p;
-configloader::Loader loader("resource/config/common.ecfg");
 #ifdef EPP_DEBUG
 int main(){
 #else
