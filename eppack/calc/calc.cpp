@@ -265,7 +265,7 @@ void cenv::Calculation::run(){
         }
         else if(ins[i].instr == "__POP__") {
             if(sset.findInAllScope(ins[i].para)){
-                auto temp = sset.scope_pool[sset.findInAllScopeI(ins[i].para)].vars[sset.scope_pool[sset.findInAllScopeI(ins[i].para)].findI(ins[i].para)];
+                auto temp = sset.getTargetVar(ins[i].para);
                 if(temp.second.isArray()){
                     is_array = true;
                     if(temp.second.getType() == "__INT__")
