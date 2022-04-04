@@ -58,6 +58,10 @@ void parser::Parser::parse_OutStmt(east::OutStmtNode* stmt){
     }
 }
 
+void parser::Parser::parse_AssignStmt(east::AssignStmtNode* stmt){
+    
+}
+
 void parser::Parser::parse_VorcStmt(east::VorcStmtNode* stmt){
     auto name = stmt->iden->content;
     auto calc = _calc(*stmt->value, sset);
