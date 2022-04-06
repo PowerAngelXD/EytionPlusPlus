@@ -119,6 +119,19 @@ namespace east{
         static bool is_it(astParser ap);
     };
 
+    class IndexOpNode{
+    public:
+        epplex::Token* left;
+        AddExprNode* begin;
+        epplex::Token* spliter = nullptr;
+        AddExprNode* end = nullptr;
+        epplex::Token* right;
+        std::string tag = "__CALC__";
+
+        std::string to_string();
+        static bool is_it(astParser ap);
+    };
+
     class MulExprNode{
     public:
         std::vector<PrimExprNode*> prims;
@@ -165,6 +178,17 @@ namespace east{
     public:
         epplex::Token* left;
         std::vector<ValExprNode*> arrayelts;
+        epplex::Token* right;
+        std::string tag = "__CALC__";
+
+        std::string to_string();
+        static bool is_it(astParser ap);
+    };
+
+    class ScopeExprNode{
+    public:
+        epplex::Token* left;
+        StatNode* body;
         epplex::Token* right;
         std::string tag = "__CALC__";
 
@@ -285,6 +309,7 @@ namespace east{
         BoolExprNode* boolexpr = nullptr;
         ListExprNode* listexpr = nullptr;
         FuncDefineExprNode* fdefexpr = nullptr;
+        ScopeExprNode* scopeexpr = nullptr;
 
         std::string tag = "__CALC__";
 
@@ -514,6 +539,17 @@ namespace east{
         StmtNode* stc=nullptr;
         BlockStmtNode* body=nullptr;
 
+        std::string tag = "__OTHER__";
+
+        std::string to_string();
+        static bool is_it(astParser ap);
+    };
+
+    class ActStmtNode{
+    public:
+        epplex::Token* mark;
+        IdentifierNode* iden;
+        epplex::Token* end;
         std::string tag = "__OTHER__";
 
         std::string to_string();

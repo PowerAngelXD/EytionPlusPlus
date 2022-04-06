@@ -312,21 +312,7 @@ east::ListExprNode* east::astParser::gen_listExprNode(){
 }
 east::FuncDefineExprNode* east::astParser::gen_fdefExprNode(){
     if(east::FuncDefineExprNode::is_it(*this)){
-        east::FuncDefineExprNode* node = new east::FuncDefineExprNode;
-        node->mark = token();
-        if(peek()->content == "(") node->left = token();
-        else throw epperr::Epperr("SyntaxError", "Expect '('!", tg[pos].line, tg[pos].column);
-        if(east::TypeToExprNode::is_it(*this)) node->paras.push_back(gen_tytExprNode());
-        while(true){
-            if(peek()->content != ",") break;
-            token();
-            node->paras.push_back(gen_tytExprNode());
-        }
-        if(peek()->content == ")") node->right = token();
-        else throw epperr::Epperr("SyntaxError", "Expect ')'!", tg[pos].line, tg[pos].column);
-        if(east::BlockStmtNode::is_it(*this)) node->body = gen_blockStmtNode();
-        else throw epperr::Epperr("SyntaxError", "A function needs a function body when it is defined!", tg[pos].line, tg[pos].column);
-        return node;
+        //TODO： 对函数的完善
     }
     else throw epperr::Epperr("SyntaxError", "Unknown type of the expr!", tg[pos].line, tg[pos].column);
 }
@@ -670,10 +656,11 @@ std::string east::ValExprNode::to_string(){
     else if(this->boolexpr != nullptr) return this->boolexpr->to_string();
     else if(this->listexpr != nullptr) return this->listexpr->to_string();
     else if(this->fdefexpr != nullptr) return this->fdefexpr->to_string();
+    else if(this->scopeexpr != nullptr) return this->scopeexpr->to_string();
     else throw epperr::Epperr("SyntaxError", "Unknown type of the expr!", 0, 0);
 }
 bool east::ValExprNode::is_it(east::astParser ap){
-    return east::AddExprNode::is_it(ap) || east::BoolExprNode::is_it(ap) || east::ListExprNode::is_it(ap) || east::FuncDefineExprNode::is_it(ap);
+    return east::AddExprNode::is_it(ap) || east::BoolExprNode::is_it(ap) || east::ListExprNode::is_it(ap) || east::FuncDefineExprNode::is_it(ap) || east::ScopeExprNode::is_it(ap);
 }
 //
 
@@ -856,6 +843,21 @@ std::string east::ListExprNode::to_string(){
 }
 bool east::ListExprNode::is_it(astParser ap){
     return ap.peek()->content == "[";
+}
+//
+
+//scope expr node
+std::string east::ScopeExprNode::to_string(){
+    std::string ret = "scope_expr: {" + this->left->simply_format() + ", body:[";
+    ret += this->body->stmts[0]->to_string();
+    for(int i = 0; i<this->body->stmts.size(); i++){
+        ret += this->body->stmts[i]->to_string();
+    }
+    ret += "]}";
+    return ret;
+}
+bool east::ScopeExprNode::is_it(east::astParser ap){
+    return ap.peek()->content == "{";
 }
 //
 
