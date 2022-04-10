@@ -1,4 +1,5 @@
-# Eytion++
+# Eytion++\
+# (说明)作者因学业问题，本项目暂时停更至6.20日
 ![](eppp.png)
 [![https://img.shields.io/badge/EppVersion-v0.2.5|Dev-red](https://img.shields.io/badge/EppVersion-v0.2.5|Dev-red)]()
 # Introduce
