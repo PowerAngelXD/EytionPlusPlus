@@ -129,6 +129,14 @@ void parser::Parser::parse_VorcStmt(east::VorcStmtNode* stmt){
     }
 }
 
+void parser::Parser::parse_DeleteStmt(east::DeleteStmtNode* stmt){
+    auto name = stmt->iden->idens[0]->content;
+    if(!sset.findInAllScope(name)) throw epperr::Epperr("NameError", "Could not find a designator named '" + name + "'",
+                                                        stmt->iden->idens[0]->line,
+                                                        stmt->iden->idens[0]->column);
+    sset.scope_pool[sset.getDeep()].vars.erase(sset.scope_pool[sset.getDeep()].vars.begin() + sset.scope_pool[sset.getDeep()].findI(name));
+}
+
 void parser::Parser::parse(){
     for(int index = 0; index < stat.stmts.size(); index++){
         if(stat.stmts[index]->outstmt != nullptr){
@@ -198,11 +206,7 @@ void parser::Parser::parse(){
                                       stat.stmts[index]->assignstmt->iden->idens[0]->column);
         }
         else if(stat.stmts[index]->deletestmt != nullptr){
-            auto name = stat.stmts[index]->deletestmt->iden->idens[0]->content;
-            if(!sset.findInAllScope(name)) throw epperr::Epperr("NameError", "Could not find a designator named '" + name + "'",
-                                                                stat.stmts[index]->deletestmt->iden->idens[0]->line,
-                                                                stat.stmts[index]->deletestmt->iden->idens[0]->column);
-            sset.scope_pool[sset.getDeep()].vars.erase(sset.scope_pool[sset.getDeep()].vars.begin() + sset.scope_pool[sset.getDeep()].findI(name));
+            parse_DeleteStmt(stat.stmts[index]->deletestmt);
         }
         else if(stat.stmts[index]->blockstmt != nullptr){
             Parser subp;
@@ -363,7 +367,7 @@ void parser::Parser::parse(){
             else _if_control = -1;
         }
         else if(stat.stmts[index]->forstmt != nullptr){
-            //TODO: UPDATE FOR STMT!
+            
         }
         else if(stat.stmts[index]->foreachstmt != nullptr){
             std::vector<cenv::calc_unit> list;
