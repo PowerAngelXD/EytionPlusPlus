@@ -21,7 +21,7 @@
 #ifdef _WIN32
 #include "eppack/global/elib.h"
 #endif
-//#define EPP_DEBUG
+#define EPP_DEBUG
 
 // global define
 parser::Parser p;
