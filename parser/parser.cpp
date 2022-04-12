@@ -58,8 +58,9 @@ void parser::Parser::parse_OutStmt(east::OutStmtNode* stmt){
     }
 }
 
-void parser::Parser::parse_AssignStmt(east::AssignStmtNode* stmt){
-    
+void parser::Parser::parse_ExprStmt(east::ExprStmtNode* stmt){
+    cenv::Calculation calc = _calc(*stmt->expr, sset);
+    this->sset = calc.sset;
 }
 
 void parser::Parser::parse_VorcStmt(east::VorcStmtNode* stmt){
@@ -434,8 +435,7 @@ void parser::Parser::parse(){
             
         }
         else if(stat.stmts[index]->exprstmt != nullptr){
-            cenv::Calculation calc = _calc(*stat.stmts[index]->exprstmt->expr, sset);
-            this->sset = calc.sset;
+            parse_ExprStmt(stat.stmts[index]->exprstmt);
         }
     }
 }
