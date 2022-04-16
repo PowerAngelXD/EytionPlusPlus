@@ -579,8 +579,7 @@ east::ForStmtNode* east::astParser::gen_forStmtNode(){
         else throw epperr::Epperr("SyntaxError", "Expect a boolean expression", tg[pos].line, tg[pos].column);
         if(peek()->content == ";") node->separate_sym2 = token();
         else throw epperr::Epperr("SyntaxError", "Expect ';'", tg[pos].line, tg[pos].column);
-        if(east::AssignStmtNode::is_it(*this)) node->dostc_assign = gen_assignStmtNode(true);
-        else if(east::SelfIaDExprNode::is_it(*this)) node->dostc_siad = gen_siadExprNode();
+        if(east::StmtNode::is_it(*this)) node->dostc = gen_stmtNode();
         else throw epperr::Epperr("SyntaxError", "Expect a sentence!", tg[pos].line, tg[pos].column);
         if(peek()->content == ")") node->right = token();
         else throw epperr::Epperr("SyntaxError", "Expect ')'", tg[pos].line, tg[pos].column);
@@ -1145,10 +1144,7 @@ bool east::ExprStmtNode::is_it(east::astParser ap){
 
 //for stmt node
 std::string east::ForStmtNode::to_string(){
-    if(this->dostc_assign != nullptr)
-        return "for_stmt: {" + this->mark->simply_format() + ", " + this->iden->to_string() + ", " + this->val->to_string() + ", " + this->cond->to_string() + ", " + dostc_assign->to_string() + "}";
-    else
-        return "for_stmt: {" + this->mark->simply_format() + ", " + this->iden->to_string() + ", " + this->val->to_string() + ", " + this->cond->to_string() + ", " + dostc_siad->to_string() + "}";
+    return "for_stmt: {" + this->mark->simply_format() + ", " + this->iden->to_string() + ", " + this->val->to_string() + ", " + this->cond->to_string() + ", " + dostc->to_string() + "}";
 }
 bool east::ForStmtNode::is_it(east::astParser ap){
     return ap.peek()->content == "for";

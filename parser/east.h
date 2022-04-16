@@ -520,8 +520,7 @@ namespace east{
 
         epplex::Token* separate_sym2;
 
-        AssignStmtNode* dostc_assign = nullptr;
-        SelfIaDExprNode* dostc_siad = nullptr;
+        StmtNode* dostc;
 
         epplex::Token* right;
         BlockStmtNode* body=nullptr;
