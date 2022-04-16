@@ -430,6 +430,7 @@ east::BlockStmtNode* east::astParser::gen_blockStmtNode(){
         east::BlockStmtNode* node = new east::BlockStmtNode;
         node->left = token();
         if(east::StatNode::is_it(*this)) node->body = gen_statNode();
+        else;
         if(peek()->content == "}") node->right = token();
         else throw epperr::Epperr("SyntaxError", "Expect '}'", tg[pos].line, tg[pos].column);
         return node;
@@ -1031,10 +1032,12 @@ bool east::AssignStmtNode::is_it(east::astParser ap){
 //block stmt node
 std::string east::BlockStmtNode::to_string(){
     std::string ret = "block_stmt: {" + this->left->simply_format() + ", body:[";
+    if(this->body == nullptr)goto end;
     ret += this->body->stmts[0]->to_string();
     for(int i = 0; i<this->body->stmts.size(); i++){
         ret += this->body->stmts[i]->to_string();
     }
+    end:
     ret += "]}";
     return ret;
 }

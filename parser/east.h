@@ -390,7 +390,7 @@ namespace east{
     class BlockStmtNode{
     public:
         epplex::Token* left;
-        StatNode* body;
+        StatNode* body = nullptr;
         epplex::Token* right;
         std::string tag = "__OTHER__";
 

@@ -148,6 +148,7 @@ void parser::Parser::parse_ForStmt(east::ForStmtNode* stmt){
             stc_p.parse();
         }
         else{
+            if(stmt->body->body == nullptr) continue;
             stc_p.stat = *stmt->body->body;
             this->sset.next();
             this->sset.newScope("__epp_ForTemp_scope__");
@@ -260,6 +261,7 @@ void parser::Parser::parse(){
             parse_DeleteStmt(stat.stmts[index]->deletestmt);
         }
         else if(stat.stmts[index]->blockstmt != nullptr){
+            if(stat.stmts[index]->blockstmt->body == nullptr) continue;
             Parser subp;
             subp.stat = *stat.stmts[index]->blockstmt->body;
             this->sset.next();
@@ -280,6 +282,7 @@ void parser::Parser::parse(){
                     stc_p.parse();
                 }
                 else{
+                    if(stat.stmts[index]->ifstmt->body->body == nullptr) continue;
                     stc_p.stat = *stat.stmts[index]->ifstmt->body->body;
                     this->sset.next();
                     this->sset.newScope("__epp_ifTemp_scope__");
@@ -309,6 +312,7 @@ void parser::Parser::parse(){
                         stc_p.parse();
                     }
                     else{
+                        if(stat.stmts[index]->whilestmt->body->body == nullptr) continue;
                         stc_p.stat = *stat.stmts[index]->whilestmt->body->body;
                         this->sset.next();
                         this->sset.newScope("__epp_whileTemp_scope__");
@@ -345,6 +349,7 @@ void parser::Parser::parse(){
                         stc_p.parse();
                     }
                     else{
+                        if(stat.stmts[index]->reptstmt->body->body == nullptr) continue;
                         stc_p.stat = *stat.stmts[index]->reptstmt->body->body;
                         this->sset.next();
                         this->sset.newScope("__epp_repeatTemp_scope__");
@@ -379,6 +384,7 @@ void parser::Parser::parse(){
                     stc_p.parse();
                 }
                 else{
+                    if(stat.stmts[index]->elifstmt->body->body == nullptr) continue;
                     stc_p.stat = *stat.stmts[index]->elifstmt->body->body;
                     this->sset.next();
                     this->sset.newScope("__epp_elifTemp_scope__");
@@ -406,6 +412,7 @@ void parser::Parser::parse(){
                     stc_p.parse();
                 }
                 else{
+                    if(stat.stmts[index]->elsestmt->body->body == nullptr) continue;
                     stc_p.stat = *stat.stmts[index]->elsestmt->body->body;
                     this->sset.next();
                     this->sset.newScope("__epp_elifTemp_scope__");
@@ -453,6 +460,7 @@ void parser::Parser::parse(){
                         stc_p.parse();
                     }
                     else{
+                        if(stat.stmts[index]->foreachstmt->body->body == nullptr) continue;
                         stc_p.stat = *stat.stmts[index]->foreachstmt->body->body;
                         this->sset.next();
                         this->sset.newScope("__epp_foreachTemp_scope__");
