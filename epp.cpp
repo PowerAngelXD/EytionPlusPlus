@@ -88,10 +88,6 @@ inline void epp_cli(){
                 #elif __linux__
                 system("ls");
                 #endif
-
-            }
-            else if(cmd == "update"){
-                system("python resource/scripts/updater.py");
             }
             else if(cmd == "envc"){
                 parser::Parser _p;
@@ -188,7 +184,7 @@ inline void epp_cli(){
                     std::cout<<std::endl;
                 }
                 east::astParser ast(tokens);
-                if(east::ValExprNode::is_it(ast) && !east::AssignStmtNode::is_it(ast) && cmd[cmd.size() - 1] != ';'){
+                if(east::ValExprNode::is(ast) && !east::AssignStmtNode::is(ast) && cmd[cmd.size() - 1] != ';'){
                     east::ValExprNode* repl_node = ast.gen_valExprNode();
                     if(loader.getData().debug_echoast == true){
                         std::cout<<"DebugMode: Ast\n";
