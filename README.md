@@ -1,7 +1,7 @@
-# Eytion++\
-# (说明)作者因学业问题，本项目暂时停更至6.20日
+# Eytion++
+# (说明)作者因学业问题，本项目暂时停更至6.20日，中途会有小更新，敬请期待
 ![](eppp.png)
-[![https://img.shields.io/badge/EppVersion-v0.2.5|Dev-red](https://img.shields.io/badge/EppVersion-v0.2.5|Dev-red)]()
+[![https://img.shields.io/badge/EppVersion-v0.2.6|Dev-red](https://img.shields.io/badge/EppVersion-v0.2.6|Dev-red)]()
 # Introduce
 Eytion++ is developed by PowerAgnelXD based on the original project Eytion, \
 which can be regarded as an enhanced version of Eytion, \
@@ -93,6 +93,12 @@ while(index < len(a)){
 var str_list = ["hello!", "Eytion", "plusplus"];
 for_each(var s: str_list){
     out "content: " + s + "\n";
+}
+```
+> For
+```go
+for(var a=0-20; a < 0-10; a=a+2;){
+    println(a);
 }
 ```
 > Break

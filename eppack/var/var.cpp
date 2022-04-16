@@ -355,7 +355,7 @@ var::UserScope::UserScope(std::string name_, east::StatNode stat_): var::Scope(n
 
 var::ScopeSet::ScopeSet(){
     this->newScope("__epp_global_scope__");
-    this->scope_pool[0].new_var("epp_version", var::Value(false, true, "dev-0.2.5", false));
+    this->scope_pool[0].new_var("epp_version", var::Value(false, true, "dev-0.2.6", false));
     this->scope_pool[0].new_var("epp_btime", var::Value(false, true, (std::string)__DATE__, false));
 }
 bool var::ScopeSet::findInAllScope(std::string name){
