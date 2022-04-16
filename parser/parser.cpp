@@ -135,7 +135,8 @@ void parser::Parser::parse_VorcStmt(east::VorcStmtNode* stmt){
 
 void parser::Parser::parse_ForStmt(east::ForStmtNode* stmt){
     auto name = stmt->iden->idens[0]->content;
-    sset.createVariable(name, var::Value(false, false, _calc(*stmt->val, sset).result[0].second));
+    if(stmt->var_mark != nullptr)
+        sset.createVariable(name, var::Value(false, false, _calc(*stmt->val, sset).result[0].second));
     auto calcBool = _calc(*stmt->cond, sset);
     while(calcBool.result[0].second > 0){
         parser::Parser stc_p;
@@ -176,7 +177,7 @@ void parser::Parser::parse_ForStmt(east::ForStmtNode* stmt){
         calcBool = _calc(*stmt->cond, sset);
         if(calcBool.result[0].second == 0) break;
     }
-    sset.deleteVariable(name); // 删除for中的变量
+    //sset.deleteVariable(name); // 删除for中的变量
 }
 
 void parser::Parser::parse_DeleteStmt(east::DeleteStmtNode* stmt){

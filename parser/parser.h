@@ -24,6 +24,10 @@ namespace parser{
         var::ScopeSet sset;
         var::ScopeSet user_sset; // User defined sset
 
+        class BifParser{
+            
+        };
+
         void parse_OutStmt(east::OutStmtNode* stmt);
         void parse_VorcStmt(east::VorcStmtNode* stmt);
         void parse_AssignStmt(east::AssignStmtNode* stmt);
