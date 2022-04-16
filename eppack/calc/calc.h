@@ -29,9 +29,11 @@ namespace cenv{
     class Calculation{
         bool is_array = false;
         bool is_top = false;
+        std::vector<calc_unit> tempSpace;
         int len = 1;
     public:
         var::ScopeSet sset;
+        int env_top = 0;
 
         Calculation(var::ScopeSet sset_);
         Calculation()=default;
@@ -39,7 +41,6 @@ namespace cenv{
         std::vector<calc_ins> ins;
         std::vector<calc_unit> env;
         std::vector<std::string> constpool;
-        int env_top = 0;
         std::vector<calc_unit> result;
 
         void push(calc_unit cu);

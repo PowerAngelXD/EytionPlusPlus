@@ -36,14 +36,14 @@ void cenv::Calculation::run(){
             if(original.first == "__INT__"){
                 push(original);
                 if(sset.scope_pool[sset.findInAllScopeI(ins[i].para)].find(ins[i].para)){
-                    this->sset.scope_pool[sset.findInAllScopeI(ins[i].para)].assign(ins[i].para, var::Value(false, false, "__INT__", (int)(original.second + 1)));
+                    this->sset.assignValue(ins[i].para, var::Value(false, false, (int)(original.second + 1)));
                 }
                 else throw epperr::Epperr("NameError", "Unable to find identifier named: '" + ins[i].para + "'", ins[i].line, ins[i].column);
             }
             else if(original.first == "__DECI__"){
                 push(original);
                 if(sset.scope_pool[sset.findInAllScopeI(ins[i].para)].find(ins[i].para)){
-                    this->sset.scope_pool[sset.findInAllScopeI(ins[i].para)].assign(ins[i].para, var::Value(false, false, "__DECI__", (float)(original.second + 1)));
+                    this->sset.assignValue(ins[i].para, var::Value(false, false, (float)(original.second + 1)));
                 }
                 else throw epperr::Epperr("NameError", "Unable to find identifier named: '" + ins[i].para + "'", ins[i].line, ins[i].column);
             }
@@ -54,14 +54,14 @@ void cenv::Calculation::run(){
             if(original.first == "__INT__"){
                 push(original);
                 if(sset.scope_pool[sset.findInAllScopeI(ins[i].para)].find(ins[i].para)){
-                    this->sset.scope_pool[sset.findInAllScopeI(ins[i].para)].assign(ins[i].para, var::Value(false, false, "__INT__", (int)(original.second - 1)));
+                    this->sset.assignValue(ins[i].para, var::Value(false, false, (int)(original.second - 1)));
                 }
                 else throw epperr::Epperr("NameError", "Unable to find identifier named: '" + ins[i].para + "'", ins[i].line, ins[i].column);
             }
             else if(original.first == "__DECI__"){
                 push(original);
                 if(sset.scope_pool[sset.findInAllScopeI(ins[i].para)].find(ins[i].para)){
-                    this->sset.scope_pool[sset.findInAllScopeI(ins[i].para)].assign(ins[i].para, var::Value(false, false, "__DECI__", (float)(original.second - 1)));
+                    this->sset.assignValue(ins[i].para, var::Value(false, false, (float)(original.second - 1)));
                 }
                 else throw epperr::Epperr("NameError", "Unable to find identifier named: '" + ins[i].para + "'", ins[i].line, ins[i].column);
             }
