@@ -12,7 +12,6 @@
 #include <string>
 #include <vector>
 #include <stdio.h>
-#include <any>
 #include "../eppack/calc/calc.h"
 #include "../eppack/calc/calcvisitor.h"
 #include "../eppack/excphg/excphg.h"

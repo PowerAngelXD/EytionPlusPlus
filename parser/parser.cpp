@@ -120,6 +120,9 @@ void parser::Parser::parse_VorcStmt(east::VorcStmtNode* stmt){
             else if(calc.result[0].first == "__CHAR__")
                 sset.createVariable(name, var::Value(false, stmt->mark->content == "const"?true:false, 
                 calc.constpool[calc.result[0].second], false));
+            else if(calc.result[0].first == "__INT__")
+                sset.createVariable(name, var::Value(false, stmt->mark->content == "const"?true:false, 
+                (int)calc.result[0].second));
             else
                 sset.createVariable(name, var::Value(false, stmt->mark->content == "const"?true:false, 
                 calc.result[0].second));
@@ -130,12 +133,57 @@ void parser::Parser::parse_VorcStmt(east::VorcStmtNode* stmt){
     }
 }
 
+void parser::Parser::parse_ForStmt(east::ForStmtNode* stmt){
+    auto name = stmt->iden->idens[0]->content;
+    sset.createVariable(name, var::Value(false, false, _calc(*stmt->val, sset).result[0].second));
+    auto calcBool = _calc(*stmt->cond, sset);
+    while(calcBool.result[0].second > 0){
+        parser::Parser stc_p;
+        sset.remove();
+        if(stmt->stc != nullptr){
+            east::StatNode _stat;
+            _stat.stmts.push_back(stmt->stc);
+            stc_p.stat = _stat;
+            stc_p.sset = sset;
+            stc_p.parse();
+        }
+        else{
+            stc_p.stat = *stmt->body->body;
+            this->sset.next();
+            this->sset.newScope("__epp_ForTemp_scope__");
+            stc_p.sset = this->sset;
+            stc_p.parse();
+            this->sset.remove();
+        }
+        //后置语句
+        east::StatNode stat;
+        stat.stmts.push_back(stmt->dostc);
+        if(stmt->dostc->exprstmt!=nullptr && stmt->dostc->exprstmt->expr->addexpr->muls[0]->prims[0]->siad!=nullptr){
+            stc_p.stat = stat;
+            stc_p.sset = sset;
+            stc_p.parse();
+        }
+        else if(stmt->dostc->assignstmt!=nullptr){
+            stc_p.stat = stat;
+            stc_p.sset = sset;
+            stc_p.parse();
+        }
+        else throw epperr::Epperr("SyntaxError", "Not the correct statement", stmt->separate_sym2->line, stmt->separate_sym2->column);
+        //
+
+        sset = stc_p.sset;
+        calcBool = _calc(*stmt->cond, sset);
+        if(calcBool.result[0].second == 0) break;
+    }
+    sset.deleteVariable(name); // 删除for中的变量
+}
+
 void parser::Parser::parse_DeleteStmt(east::DeleteStmtNode* stmt){
     auto name = stmt->iden->idens[0]->content;
     if(!sset.findInAllScope(name)) throw epperr::Epperr("NameError", "Could not find a designator named '" + name + "'",
                                                         stmt->iden->idens[0]->line,
                                                         stmt->iden->idens[0]->column);
-    sset.scope_pool[sset.getDeep()].vars.erase(sset.scope_pool[sset.getDeep()].vars.begin() + sset.scope_pool[sset.getDeep()].findI(name));
+    sset.deleteVariable(name);
 }
 
 void parser::Parser::parse(){
@@ -368,7 +416,7 @@ void parser::Parser::parse(){
             else _if_control = -1;
         }
         else if(stat.stmts[index]->forstmt != nullptr){
-            
+            parse_ForStmt(stat.stmts[index]->forstmt);
         }
         else if(stat.stmts[index]->foreachstmt != nullptr){
             std::vector<cenv::calc_unit> list;
