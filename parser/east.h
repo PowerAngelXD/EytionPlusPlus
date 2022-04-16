@@ -16,16 +16,8 @@
 #include "../eppack/error/epperr.h"
 
 namespace east{
-    class AddExprNode;
-    class ValExprNode;
-    class IdentifierNode;
-    class PrimExprNode;
-    class BoolExprNode;
-    class StatNode;
-    class astParser;
-    class TypeOfExprNode;
-    class BlockStmtNode;
-    class StmtNode;
+    class AddExprNode; class ValExprNode; class IdentifierNode; class PrimExprNode; class BoolExprNode; class StatNode; 
+    class astParser; class TypeOfExprNode; class BlockStmtNode; class IndexOpNode; class StmtNode;
 
     class AssignExprNode{
     public:
@@ -36,7 +28,7 @@ namespace east{
         std::string tag = "__CALC__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class SelfIaDExprNode{
@@ -48,7 +40,7 @@ namespace east{
         bool isFront = false;
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class WholeExprNode{
@@ -58,7 +50,7 @@ namespace east{
         std::string tag = "__CALC__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class IdentifierNode{
@@ -72,6 +64,7 @@ namespace east{
         std::vector<epplex::Token*> idens;
         std::vector<epplex::Token*> dots; // .
 
+        std::vector<IndexOpNode*> indexops;
         epplex::Token* arrleft = nullptr;
         AddExprNode* arrindex = nullptr;
         epplex::Token* arrright = nullptr;
@@ -80,7 +73,7 @@ namespace east{
         IdentifierNode(std::string type_ = "__PURE__");
         std::string to_string();
         std::string getIdenType();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class AddOpNode{
@@ -89,7 +82,7 @@ namespace east{
         std::string tag = "__CALC__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class MulOpNode{
@@ -98,7 +91,7 @@ namespace east{
         std::string tag = "__CALC__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class CmpOpNode{
@@ -107,7 +100,7 @@ namespace east{
         std::string tag = "__CALC__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class BoolOpNode{
@@ -116,7 +109,7 @@ namespace east{
         std::string tag = "__CALC__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class IndexOpNode{
@@ -129,7 +122,7 @@ namespace east{
         std::string tag = "__CALC__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class MulExprNode{
@@ -139,7 +132,7 @@ namespace east{
         std::string tag = "__CALC__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class AddExprNode{
@@ -149,7 +142,7 @@ namespace east{
         std::string tag = "__CALC__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class CmpExprNode{
@@ -160,7 +153,7 @@ namespace east{
         std::string tag = "__CALC__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class BoolExprNode{
@@ -171,7 +164,7 @@ namespace east{
         std::string tag = "__CALC__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class ListExprNode{
@@ -182,7 +175,7 @@ namespace east{
         std::string tag = "__CALC__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class ScopeExprNode{
@@ -193,7 +186,7 @@ namespace east{
         std::string tag = "__CALC__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class TypeOfExprNode{
@@ -203,7 +196,7 @@ namespace east{
         std::string tag = "__CALC__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class InputExprNode{
@@ -213,7 +206,7 @@ namespace east{
         std::string tag = "__CALC__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class PrintoLnExprNode{
@@ -223,7 +216,7 @@ namespace east{
         std::string tag = "__CALC__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class TypeToExprNode{
@@ -233,7 +226,7 @@ namespace east{
         std::string tag = "__CALC__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class LenExprNode{
@@ -243,20 +236,41 @@ namespace east{
         std::string tag = "__CALC__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
+    };
+
+    class BifInstanceNode{
+    public:
+        epplex::Token* mark;
+        epplex::Token* left;
+        std::vector<ValExprNode*> paras;
+        std::vector<epplex::Token*> dots;
+        epplex::Token* right;
+        std::string tag = "__CALC__";
+
+        std::string to_string();
+        static bool is(astParser ap);
     };
 
     class FuncDefineExprNode{
     public:
+        struct Para{
+        public:
+            epplex::Token* name;
+            epplex::Token* mh;
+            epplex::Token* type;
+            std::string to_string();
+        };
         epplex::Token* mark;
         epplex::Token* left;
-        std::vector<TypeToExprNode*> paras;
+        std::vector<Para*> paras;
+        std::vector<epplex::Token*> dots;
         epplex::Token* right;
         BlockStmtNode* body;
         std::string tag = "__FUNC_DEF__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class FuncCallExprNode{
@@ -266,7 +280,7 @@ namespace east{
         std::string tag = "__CALC_STMT__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class BifNode{
@@ -279,7 +293,7 @@ namespace east{
         std::string tag = "__CALC__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class PrimExprNode{
@@ -300,7 +314,7 @@ namespace east{
         std::string tag = "__CALC__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class ValExprNode{
@@ -314,7 +328,7 @@ namespace east{
         std::string tag = "__CALC__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class ExprStmtNode{
@@ -326,7 +340,7 @@ namespace east{
         std::string tag = "__CALC__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class OutStmtNode{
@@ -338,7 +352,7 @@ namespace east{
         std::string tag = "__OTHER__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class VorcStmtNode{
@@ -357,7 +371,7 @@ namespace east{
         std::string tag = "__OTHER__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class AssignStmtNode{
@@ -372,7 +386,7 @@ namespace east{
         std::string tag = "__OTHER__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class DeleteStmtNode{
@@ -384,7 +398,7 @@ namespace east{
         std::string tag = "__OTHER__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class BlockStmtNode{
@@ -395,7 +409,7 @@ namespace east{
         std::string tag = "__OTHER__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class BreakStmtNode{
@@ -405,7 +419,7 @@ namespace east{
         std::string tag = "__OTHER__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class AreaStmtNode{
@@ -416,7 +430,7 @@ namespace east{
         std::string tag = "__OTHER__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class IfStmtNode{
@@ -430,7 +444,7 @@ namespace east{
         std::string tag = "__OTHER__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class ElseifStmtNode{
@@ -444,7 +458,7 @@ namespace east{
         std::string tag = "__OTHER__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class ElseStmtNode{
@@ -455,7 +469,7 @@ namespace east{
         std::string tag = "__OTHER__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class WhileStmtNode{
@@ -469,7 +483,7 @@ namespace east{
         std::string tag = "__OTHER__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class RepeatStmtNode{
@@ -483,7 +497,7 @@ namespace east{
         std::string tag = "__OTHER__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class ForEachStmtNode{
@@ -501,7 +515,7 @@ namespace east{
         std::string tag = "__OTHER__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class ForStmtNode{
@@ -529,7 +543,7 @@ namespace east{
         std::string tag = "__OTHER__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class DeferStmtNode{
@@ -541,7 +555,7 @@ namespace east{
         std::string tag = "__OTHER__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class ActStmtNode{
@@ -552,7 +566,7 @@ namespace east{
         std::string tag = "__OTHER__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class TryStmtNode{};
@@ -580,7 +594,7 @@ namespace east{
         std::string tag = "__OTHER__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
 
     class StatNode{
@@ -589,7 +603,7 @@ namespace east{
         std::string tag = "__OTHER__";
 
         std::string to_string();
-        static bool is_it(astParser ap);
+        static bool is(astParser ap);
     };
     
     /**
@@ -619,6 +633,7 @@ namespace east{
         ValExprNode* gen_valExprNode();
         AddOpNode* gen_addOpNode();
         MulOpNode* gen_mulOpNode();
+        IndexOpNode* gen_indexOpNode();
         CmpOpNode* gen_cmpOpNode();
         BoolOpNode* gen_boolOpNode();
         PrimExprNode* gen_primExprNode();
