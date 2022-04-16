@@ -21,4 +21,10 @@ namespace configloader{
         Loader(std::string path);
         configData getData();
     };
+
+    class Writer{
+        configData data;
+    public:
+        Writer(std::string path);
+    };
 }
