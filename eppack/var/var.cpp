@@ -342,6 +342,10 @@ int var::Scope::findI(std::string target){
     }
     return -1;
 }
+void var::Scope::deleteVar(std::string name){
+    this->identifier_table.erase(this->identifier_table.begin() + this->findI(name));
+    this->vars.erase(this->vars.begin() + this->findI(name));
+}
 void var::Scope::assign(std::string name, var::Value value){
     vars.erase(vars.begin() + findI(name));
     vars.push_back(std::pair<std::string ,var::Value>(name, value));
@@ -416,5 +420,8 @@ void var::ScopeSet::assignValue(std::string target, var::Value val){
 }
 void var::ScopeSet::createVariable(std::string name, var::Value val){
     this->scope_pool[getDeep()].new_var(name, val);
+}
+void var::ScopeSet::deleteVariable(std::string name){
+    this->scope_pool[this->findInAllScopeI(name)].deleteVar(name);
 }
 //

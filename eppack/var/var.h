@@ -120,6 +120,7 @@ namespace var{
         bool find(std::string target);
         int findI(std::string target);
         void assign(std::string name, var::Value value);
+        void deleteVar(std::string name);
     };
 
     class UserScope: public Scope{
@@ -200,5 +201,12 @@ namespace var{
          * @param val value
          */
         void createVariable(std::string name, var::Value val);
+
+        /**
+         * @brief Delete a variable
+         * 
+         * @param name target name
+         */
+        void deleteVariable(std::string name);
     };
 }
