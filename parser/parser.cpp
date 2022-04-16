@@ -197,6 +197,8 @@ void parser::Parser::parse(){
         else if(stat.stmts[index]->assignstmt != nullptr){
             auto name = stat.stmts[index]->assignstmt->iden->idens[0]->content;
             auto expr = stat.stmts[index]->assignstmt->val;
+            if(sset.findInAllScope(name) == false)
+                throw epperr::Epperr("NameError", "Cannot find identifier named '" + name + "'", stat.stmts[index]->assignstmt->iden->idens[0]->line, stat.stmts[index]->assignstmt->iden->idens[0]->column);
             cenv::Calculation calc = _calc(*expr, sset);
             if(sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.isConst())
                 throw epperr::Epperr("AssignError", "Cannot assign a value to a constant", stat.stmts[index]->assignstmt->iden->idens[0]->line, stat.stmts[index]->assignstmt->iden->idens[0]->column);
