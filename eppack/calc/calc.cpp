@@ -92,14 +92,14 @@ void cenv::Calculation::run(){
             if(original.first == "__INT__"){
                 push(original);
                 if(sset.scope_pool[sset.findInAllScopeI(ins[i].para)].find(ins[i].para)){
-                    this->sset.scope_pool[sset.findInAllScopeI(ins[i].para)].assign(ins[i].para, var::Value(false, false, "__INT__", (int)(original.second)));
+                    this->sset.scope_pool[sset.findInAllScopeI(ins[i].para)].assign(ins[i].para, var::Value(false, false, (int)(original.second)));
                 }
                 else throw epperr::Epperr("NameError", "Unable to find identifier named: '" + ins[i].para + "'", ins[i].line, ins[i].column);
             }
             else if(original.first == "__DECI__"){
                 push(original);
                 if(sset.scope_pool[sset.findInAllScopeI(ins[i].para)].find(ins[i].para)){
-                    this->sset.scope_pool[sset.findInAllScopeI(ins[i].para)].assign(ins[i].para, var::Value(false, false, "__DECI__", (float)(original.second)));
+                    this->sset.scope_pool[sset.findInAllScopeI(ins[i].para)].assign(ins[i].para, var::Value(false, false, (float)(original.second)));
                 }
                 else throw epperr::Epperr("NameError", "Unable to find identifier named: '" + ins[i].para + "'", ins[i].line, ins[i].column);
             }
@@ -287,6 +287,8 @@ void cenv::Calculation::run(){
                             constpool.push_back(temp.second.getValueOfStringArray()[len]);
                             push(cenv::calc_unit("__STRING__", constpool.size()-1));
                         }
+                    else if(temp.second.getType() == "__NULL__")
+                        push(cenv::calc_unit("__NULL__", 0));
                 }
                 else{
                     if(temp.second.getType() == "__INT__") push(cenv::calc_unit("__INT__", temp.second.getValueOfInt()));
@@ -299,6 +301,9 @@ void cenv::Calculation::run(){
                     else if(temp.second.getType() == "__STRING__") {
                         constpool.push_back(temp.second.getValueOfString());
                         push(cenv::calc_unit("__STRING__", constpool.size()-1));
+                    }
+                    else if(temp.second.getType() == "__NULL__"){
+                        push(cenv::calc_unit("__NULL__", 0));
                     }
                 }
             }
@@ -332,6 +337,9 @@ void cenv::Calculation::run(){
                     if(index.second > temp.second.len-1) throw epperr::Epperr("ArrayError", "The referenced content is outside the bounds of the array", ins[i].line, ins[i].column);
                     constpool.push_back(temp.second.getValueOfStringArray()[index.second]);
                     push(cenv::calc_unit("__STRING__", constpool.size()-1));
+                }
+                else if(temp.second.getType() == "__NULL__"){
+                    push(cenv::calc_unit("__NULL__", 0));
                 }
             }
             else throw epperr::Epperr("NameError", "Unable to find identifier named: '" + ins[i].para + "'", ins[i].line, ins[i].column);
@@ -379,9 +387,9 @@ void cenv::Calculation::run(){
             auto right = pop();
             auto left = pop();
             if(left.first != right.first) push(cenv::calc_unit("__BOOL__", 0));
-            if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__BOOL__", left.second == right.second));
-            else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__BOOL__", left.second == right.second));
-            else if(left.first == "__STRING__" && right.first == "__STRING__") {
+            if(left.first == "__DECI__" || right.first == "__DECI__" || left.first == "__NULL__" || right.first == "__NULL__") push(cenv::calc_unit("__BOOL__", left.second == right.second));
+            else if(left.first == "__INT__" || right.first == "__INT__" || left.first == "__NULL__" || right.first == "__NULL__") push(cenv::calc_unit("__BOOL__", left.second == right.second));
+            else if((left.first == "__STRING__" && right.first == "__STRING__")|| left.first == "__NULL__" || right.first == "__NULL__") {
                 push(cenv::calc_unit("__BOOL__", constpool[left.second] == constpool[right.second]));
             }
             else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '=='", ins[i].line, ins[i].column);
@@ -389,38 +397,38 @@ void cenv::Calculation::run(){
         else if(ins[i].instr == ">=") {
             auto right = pop();
             auto left = pop();
-            if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__BOOL__", left.second >= right.second));
-            else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__BOOL__", left.second >= right.second));
+            if(left.first == "__DECI__" || right.first == "__DECI__" || left.first == "__NULL__" || right.first == "__NULL__") push(cenv::calc_unit("__BOOL__", left.second >= right.second));
+            else if(left.first == "__INT__" || right.first == "__INT__" || left.first == "__NULL__" || right.first == "__NULL__") push(cenv::calc_unit("__BOOL__", left.second >= right.second));
             else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '>='", ins[i].line, ins[i].column);
         }
         else if(ins[i].instr == "<=") {
             auto right = pop();
             auto left = pop();
-            if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__BOOL__", left.second <= right.second));
-            else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__BOOL__", left.second <= right.second));
+            if(left.first == "__DECI__" || right.first == "__DECI__" || left.first == "__NULL__" || right.first == "__NULL__") push(cenv::calc_unit("__BOOL__", left.second <= right.second));
+            else if(left.first == "__INT__" || right.first == "__INT__" || left.first == "__NULL__" || right.first == "__NULL__") push(cenv::calc_unit("__BOOL__", left.second <= right.second));
             else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '<='", ins[i].line, ins[i].column);
         }
         else if(ins[i].instr == ">") {
             auto right = pop();
             auto left = pop();
-            if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__BOOL__", left.second > right.second));
-            else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__BOOL__", left.second > right.second));
+            if(left.first == "__DECI__" || right.first == "__DECI__" || left.first == "__NULL__" || right.first == "__NULL__") push(cenv::calc_unit("__BOOL__", left.second > right.second));
+            else if(left.first == "__INT__" || right.first == "__INT__" || left.first == "__NULL__" || right.first == "__NULL__") push(cenv::calc_unit("__BOOL__", left.second > right.second));
             else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '>'", ins[i].line, ins[i].column);
         }
         else if(ins[i].instr == "<") {
             auto right = pop();
             auto left = pop();
-            if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__BOOL__", left.second < right.second));
-            else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__BOOL__", left.second < right.second));
+            if(left.first == "__DECI__" || right.first == "__DECI__" || left.first == "__NULL__" || right.first == "__NULL__") push(cenv::calc_unit("__BOOL__", left.second < right.second));
+            else if(left.first == "__INT__" || right.first == "__INT__" || left.first == "__NULL__" || right.first == "__NULL__") push(cenv::calc_unit("__BOOL__", left.second < right.second));
             else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '<'", ins[i].line, ins[i].column);
         }
         else if(ins[i].instr == "!=") {
             auto right = pop();
             auto left = pop();
             if(left.first == right.first) push(cenv::calc_unit("__BOOL__", 0));
-            if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__BOOL__", left.second != right.second));
-            else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__BOOL__", left.second != right.second));
-            else if(left.first == "__STRING__" && right.first == "__STRING__") {
+            if(left.first == "__DECI__" || right.first == "__DECI__" || left.first == "__NULL__" || right.first == "__NULL__") push(cenv::calc_unit("__BOOL__", left.second != right.second));
+            else if(left.first == "__INT__" || right.first == "__INT__" || left.first == "__NULL__" || right.first == "__NULL__") push(cenv::calc_unit("__BOOL__", left.second != right.second));
+            else if((left.first == "__STRING__" && right.first == "__STRING__") || left.first == "__NULL__" || right.first == "__NULL__") {
                 push(cenv::calc_unit("__BOOL__", constpool[left.second] != constpool[right.second]));
             }
             else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '!='", ins[i].line, ins[i].column);
@@ -428,17 +436,17 @@ void cenv::Calculation::run(){
         else if(ins[i].instr == "&&") {
             auto right = pop();
             auto left = pop();
-            if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__BOOL__", left.second && right.second));
-            else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__BOOL__", left.second && right.second));
-            else if(left.first == "__BOOL__" || right.first == "__BOOL__") push(cenv::calc_unit("__BOOL__", left.second && right.second));
+            if(left.first == "__DECI__" || right.first == "__DECI__" || left.first == "__NULL__" || right.first == "__NULL__") push(cenv::calc_unit("__BOOL__", left.second && right.second));
+            else if(left.first == "__INT__" || right.first == "__INT__" || left.first == "__NULL__" || right.first == "__NULL__") push(cenv::calc_unit("__BOOL__", left.second && right.second));
+            else if(left.first == "__BOOL__" || right.first == "__BOOL__" || left.first == "__NULL__" || right.first == "__NULL__") push(cenv::calc_unit("__BOOL__", left.second && right.second));
             else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '&&'", ins[i].line, ins[i].column);
         }
         else if(ins[i].instr == "||") {
             auto right = pop();
             auto left = pop();
-            if(left.first == "__DECI__" || right.first == "__DECI__") push(cenv::calc_unit("__BOOL__", left.second || right.second));
-            else if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__BOOL__", left.second || right.second));
-            else if(left.first == "__BOOL__" || right.first == "__BOOL__") push(cenv::calc_unit("__BOOL__", left.second || right.second));
+            if(left.first == "__DECI__" || right.first == "__DECI__" || left.first == "__NULL__" || right.first == "__NULL__") push(cenv::calc_unit("__BOOL__", left.second || right.second));
+            else if(left.first == "__INT__" || right.first == "__INT__" || left.first == "__NULL__" || right.first == "__NULL__") push(cenv::calc_unit("__BOOL__", left.second || right.second));
+            else if(left.first == "__BOOL__" || right.first == "__BOOL__" || left.first == "__NULL__" || right.first == "__NULL__") push(cenv::calc_unit("__BOOL__", left.second || right.second));
             else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '||'", ins[i].line, ins[i].column);
         }
         else if(ins[i].instr == "!") {

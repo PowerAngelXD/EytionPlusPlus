@@ -1,7 +1,7 @@
 #include "calcvisitor.h"
 
 void cvisitor::visitor::visitNull(epplex::Token* token){
-    ins.push_back({"__PUSH__", cenv::calc_unit("__INT__", 0), "__NULL__", token->line, token->column});
+    ins.push_back({"__PUSH__", cenv::calc_unit("__NULL__", 0), "__NULL__", token->line, token->column});
 }
 void cvisitor::visitor::visitNumber(epplex::Token* token){
     if(token->content.find(".") != token->content.npos) {
