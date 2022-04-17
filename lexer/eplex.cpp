@@ -141,8 +141,9 @@ epplex::Token epplex::Lexer::Identifier() {
         ch = get();
     }
     put(ch);
-    std::vector keymap = {"out", "var", "for", "const", "typeof", "delete", "area", "act", "true", "false", "if", "else", "elif", "for_each", "while", "repeat"};
-    std::vector bifmap = {"input", "int", "deci", "bool", "str", "len", "print", "println"};
+    std::vector keymap = {"out", "var", "for", "const", "typeof", "delete", "area", "act", "true", "false", "if", "else", "elif", "for_each", "while", "repeat", "null"
+                        , "use", "pack", "as", "integer", "decimal", "string", "char", "boolean"};
+    std::vector bifmap = {"input", "int", "deci", "bool", "str", "len", "print", "println", "system", "random_int", "random_deci"};
     for(auto iden : keymap)
         if (str == iden) {return {str, "__KEYWORD__", "__IDENTIFIER__", line, column};}
     for(auto iden : bifmap)
