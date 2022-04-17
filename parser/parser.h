@@ -17,16 +17,21 @@
 #include "../eppack/excphg/excphg.h"
 
 namespace parser{
+    class BifParser{
+        public:
+            east::BifInstanceNode* bif;
+            var::ScopeSet _sset;
+            var::ScopeSet _user_sset; // User defined sset
+
+            BifParser(east::BifInstanceNode* bif, var::ScopeSet sset);
+            void bif_Sytem();
+        };
     class Parser{
         int _if_control = -1;
     public:
         east::StatNode stat;
         var::ScopeSet sset;
         var::ScopeSet user_sset; // User defined sset
-
-        class BifParser{
-            
-        };
 
         void parse_OutStmt(east::OutStmtNode* stmt);
         void parse_VorcStmt(east::VorcStmtNode* stmt);

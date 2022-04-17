@@ -3,8 +3,18 @@
 inline cenv::Calculation _calc(east::ValExprNode node, var::ScopeSet sset) {
     cenv::Calculation calc(sset);
     cvisitor::visitor v;
-    if(node.addexpr != nullptr)
-        v.visitAddExpr(node.addexpr);
+    if(node.addexpr != nullptr){
+        if(node.addexpr->muls[0]->prims[0]->bif->bifi != nullptr){
+            parser::BifParser bif(node.addexpr->muls[0]->prims[0]->bif->bifi, sset);
+            if(bif.bif->mark->content == "system"){
+                bif.bif_Sytem();
+            }
+            sset = bif._sset;
+            goto end;
+        }
+        else
+            v.visitAddExpr(node.addexpr);
+    }
     else if(node.boolexpr != nullptr)
         v.visitBoolExpr(node.boolexpr);
     else if(node.listexpr != nullptr)
@@ -12,6 +22,7 @@ inline cenv::Calculation _calc(east::ValExprNode node, var::ScopeSet sset) {
     calc.ins = v.ins; calc.constpool = v.constpool;
     calc.run();
     sset = calc.sset;
+    end:
     return calc;
 }
 
@@ -27,6 +38,27 @@ inline cenv::Calculation _calc(east::BoolExprNode node, var::ScopeSet sset) {
 
 
 //-------------------//
+
+parser::BifParser::BifParser(east::BifInstanceNode* bif, var::ScopeSet sset): bif(bif), _sset(sset) {}
+
+void parser::BifParser::bif_Sytem(){
+    if(bif->paras.empty() == true) throw epperr::Epperr("SyntaxError", "Too few parameters", bif->mark->line, bif->mark->column);
+    else{
+        if(bif->paras.size() > 1) throw epperr::Epperr("SyntaxError", "Too many parameters", bif->mark->line, bif->mark->column);
+        else{
+            if(bif->paras[0]->addexpr!=nullptr, bif->paras[0]->addexpr->muls[0]->prims[0]->str != nullptr){
+                cenv::Calculation calc(_sset);
+                cvisitor::visitor v;
+                v.visitString(bif->paras[0]->addexpr->muls[0]->prims[0]->str);
+                calc.ins = v.ins; calc.constpool = v.constpool;
+                calc.run();
+                _sset = calc.sset;
+                system(calc.constpool[(int)calc.result[0].second].c_str());
+            }
+            else throw epperr::Epperr("SyntaxError", "There are no overloaded functions that meet the requirements: 'system(cmd: string)'", bif->mark->line, bif->mark->column);
+        }
+    }
+}
 
 void parser::Parser::parse_OutStmt(east::OutStmtNode* stmt){
     cenv::Calculation calc = _calc(*stmt->content, this->sset);
