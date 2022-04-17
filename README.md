@@ -36,6 +36,10 @@ out a+b;
 a="helloworld!";
 out a;
 var c:string = "yes"; #You can also write that
+var i:integer = 1;
+var c:char = "h";
+var o:boolean = true;
+var d:decimal = 1.2;
 out c;
 ```
 > Constant
