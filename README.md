@@ -58,7 +58,7 @@ delete a;
 var b="string";
 delete b;
 ```
-> If--elif-else
+> If-elif-else
 ```go
 var a=input();
 if (a=="hello")
@@ -97,9 +97,11 @@ for_each(var s: str_list){
 ```
 > For
 ```go
-for(var a=0-20; a < 0-10; a=a+2;){
+var a=0-20;
+for(a=0-20; a < 0-10; a=a+2;){
     println(a);
 }
+println(a);
 ```
 > Break
 ```go
@@ -136,6 +138,9 @@ if(int(i) == 12)
 # print/println
 var a=print(123)
 out a;
+
+# system
+system("echo hhh");
 ```
 
 # Config File
