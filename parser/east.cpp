@@ -102,6 +102,7 @@ east::BifNode* east::astParser::gen_bifNode(){
         else if(east::TypeToExprNode::is(*this)) node->tyt = gen_tytExprNode();
         else if(east::InputExprNode::is(*this)) node->input = gen_inputExprNode();
         else if(east::PrintoLnExprNode::is(*this)) node->print = gen_polnExprNode();
+        else if(east::BifInstanceNode::is(*this)) node->bifi = gen_bifiExprNode();
         return node;
     }
     else throw epperr::Epperr("SyntaxErrror", "Non existent built-in function", tg[pos].line, tg[pos].column);
@@ -228,6 +229,26 @@ east::TypeToExprNode* east::astParser::gen_tytExprNode(){
         else throw epperr::Epperr("SyntaxErrror", "Expect '('!", tg[pos].line, tg[pos].column);
         if(east::ValExprNode::is(*this)) node->expr = gen_valExprNode();
         else throw epperr::Epperr("SyntaxErrror", "Unknown type of the expr!", tg[pos].line, tg[pos].column);
+        if(peek()->content == ")") token();
+        else throw epperr::Epperr("SyntaxErrror", "Expect ')'!", tg[pos].line, tg[pos].column);
+        return node;
+    }
+    else throw epperr::Epperr("SyntaxErrror", "Unknown type of the expr!", tg[pos].line, tg[pos].column);
+}
+east::BifInstanceNode* east::astParser::gen_bifiExprNode(){
+    if(east::BifInstanceNode::is(*this)){
+        east::BifInstanceNode* node = new east::BifInstanceNode;
+        node->mark = token();
+        if(peek()->content == "(") token();
+        else throw epperr::Epperr("SyntaxErrror", "Expect '('!", tg[pos].line, tg[pos].column);
+        if(east::ValExprNode::is(*this)){
+            node->paras.push_back(gen_valExprNode());
+            while(true){
+                if(peek()->content != ",") break;
+                node->dots.push_back(token());
+                node->paras.push_back(gen_valExprNode());
+            }
+        }
         if(peek()->content == ")") token();
         else throw epperr::Epperr("SyntaxErrror", "Expect ')'!", tg[pos].line, tg[pos].column);
         return node;
@@ -688,10 +709,11 @@ std::string east::BifNode::to_string(){
     else if(this->tyt != nullptr) return "bif_node: {" + this->tyt->to_string() + "}";
     else if(this->typef != nullptr) return "bif_node: {" + this->typef->to_string() + "}";
     else if(this->input != nullptr) return "bif_node: {" + this->input->to_string() + "}";
+    else if(this->bifi != nullptr) return "bif_node: {" + this->bifi->to_string() + "}";
     else throw epperr::Epperr("SyntaxError", "Unknown type of the expr!", 0, 0);
 }
 bool east::BifNode::is(east::astParser ap){
-    return LenExprNode::is(ap) || PrintoLnExprNode::is(ap) || TypeToExprNode::is(ap) || TypeOfExprNode::is(ap) || InputExprNode::is(ap);
+    return LenExprNode::is(ap) || PrintoLnExprNode::is(ap) || TypeToExprNode::is(ap) || TypeOfExprNode::is(ap) || InputExprNode::is(ap) || BifInstanceNode::is(ap);
 }
 //
 
@@ -911,6 +933,26 @@ std::string east::PrintoLnExprNode::to_string(){
 }
 bool east::PrintoLnExprNode::is(east::astParser ap){
     return ap.peek()->content == "print" || ap.peek()->content == "println";
+}
+//
+
+//bif instance node
+std::string east::BifInstanceNode::to_string(){
+    std::string ret = "bif_ins: {" + this->mark->simply_format() + ", para:[";
+    if(paras.empty()){
+        ret+= "]}";
+    }
+    else{
+        ret += paras[0]->to_string();
+        for(int i = 0; i<dots.size(); i++){
+            ret += paras[i + 1]->to_string();
+        }
+        ret += "]}";
+    }
+    return ret;
+}
+bool east::BifInstanceNode::is(astParser ap){
+    return ap.peek()->type == "__BIFIDEN__";
 }
 //
 

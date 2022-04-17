@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 #include <stdio.h>
+#include <memory>
 #include "../lexer/eplex.h"
 #include "../eppack/error/epperr.h"
 
@@ -64,7 +65,7 @@ namespace east{
         std::vector<epplex::Token*> idens;
         std::vector<epplex::Token*> dots; // .
 
-        std::vector<IndexOpNode*> indexops;
+        std::vector<IndexOpNode*> indexops; //TODO: 重做indexop
         epplex::Token* arrleft = nullptr;
         AddExprNode* arrindex = nullptr;
         epplex::Token* arrright = nullptr;
@@ -290,6 +291,7 @@ namespace east{
         TypeToExprNode* tyt=nullptr;
         PrintoLnExprNode* print=nullptr;
         InputExprNode* input=nullptr;
+        BifInstanceNode* bifi=nullptr;
         std::string tag = "__CALC__";
 
         std::string to_string();
@@ -334,7 +336,6 @@ namespace east{
     class ExprStmtNode{
     public:
         ValExprNode* expr;
-
         epplex::Token* end;
 
         std::string tag = "__CALC__";
@@ -647,6 +648,7 @@ namespace east{
         TypeOfExprNode* gen_tpofExprNode();
         InputExprNode* gen_inputExprNode();
         PrintoLnExprNode* gen_polnExprNode();
+        BifInstanceNode* gen_bifiExprNode();
         FuncCallExprNode* gen_fcallExprNode();
         SelfIaDExprNode* gen_siadExprNode();
         FuncDefineExprNode* gen_fdefExprNode();
