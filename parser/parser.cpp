@@ -4,13 +4,17 @@ inline cenv::Calculation _calc(east::ValExprNode node, var::ScopeSet sset) {
     cenv::Calculation calc(sset);
     cvisitor::visitor v;
     if(node.addexpr != nullptr){
-        if(node.addexpr->muls[0]->prims[0]->bif->bifi != nullptr){
-            parser::BifParser bif(node.addexpr->muls[0]->prims[0]->bif->bifi, sset);
-            if(bif.bif->mark->content == "system"){
-                bif.bif_Sytem();
+        if(node.addexpr->muls[0]->prims[0]->bif != nullptr){
+            if(node.addexpr->muls[0]->prims[0]->bif->bifi != nullptr){
+                parser::BifParser bif(node.addexpr->muls[0]->prims[0]->bif->bifi, sset);
+                if(bif.bif->mark->content == "system"){
+                    calc = bif.bif_Sytem();
+                }
+                sset = bif._sset;
+                goto end;
             }
-            sset = bif._sset;
-            goto end;
+            else
+                v.visitAddExpr(node.addexpr);
         }
         else
             v.visitAddExpr(node.addexpr);
@@ -41,7 +45,7 @@ inline cenv::Calculation _calc(east::BoolExprNode node, var::ScopeSet sset) {
 
 parser::BifParser::BifParser(east::BifInstanceNode* bif, var::ScopeSet sset): bif(bif), _sset(sset) {}
 
-void parser::BifParser::bif_Sytem(){
+cenv::Calculation parser::BifParser::bif_Sytem(){
     if(bif->paras.empty() == true) throw epperr::Epperr("SyntaxError", "Too few parameters", bif->mark->line, bif->mark->column);
     else{
         if(bif->paras.size() > 1) throw epperr::Epperr("SyntaxError", "Too many parameters", bif->mark->line, bif->mark->column);
@@ -54,6 +58,9 @@ void parser::BifParser::bif_Sytem(){
                 calc.run();
                 _sset = calc.sset;
                 system(calc.constpool[(int)calc.result[0].second].c_str());
+                calc.result.clear();
+                calc.result.push_back(cenv::calc_unit("__INT__", 0.0));
+                return calc;
             }
             else throw epperr::Epperr("SyntaxError", "There are no overloaded functions that meet the requirements: 'system(cmd: string)'", bif->mark->line, bif->mark->column);
         }

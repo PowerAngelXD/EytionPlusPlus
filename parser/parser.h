@@ -24,7 +24,7 @@ namespace parser{
             var::ScopeSet _user_sset; // User defined sset
 
             BifParser(east::BifInstanceNode* bif, var::ScopeSet sset);
-            void bif_Sytem();
+            cenv::Calculation bif_Sytem();
         };
     class Parser{
         int _if_control = -1;
