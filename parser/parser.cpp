@@ -109,10 +109,10 @@ void parser::Parser::parse_VorcStmt(east::VorcStmtNode* stmt){
     auto type = stmt->type;
     if(type == nullptr);
     else{
-        if(type->content == "int" && calc.result[0].first == "__INT__");
+        if(type->content == "integer" && calc.result[0].first == "__INT__");
         else if(type->content == "string" && calc.result[0].first == "__STRING__");
-        else if(type->content == "deci" && calc.result[0].first == "__DECI__");
-        else if(type->content == "bool" && calc.result[0].first == "__BOOL__");
+        else if(type->content == "decimal" && calc.result[0].first == "__DECI__");
+        else if(type->content == "boolean" && calc.result[0].first == "__BOOL__");
         else if(type->content == "char" && calc.result[0].first == "__CHAR__");
         else throw epperr::Epperr("TypeError", "The pre type at the time of declaration does not match the actual incoming type", type->line, type->column);
     }
