@@ -111,6 +111,7 @@ east::PrimExprNode* east::astParser::gen_primExprNode(){
     if(east::PrimExprNode::is(*this)){
         east::PrimExprNode* node = new east::PrimExprNode;
         if(east::FuncCallExprNode::is(*this)) node->fcall = gen_fcallExprNode();
+        else if(peek()->content == "null") node->null = token();
         else if(east::SelfIaDExprNode::is(*this)) node->siad = gen_siadExprNode();
         else if(east::BifNode::is(*this)) node->bif= gen_bifNode();
         else if(peek()->type == "__IDENTIFIER__") node->iden = gen_identifierNode();
@@ -719,7 +720,9 @@ bool east::BifNode::is(east::astParser ap){
 
 //prim node
 std::string east::PrimExprNode::to_string(){
-    if(number != nullptr)
+    if(null != nullptr)
+        return "prim_expr(NULL): {" + this->null->simply_format() + "}";
+    else if(number != nullptr)
         return "prim_expr(NUMBER): {" + this->number->simply_format() + "}";
     else if(iden != nullptr)
         return "prim_expr(IDENTIFIER): {" + this->iden->to_string() + "}";
@@ -744,7 +747,7 @@ std::string east::PrimExprNode::to_string(){
 bool east::PrimExprNode::is(east::astParser ap){
     return ap.peek()->type == "__IDENTIFIER__" || ap.peek()->type == "__NUMBER__" || ap.peek()->type == "__STRING__"||
            ap.peek()->type == "__CHAR__"|| ap.peek()->content == "(" || east::BifNode::is(ap) || 
-           ap.peek()->content == "true"||ap.peek()->content == "false"|| ap.peek()->type == "__BIFIDEN__" || east::FuncCallExprNode::is(ap) ||
+           ap.peek()->content == "true"||ap.peek()->content == "false" || ap.peek()->content == "null"|| ap.peek()->type == "__BIFIDEN__" || east::FuncCallExprNode::is(ap) ||
            east::SelfIaDExprNode::is(ap);
 }
 //

@@ -1,5 +1,8 @@
 #include "calcvisitor.h"
 
+void cvisitor::visitor::visitNull(epplex::Token* token){
+    ins.push_back({"__PUSH__", cenv::calc_unit("__INT__", 0), "__NULL__", token->line, token->column});
+}
 void cvisitor::visitor::visitNumber(epplex::Token* token){
     if(token->content.find(".") != token->content.npos) {
         ins.push_back({"__PUSH__", cenv::calc_unit("__DECI__", atof(token->content.c_str())), "__NULL__", token->line,
@@ -136,6 +139,7 @@ void cvisitor::visitor::visitMulOp(east::MulOpNode* node){
 }
 void cvisitor::visitor::visitPrimExpr(east::PrimExprNode* node){
     if(node->number != nullptr) visitNumber(node->number);
+    else if(node->null != nullptr) visitNull(node->null);
     else if(node->boolconst != nullptr) {
         if(node->boolconst->content == "true")
             ins.push_back({"__PUSH__", cenv::calc_unit("__BOOL__", true), "__NULL__", node->boolconst->line, node->boolconst->column});

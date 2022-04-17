@@ -300,6 +300,7 @@ namespace east{
 
     class PrimExprNode{
     public:
+        epplex::Token* null = nullptr;
         epplex::Token* number = nullptr;
         epplex::Token* boolconst = nullptr;
         IdentifierNode* iden = nullptr;

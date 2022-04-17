@@ -21,6 +21,7 @@ namespace cvisitor{
         std::vector<cenv::calc_ins> ins;
         std::vector<std::string> constpool;
 
+        void visitNull(epplex::Token* token);
         void visitNumber(epplex::Token* token);
         void visitString(epplex::Token* token);
         void visitAssign(epplex::Token* token);
