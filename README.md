@@ -114,7 +114,7 @@ while(index < len(a)){
     index=index+1;
 }
 ```
-> Special keywords/built-in functions
+> Special keywords/built-in functions/features
 ```go
 # typeof
 var a=typeof("hello");
@@ -141,6 +141,14 @@ out a;
 
 # system
 system("echo hhh");
+
+# null
+var a=null;
+if(a==null){
+    println(123);
+}
+a=4;
+println(a);
 ```
 
 # Config File
@@ -162,3 +170,8 @@ When you modify the configuration file and need to re apply and load it, you sho
 ```bash
 redcfg
 ```
+
+# New Feature
+1. - [x] null value
+2. - [ ] More convenient function declaration
+3. - [ ] More humanized variable declaration statement
