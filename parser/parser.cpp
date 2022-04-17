@@ -49,7 +49,7 @@ void parser::BifParser::bif_Sytem(){
             if(bif->paras[0]->addexpr!=nullptr, bif->paras[0]->addexpr->muls[0]->prims[0]->str != nullptr){
                 cenv::Calculation calc(_sset);
                 cvisitor::visitor v;
-                v.visitString(bif->paras[0]->addexpr->muls[0]->prims[0]->str);
+                v.visitAddExpr(bif->paras[0]->addexpr);
                 calc.ins = v.ins; calc.constpool = v.constpool;
                 calc.run();
                 _sset = calc.sset;
