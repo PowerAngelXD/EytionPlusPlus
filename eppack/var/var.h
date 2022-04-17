@@ -28,6 +28,7 @@ namespace var{
         std::vector<Value> val_val;
 
         bool is_array = false;
+        int nullval = 1;
         bool is_const = false;
         bool is_func = false;
         std::string type = "__NULL__"; // __DECI__ __STRING__ __INT__ __CHAR__ __BOOL__ __FUNC__
@@ -36,6 +37,7 @@ namespace var{
         int len = 1;
         Value(bool is_arr, bool is_con);
         Value(bool is_arr, bool is_con, std::string _type);
+        Value(bool is_null);
         // init value
         Value(bool is_arr, bool is_con, int val);
         Value(bool is_arr, bool is_con, float val);

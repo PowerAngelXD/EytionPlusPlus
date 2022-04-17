@@ -162,6 +162,8 @@ void parser::Parser::parse_VorcStmt(east::VorcStmtNode* stmt){
             else if(calc.result[0].first == "__INT__")
                 sset.createVariable(name, var::Value(false, stmt->mark->content == "const"?true:false, 
                 (int)calc.result[0].second));
+            else if(calc.result[0].first == "__NULL__")
+                sset.createVariable(name, var::Value(true));
             else
                 sset.createVariable(name, var::Value(false, stmt->mark->content == "const"?true:false, 
                 calc.result[0].second));
@@ -250,7 +252,7 @@ void parser::Parser::parse(){
                     east::ValExprNode _temp;
                     _temp.addexpr = stat.stmts[index]->assignstmt->iden->arrindex;
                     auto arri = _calc(_temp, sset);
-                    if(temp.second.getType() != type) throw epperr::Epperr("TypeError", "A value of a different type cannot be assigned to this variable",
+                    if(temp.second.getType() != type && temp.second.getType() != "__NULL__") throw epperr::Epperr("TypeError", "A value of a different type cannot be assigned to this variable",
                                                                            stat.stmts[index]->assignstmt->iden->idens[0]->line,
                                                                            stat.stmts[index]->assignstmt->iden->idens[0]->column);
                     else{
@@ -264,7 +266,7 @@ void parser::Parser::parse(){
                 else{
                     auto temp = sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)];
                     auto type = calc.result[0].first;
-                    if(temp.second.getType() != type) throw epperr::Epperr("TypeError", "A value of a different type cannot be assigned to this variable",
+                    if(temp.second.getType() != type && temp.second.getType() != "__NULL__") throw epperr::Epperr("TypeError", "A value of a different type cannot be assigned to this variable",
                                                                                 stat.stmts[index]->assignstmt->iden->idens[0]->line,
                                                                                 stat.stmts[index]->assignstmt->iden->idens[0]->column);
                     if(temp.second.isArray()){

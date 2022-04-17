@@ -1,6 +1,10 @@
 #include "var.h"
 
 //var
+var::Value::Value(bool is_null){
+    this->nullval = 0;
+    this->type = "__NULL__";
+}
 var::Value::Value(bool is_arr, bool is_con) : is_array(is_arr), is_const(is_con) {}
 var::Value::Value(bool is_arr, bool is_con, std::string _type) : is_array(is_arr), is_const(is_con), type(_type) {}
 var::Value::Value(bool is_arr, bool is_con, int val) : is_array(is_arr), is_const(is_con) {
@@ -80,6 +84,7 @@ std::string var::Value::getType(){
     return type;
 }
 int var::Value::getValueOfInt(){
+    if(type == "__NULL__") return 0;
     if(type == "__INT__"){
         if(!is_array) return int_val[0];
         else throw epperr::Epperr("TypeError", "Cannot call the value of a non-array variable as an array", line, column);
@@ -87,6 +92,7 @@ int var::Value::getValueOfInt(){
     else throw epperr::Epperr("TypeError", "The type of the variable is not Integer", line, column);
 }
 std::vector<int> var::Value::getValueOfIntArray(){
+    if(type == "__NULL__") return {0};
     if(type == "__INT__"){
         if(is_array) return int_val;
         else throw epperr::Epperr("TypeError", "Cannot call the value of a array variable as an non-array", line, column);
@@ -94,6 +100,7 @@ std::vector<int> var::Value::getValueOfIntArray(){
     else throw epperr::Epperr("TypeError", "The type of the variable is not Integer(array)", line, column);
 }
 float var::Value::getValueOfDecimal(){
+    if(type == "__NULL__") return 0;
     if(type == "__DECI__"){
         if(!is_array) return deci_val[0];
         else throw epperr::Epperr("TypeError", "Cannot call the value of a non-array variable as an array", line, column);
@@ -101,6 +108,7 @@ float var::Value::getValueOfDecimal(){
     else throw epperr::Epperr("TypeError", "The type of the variable is not Decimal", line, column);
 }
 std::vector<float> var::Value::getValueOfDecimalArray(){
+    if(type == "__NULL__") return {0};
     if(type == "__DECI__"){
         if(is_array) return deci_val;
         else throw epperr::Epperr("TypeError", "Cannot call the value of a array variable as an non-array", line, column);
@@ -108,6 +116,7 @@ std::vector<float> var::Value::getValueOfDecimalArray(){
     else throw epperr::Epperr("TypeError", "The type of the variable is not Decimal(array)", line, column);
 }
 std::string var::Value::getValueOfChar(){
+    if(type == "__NULL__") return "\0";
     if(type == "__CHAR__"){
         if(!is_array) return ch_val[0];
         else throw epperr::Epperr("TypeError", "Cannot call the value of a non-array variable as an array", line, column);
@@ -115,6 +124,7 @@ std::string var::Value::getValueOfChar(){
     else throw epperr::Epperr("TypeError", "The type of the variable is not Char", line, column);
 }
 std::vector<std::string> var::Value::getValueOfCharArray(){
+    if(type == "__NULL__") return {"\0"};
     if(type == "__CHAR__"){
         if(is_array) return ch_val;
         else throw epperr::Epperr("TypeError", "Cannot call the value of a array variable as an non-array", line, column);
@@ -122,6 +132,7 @@ std::vector<std::string> var::Value::getValueOfCharArray(){
     else throw epperr::Epperr("TypeError", "The type of the variable is not Char(array)", line, column);
 }
 std::string var::Value::getValueOfString(){
+    if(type == "__NULL__") return "\n";
     if(type == "__STRING__"){
         if(!is_array) return str_val[0];
         else throw epperr::Epperr("TypeError", "Cannot call the value of a non-array variable as an array", line, column);
@@ -129,6 +140,7 @@ std::string var::Value::getValueOfString(){
     else throw epperr::Epperr("TypeError", "The type of the variable is not String", line, column);
 }
 std::vector<std::string> var::Value::getValueOfStringArray(){
+    if(type == "__NULL__") return {"\n"};
     if(type == "__STRING__"){
         if(is_array) return str_val;
         else throw epperr::Epperr("TypeError", "Cannot call the value of a array variable as an non-array", line, column);
@@ -136,6 +148,7 @@ std::vector<std::string> var::Value::getValueOfStringArray(){
     else throw epperr::Epperr("TypeError", "The type of the variable is not String(array)", line, column);
 }
 bool var::Value::getValueOfBool(){
+    if(type == "__NULL__") return false;
     if(type == "__BOOL__"){
         if(!is_array) return bool_val[0];
         else throw epperr::Epperr("TypeError", "Cannot call the value of a non-array variable as an array", line, column);
@@ -143,6 +156,7 @@ bool var::Value::getValueOfBool(){
     else throw epperr::Epperr("TypeError", "The type of the variable is not Bool", line, column);
 }
 std::vector<bool> var::Value::getValueOfBoolArray(){
+    if(type == "__NULL__") return {false};
     if(type == "__BOOL__"){
         if(is_array) return bool_val;
         else throw epperr::Epperr("TypeError", "Cannot call the value of a array variable as an non-array", line, column);
