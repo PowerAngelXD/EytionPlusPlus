@@ -177,6 +177,8 @@ void cvisitor::visitor::visitListExpr(east::ListExprNode* node){
             visitAddExpr(node->arrayelts[len]->addexpr);
         else if(node->arrayelts[len]->boolexpr != nullptr)
             visitBoolExpr(node->arrayelts[len]->boolexpr);
+        else if(node->arrayelts[len]->listexpr != nullptr)
+            visitListExpr(node->arrayelts[len]->listexpr);
     }
     ins.push_back({"__PUSHA__", cenv::calc_unit("__NULL__", 0.0), std::to_string(len), node->left->line, node->left->column});
 }
