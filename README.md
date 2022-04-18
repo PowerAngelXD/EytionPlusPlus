@@ -177,7 +177,10 @@ When you modify the configuration file and need to re apply and load it, you sho
 redcfg
 ```
 
-# New Feature
+# What will happen next
 1. - [x] null value
 2. - [ ] More convenient function declaration
 3. - [ ] More humanized variable declaration statement
+4. - [ ] Modular system
+5. - [ ] Faster speed
+6. - [ ] Better support for Linux
