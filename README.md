@@ -1,7 +1,7 @@
 # Eytion++
 # (说明)作者因学业问题，本项目暂时停更至6.20日，中途会有小更新，敬请期待
 ![](eppp.png)
-[![https://img.shields.io/badge/EppVersion-v0.2.6|Dev-red](https://img.shields.io/badge/EppVersion-v0.2.6|Dev-red)]()
+[![https://img.shields.io/badge/EppVersion-v0.2.7|Dev-red](https://img.shields.io/badge/EppVersion-v0.2.7|Dev-red)]()
 # Introduce
 Eytion++ is developed by PowerAgnelXD based on the original project Eytion, \
 which can be regarded as an enhanced version of Eytion, \
