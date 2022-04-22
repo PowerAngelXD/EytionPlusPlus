@@ -1,0 +1,7 @@
+{
+    "snippet.const": {
+		"body": ["const ${1:name} = ${2:value};"],
+		"description": "Code snippet for 'const'",
+		"prefix": "con"
+	}
+}

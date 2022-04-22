@@ -1,0 +1,78 @@
+{
+    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    "name": "epp",
+    "patterns": [
+        { "include": "#keywords" },
+        { "include": "#string" },
+        { "include": "#char" },
+        { "include": "#numbers" },
+        { "include": "#boolean" },
+        { "include": "#comments" },
+        { "include": "#bif" },
+        { "include": "#externType" },
+        { "include": "#iden" }
+    ],
+    "repository": {
+        "keywords": {
+            "patterns": [{
+                "name": "keyword.control.epp",
+                "match": "\\b(if|while|var|out|elif|else|const|func|typeof|delete|act|area|repeat|break|for_each|defer|for|pack|use|as|null|integer|boolean|char|decimal)\\b"
+            }]
+        },
+        "string": {
+            "name": "string.quoted.double.epp",
+            "begin": "\"",
+            "end": "\"",
+            "patterns": [{
+                "name": "constant.character.escape.epp",
+                "match": "\\\\."
+            }]
+        },
+        "char": {
+            "name": "string.quoted.double.epp",
+            "begin": "'",
+            "end": "'",
+            "patterns": [{
+                "name": "constant.character.escape.epp",
+                "match": "\\\\."
+            }]
+        },
+        "numbers": {
+            "patterns": [{
+                "name": "constant.numeric.epp",
+                "match": "\\b(0x[0-9a-fA-F]+|[0-9]+(\\.[0-9]+)?)\\b"
+            }]
+        },
+        "boolean": {
+            "patterns": [{
+                "name": "constant.language.epp",
+                "match": "\\b(true|false)\\b"
+            }]
+        },
+        "comments": {
+            "patterns": [{
+                "name": "comment.line.number-sign.epp",
+                "match": "#.*$"
+            }]
+        },
+        "bif": {
+            "patterns": [{
+                "name": "support.function.epp",
+                "match": "\\b(int|bool|deci|str|len|input|print|println|native)\\b"
+            }]
+        },
+        "externType": {
+            "patterns": [{
+                "name": "support.class.epp",
+                "match": "\\b(string|object)\\b"
+            }]
+        },
+        "iden": {
+            "patterns": [{
+                "name": "variable.other.epp",
+                "match": "\\b[A-Za-z0-9_]+\\b"
+            }]
+        }
+    },
+    "scopeName": "source.epp"
+}

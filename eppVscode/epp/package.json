@@ -1,0 +1,42 @@
+{
+    "name": "epp",
+    "publisher": "powerangel",
+    "icon": "icon/epp.png",
+    "displayName": "Epp",
+    "description": "Eytion plus plus language extension",
+    "version": "2.7.0",
+    "engines": {
+        "vscode": "^1.63.0"
+    },
+    "categories": [
+        "Snippets",
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "epp",
+            "aliases": [
+                "epp",
+                "epp"
+            ],
+            "extensions": [
+                ".epp"
+            ],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "epp",
+            "scopeName": "source.epp",
+            "path": "./syntaxes/epp.tmLanguage.json"
+        }],
+        "contributes": {
+            "snippets": [{
+                "language": "epp",
+                "path": "snippets/snippets.json"
+            }]
+        }
+    },
+    "dependencies": {
+        "vsce": "^2.7.0"
+    }
+}
