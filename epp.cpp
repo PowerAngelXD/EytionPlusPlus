@@ -184,7 +184,7 @@ inline void epp_cli(){
                     std::cout<<std::endl;
                 }
                 east::astParser ast(tokens);
-                if(east::ValExprNode::is(ast) && !east::AssignStmtNode::is(ast) && cmd[cmd.size() - 1] != ';'){
+                if(east::ValExprNode::is(ast)&&cmd[cmd.size() - 1] != ';'){
                     east::ValExprNode* repl_node = ast.gen_valExprNode();
                     if(loader.getData().debug_echoast == true){
                         std::cout<<"DebugMode: Ast\n";
