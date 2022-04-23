@@ -18,14 +18,13 @@
 
 namespace east{
     class AddExprNode; class ValExprNode; class IdentifierNode; class PrimExprNode; class BoolExprNode; class StatNode; 
-    class astParser; class TypeOfExprNode; class BlockStmtNode; class IndexOpNode; class StmtNode;
+    class astParser; class TypeOfExprNode; class BlockStmtNode; class IndexOpNode; class StmtNode; class EquOpNode;
 
     class AssignExprNode{
     public:
         IdentifierNode* iden;
-        epplex::Token* equ;
+        EquOpNode* op;
         ValExprNode* val;
-        epplex::Token* end;
         std::string tag = "__CALC__";
 
         std::string to_string();
@@ -66,14 +65,20 @@ namespace east{
         std::vector<epplex::Token*> dots; // .
 
         std::vector<IndexOpNode*> indexops; //TODO: 重做indexop
-        epplex::Token* arrleft = nullptr;
-        AddExprNode* arrindex = nullptr;
-        epplex::Token* arrright = nullptr;
         std::string tag = "__CALC__";
 
         IdentifierNode(std::string type_ = "__PURE__");
         std::string to_string();
         std::string getIdenType();
+        static bool is(astParser ap);
+    };
+
+    class EquOpNode{
+    public:
+        epplex::Token* op;
+        std::string tag = "__CALC__";
+
+        std::string to_string();
         static bool is(astParser ap);
     };
 
@@ -336,7 +341,8 @@ namespace east{
 
     class ExprStmtNode{
     public:
-        ValExprNode* expr;
+        ValExprNode* expr = nullptr;
+        AssignExprNode* assign = nullptr;
         epplex::Token* end;
 
         std::string tag = "__CALC__";
@@ -370,21 +376,6 @@ namespace east{
         epplex::Token* equ;
         ValExprNode* value;
         epplex::Token* end;
-        std::string tag = "__OTHER__";
-
-        std::string to_string();
-        static bool is(astParser ap);
-    };
-
-    class AssignStmtNode{
-        // a = 1;
-        // a.b.c = 2;
-        // list[3] = 5;
-    public:
-        IdentifierNode* iden;
-        epplex::Token* equ;
-        ValExprNode* val;
-        epplex::Token* end = nullptr;
         std::string tag = "__OTHER__";
 
         std::string to_string();
@@ -579,7 +570,6 @@ namespace east{
     public:
         OutStmtNode* outstmt = nullptr;
         VorcStmtNode* vorcstmt = nullptr;
-        AssignStmtNode* assignstmt = nullptr;
         DeleteStmtNode* deletestmt = nullptr;
         BlockStmtNode* blockstmt = nullptr;
         IfStmtNode* ifstmt = nullptr;
@@ -633,6 +623,7 @@ namespace east{
 
         WholeExprNode* gen_wholeExprNode();
         ValExprNode* gen_valExprNode();
+        EquOpNode* gen_equOpNode();
         AddOpNode* gen_addOpNode();
         MulOpNode* gen_mulOpNode();
         IndexOpNode* gen_indexOpNode();
@@ -661,7 +652,6 @@ namespace east{
         StatNode* gen_statNode();
         OutStmtNode* gen_outStmtNode();
         VorcStmtNode* gen_vorcStmtNode();
-        AssignStmtNode* gen_assignStmtNode(bool asexpr = false);
         DeleteStmtNode* gen_delStmtNode();
         IfStmtNode* gen_ifStmtNode();
         ElseifStmtNode* gen_elifStmtNode();
