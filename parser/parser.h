@@ -17,6 +17,9 @@
 #include "../eppack/excphg/excphg.h"
 
 namespace parser{
+    cenv::Calculation getCalc(east::ValExprNode node, var::ScopeSet sset);    // Used to get the calculated value
+    cenv::Calculation getCalc(east::AssignExprNode node, var::ScopeSet sset);
+    cenv::Calculation getCalc(east::BoolExprNode node, var::ScopeSet sset);   // Used to get the calculated value(just boolean)
     class BifParser{
         public:
             east::BifInstanceNode* bif;
@@ -35,7 +38,6 @@ namespace parser{
 
         void parse_OutStmt(east::OutStmtNode* stmt);
         void parse_VorcStmt(east::VorcStmtNode* stmt);
-        void parse_AssignStmt(east::AssignStmtNode* stmt);
         void parse_ExprStmt(east::ExprStmtNode* stmt);
         void parse_DeleteStmt(east::DeleteStmtNode* stmt);
         void parse_BlockStmt(east::BlockStmtNode* stmt);

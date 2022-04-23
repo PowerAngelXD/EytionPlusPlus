@@ -1,6 +1,6 @@
 #include "parser.h"
 
-inline cenv::Calculation _calc(east::ValExprNode node, var::ScopeSet sset) {
+cenv::Calculation parser::getCalc(east::ValExprNode node, var::ScopeSet sset) {
     cenv::Calculation calc(sset);
     cvisitor::visitor v;
     if(node.addexpr != nullptr){
@@ -30,7 +30,17 @@ inline cenv::Calculation _calc(east::ValExprNode node, var::ScopeSet sset) {
     return calc;
 }
 
-inline cenv::Calculation _calc(east::BoolExprNode node, var::ScopeSet sset) {
+cenv::Calculation parser::getCalc(east::AssignExprNode node, var::ScopeSet sset){
+    cenv::Calculation calc(sset);
+    cvisitor::visitor v;
+    v.visitAssignExpr(&node);
+    calc.ins = v.ins; calc.constpool = v.constpool;
+    calc.run();
+    sset = calc.sset;
+    return calc;
+}
+
+cenv::Calculation parser::getCalc(east::BoolExprNode node, var::ScopeSet sset) {
     cenv::Calculation calc(sset);
     cvisitor::visitor v;
     v.visitBoolExpr(&node);
@@ -68,7 +78,7 @@ cenv::Calculation parser::BifParser::bif_Sytem(){
 }
 
 void parser::Parser::parse_OutStmt(east::OutStmtNode* stmt){
-    cenv::Calculation calc = _calc(*stmt->content, this->sset);
+    cenv::Calculation calc = getCalc(*stmt->content, this->sset);
     if (calc.isArray()){
         if (calc.result[0].first == "__STRING__"){
             for (int i = 0; i < calc.result.size(); i++){
@@ -98,13 +108,19 @@ void parser::Parser::parse_OutStmt(east::OutStmtNode* stmt){
 }
 
 void parser::Parser::parse_ExprStmt(east::ExprStmtNode* stmt){
-    cenv::Calculation calc = _calc(*stmt->expr, sset);
-    this->sset = calc.sset;
+    if(stmt->assign != nullptr){
+        cenv::Calculation calc = getCalc(*stmt->assign, sset);
+        this->sset = calc.sset;
+    }
+    else{
+        cenv::Calculation calc = getCalc(*stmt->expr, sset);
+        this->sset = calc.sset;
+    }
 }
 
 void parser::Parser::parse_VorcStmt(east::VorcStmtNode* stmt){
     auto name = stmt->iden->content;
-    auto calc = _calc(*stmt->value, sset);
+    auto calc = getCalc(*stmt->value, sset);
     //type checker
     auto type = stmt->type;
     if(type == nullptr);
@@ -177,8 +193,8 @@ void parser::Parser::parse_VorcStmt(east::VorcStmtNode* stmt){
 void parser::Parser::parse_ForStmt(east::ForStmtNode* stmt){
     auto name = stmt->iden->idens[0]->content;
     if(stmt->var_mark != nullptr)
-        sset.createVariable(name, var::Value(false, false, _calc(*stmt->val, sset).result[0].second));
-    auto calcBool = _calc(*stmt->cond, sset);
+        sset.createVariable(name, var::Value(false, false, getCalc(*stmt->val, sset).result[0].second));
+    auto calcBool = getCalc(*stmt->cond, sset);
     while(calcBool.result[0].second > 0){
         parser::Parser stc_p;
         sset.remove();
@@ -206,7 +222,7 @@ void parser::Parser::parse_ForStmt(east::ForStmtNode* stmt){
             stc_p.sset = sset;
             stc_p.parse();
         }
-        else if(stmt->dostc->assignstmt!=nullptr){
+        else if(stmt->dostc->exprstmt!=nullptr && stmt->dostc->exprstmt->assign != nullptr){
             stc_p.stat = stat;
             stc_p.sset = sset;
             stc_p.parse();
@@ -215,7 +231,7 @@ void parser::Parser::parse_ForStmt(east::ForStmtNode* stmt){
         //
 
         sset = stc_p.sset;
-        calcBool = _calc(*stmt->cond, sset);
+        calcBool = getCalc(*stmt->cond, sset);
         if(calcBool.result[0].second == 0) break;
     }
     //sset.deleteVariable(name); // 删除for中的变量
@@ -237,68 +253,6 @@ void parser::Parser::parse(){
         else if(stat.stmts[index]->vorcstmt != nullptr){
             parse_VorcStmt(stat.stmts[index]->vorcstmt);
         }
-        else if(stat.stmts[index]->assignstmt != nullptr){
-            auto name = stat.stmts[index]->assignstmt->iden->idens[0]->content;
-            auto expr = stat.stmts[index]->assignstmt->val;
-            if(sset.findInAllScope(name) == false)
-                throw epperr::Epperr("NameError", "Cannot find identifier named '" + name + "'", stat.stmts[index]->assignstmt->iden->idens[0]->line, stat.stmts[index]->assignstmt->iden->idens[0]->column);
-            cenv::Calculation calc = _calc(*expr, sset);
-            if(sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.isConst())
-                throw epperr::Epperr("AssignError", "Cannot assign a value to a constant", stat.stmts[index]->assignstmt->iden->idens[0]->line, stat.stmts[index]->assignstmt->iden->idens[0]->column);
-            if(sset.findInAllScope(name)){
-                if(stat.stmts[index]->assignstmt->iden->getIdenType() == "__ARRE__"){
-                    auto temp = sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)];
-                    auto type = calc.result[0].first;
-                    east::ValExprNode _temp;
-                    _temp.addexpr = stat.stmts[index]->assignstmt->iden->arrindex;
-                    auto arri = _calc(_temp, sset);
-                    if(temp.second.getType() != type && temp.second.getType() != "__NULL__") throw epperr::Epperr("TypeError", "A value of a different type cannot be assigned to this variable",
-                                                                           stat.stmts[index]->assignstmt->iden->idens[0]->line,
-                                                                           stat.stmts[index]->assignstmt->iden->idens[0]->column);
-                    else{
-                        if(type == "__INT__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal((int)calc.result[0].second, (int)arri.result[0].second);
-                        else if(type == "__DECI__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal(calc.result[0].second, (int)arri.result[0].second);
-                        else if(type == "__STRING__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal(calc.constpool[(int)calc.result[0].second], (int)arri.result[0].second, false);
-                        else if(type == "__CHAR__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal(calc.constpool[(int)calc.result[0].second], (int)arri.result[0].second, true);
-                        else if(type == "__BOOL__") sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal((bool)calc.result[0].second, (int)arri.result[0].second);
-                    }
-                }
-                else{
-                    auto temp = sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)];
-                    auto type = calc.result[0].first;
-                    if(temp.second.getType() != type && temp.second.getType() != "__NULL__") throw epperr::Epperr("TypeError", "A value of a different type cannot be assigned to this variable",
-                                                                                stat.stmts[index]->assignstmt->iden->idens[0]->line,
-                                                                                stat.stmts[index]->assignstmt->iden->idens[0]->column);
-                    if(temp.second.isArray()){
-                        if(type == "__INT__")
-                            for(int i = 0; i<temp.second.len; i++)
-                                sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal((int)calc.result[i].second, i);
-                        else if(type == "__DECI__")
-                            for(int i = 0; i<temp.second.len; i++)
-                                sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal((float)calc.result[i].second, i);
-                        else if(type == "__BOOL__")
-                            for(int i = 0; i<temp.second.len; i++)
-                                sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal((bool)calc.result[i].second, i);
-                        else if(type == "__STRING__")
-                            for(int i = 0; i<temp.second.len; i++)
-                                sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal(calc.constpool[(int)calc.result[i].second], i, false);
-                        else if(type == "__CHAR__")
-                            for(int i = 0; i<temp.second.len; i++)
-                                sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.arr_setVal(calc.constpool[(int)calc.result[i].second], i, true);
-                    }
-                    else{
-                        if(type == "__INT__") sset.assignValue(name, var::Value(false, false,((int)calc.result[0].second)));
-                        else if(type == "__DECI__") sset.assignValue(name, var::Value(false, false, (calc.result[0].second)));
-                        else if(type == "__STRING__") sset.assignValue(name, var::Value(false, false, calc.constpool[(int)calc.result[0].second], false));
-                        else if(type == "__CHAR__") sset.assignValue(name, var::Value(false, false, calc.constpool[(int)calc.result[0].second], true));
-                        else if(type == "__BOOL__") sset.assignValue(name, var::Value(false, false, ((bool)calc.result[0].second)));
-                    }
-                }
-            }
-            else throw epperr::Epperr("NameError", "Unable to find identifier named: '" + name + "'",
-                                      stat.stmts[index]->assignstmt->iden->idens[0]->line,
-                                      stat.stmts[index]->assignstmt->iden->idens[0]->column);
-        }
         else if(stat.stmts[index]->deletestmt != nullptr){
             parse_DeleteStmt(stat.stmts[index]->deletestmt);
         }
@@ -313,7 +267,7 @@ void parser::Parser::parse(){
             this->sset.remove();
         }
         else if(stat.stmts[index]->ifstmt != nullptr){
-            cenv::Calculation calc = _calc(*stat.stmts[index]->ifstmt->cond, sset);
+            cenv::Calculation calc = getCalc(*stat.stmts[index]->ifstmt->cond, sset);
             if(calc.result[0].first != "__STRING__" && calc.result[0].second > 0){
                 parser::Parser stc_p;
                 if(stat.stmts[index]->ifstmt->stc != nullptr){
@@ -341,7 +295,7 @@ void parser::Parser::parse(){
             }
         }
         else if(stat.stmts[index]->whilestmt != nullptr){
-            cenv::Calculation calc = _calc(*stat.stmts[index]->whilestmt->cond, sset);
+            cenv::Calculation calc = getCalc(*stat.stmts[index]->whilestmt->cond, sset);
             try{
                 while(calc.result[0].first != "__STRING__" && calc.result[0].second > 0){
                     parser::Parser stc_p;
@@ -363,7 +317,7 @@ void parser::Parser::parse(){
                         this->sset.remove();
                     }
                     sset = stc_p.sset;
-                    calc = _calc(*stat.stmts[index]->whilestmt->cond, sset);
+                    calc = getCalc(*stat.stmts[index]->whilestmt->cond, sset);
                     if(calc.result[0].second == 0) break;
                 }
             }
@@ -373,7 +327,7 @@ void parser::Parser::parse(){
             catch(...){}
         }
         else if(stat.stmts[index]->reptstmt != nullptr){
-            cenv::Calculation calc = _calc(*stat.stmts[index]->reptstmt->cond, sset);
+            cenv::Calculation calc = getCalc(*stat.stmts[index]->reptstmt->cond, sset);
             if(calc.result[0].first != "__INT__" || calc.isArray())
                 throw epperr::Epperr("TypeError", "The condition of the repeat statement must be an integer",
                                      stat.stmts[index]->reptstmt->mark->line,
@@ -411,7 +365,7 @@ void parser::Parser::parse(){
             throw epperr::Epperr("SyntaxError", "You cannot use the 'break' statement outside the loop body", stat.stmts[index]->brkstmt->mark->line, stat.stmts[index]->brkstmt->mark->column);
         }
         else if(stat.stmts[index]->elifstmt != nullptr){
-            cenv::Calculation calc = _calc(*stat.stmts[index]->elifstmt->cond, sset);
+            cenv::Calculation calc = getCalc(*stat.stmts[index]->elifstmt->cond, sset);
             if(_if_control == -1)
                 throw epperr::Epperr("SyntaxError", "Cannot use else statement without else-if statement",
                                      stat.stmts[index]->elsestmt->mark->line,
@@ -472,7 +426,7 @@ void parser::Parser::parse(){
         else if(stat.stmts[index]->foreachstmt != nullptr){
             std::vector<cenv::calc_unit> list;
             auto name = stat.stmts[index]->foreachstmt->iden->content;
-            cenv::Calculation calc = _calc(*stat.stmts[index]->foreachstmt->ariden, sset);
+            cenv::Calculation calc = getCalc(*stat.stmts[index]->foreachstmt->ariden, sset);
             if(calc.isArray());
             else if(!calc.isArray()) throw epperr::Epperr("TypeError", "Cannot traverse an object that is not an array", 
                 stat.stmts[index]->foreachstmt->ariden->addexpr->muls[0]->prims[0]->iden->idens[0]->line,
