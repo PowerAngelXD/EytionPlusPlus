@@ -43,31 +43,39 @@ var::Value::Value(bool is_arr, bool is_con, var::Value val) : is_array(is_arr), 
 }
 
 var::Value::Value(bool is_arr, bool is_con, std::vector<int> val) : is_array(is_arr), is_const(is_con), int_val(val) {
+    len = val.size();
     type = "__INT__";
 }
 var::Value::Value(bool is_arr, bool is_con, std::vector<float> val) : is_array(is_arr), is_const(is_con), deci_val(val) {
+    len = val.size();
     type = "__DECI__";
 }
 var::Value::Value(bool is_arr, bool is_con, std::vector<std::string> s, bool ischar) : is_array(is_arr), is_const(is_con) {
     if(ischar){
+        len = ch_val.size();
         type = "__CHAR__";
         ch_val = s;
     }
     else{
+        len = str_val.size();
         type = "__STRING__";
         str_val = s;
     }
 }
 var::Value::Value(bool is_arr, bool is_con, std::vector<bool> val) : is_array(is_arr), is_const(is_con), bool_val(val) {
+    len = val.size();
     type = "__BOOL__";
 }
 var::Value::Value(bool is_arr, bool is_con, std::vector<efunc::Efunction> val) : is_array(is_arr), is_const(is_con), func_val(val) {
+    len = val.size();
     type = "__FUNC__";
 }
 var::Value::Value(bool is_arr, bool is_con, std::vector<UserScope> val) : is_array(is_arr), is_const(is_con), us_val(val) {
+    len = val.size();
     type = "__SCOP__";
 }
 var::Value::Value(bool is_arr, bool is_con, std::vector<Value> val) : is_array(is_arr), is_const(is_con), val_val(val) {
+    len = val.size();
     type = "__VAL__";
 }
 
