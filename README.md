@@ -1,4 +1,4 @@
-# Eytion++
+# Eytion++ ***警告: 当前版本为极不稳定版本，会有很多bug请不要直接使用此版本***
 # (说明)作者因学业问题，本项目暂时停更至6.20日，中途会有小更新，敬请期待
 ![](eppp.png)
 [![https://img.shields.io/badge/EppVersion-v0.2.7|Dev-red](https://img.shields.io/badge/EppVersion-v0.2.7|Dev-red)]()
