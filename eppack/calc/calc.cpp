@@ -1,4 +1,3 @@
-#include <sstream>
 #include "calc.h"
 
 cenv::Calculation::Calculation(var::ScopeSet sset_) : sset(sset_), is_array(false) {}
@@ -14,15 +13,33 @@ cenv::calc_unit cenv::Calculation::pop(){
     auto ret = env[-- env_top];
     return ret;
 }
+cenv::calc_unit cenv::Calculation::get(){
+    auto ret = env[-- env_top];
+    env_top++;
+    return ret;
+}
 
 bool cenv::Calculation::isArray(){
     return is_array;
 }
 
 void cenv::Calculation::run(){
+    bool pcidx = false; //Process index type
+    bool isassigned = false;
     for(int i = 0; i < ins.size(); i++){
         if(ins[i].instr == "__PUSH__") {
             push(ins[i].unit);
+        }
+        else if(ins[i].instr == "__PUSHI__") {
+            symbolpool.push_back(ins[i].para);
+            push(cenv::calc_unit("__IDEN__", symbolpool.size()-1));
+        }
+        else if(ins[i].instr == "__GEIDX__") {
+            auto index = pop();
+            if(index.first != "__INT__")
+                throw epperr::Epperr("TypeError", "The index of the list must be of type int", ins[i].line, ins[i].column);
+            push(cenv::calc_unit("__INDEX__", index.second));
+            pcidx = true;
         }
         else if(ins[i].instr == "__PUSHA__") {
             is_array = true;
@@ -313,8 +330,6 @@ void cenv::Calculation::run(){
             //is_array = true;
             if(sset.findInAllScope(ins[i].para)){
                 auto index = pop();
-                if(index.first != "__INT__")
-                    throw epperr::Epperr("TypeError", "The index of the list must be of type int", ins[i].line, ins[i].column);
                 auto temp = sset.scope_pool[sset.findInAllScopeI(ins[i].para)].vars[sset.scope_pool[sset.findInAllScopeI(ins[i].para)].findI(ins[i].para)];
                 if(temp.second.getType() == "__INT__") {
                     if(index.second > temp.second.len-1) throw epperr::Epperr("ArrayError", "The referenced content is outside the bounds of the array", ins[i].line, ins[i].column);
@@ -382,7 +397,6 @@ void cenv::Calculation::run(){
             if(left.first == "__INT__" || right.first == "__INT__") push(cenv::calc_unit("__INT__", (int)left.second % (int)right.second));
             else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '%'", ins[i].line, ins[i].column);
         }
-
         else if(ins[i].instr == "==") {
             auto right = pop();
             auto left = pop();
@@ -454,8 +468,117 @@ void cenv::Calculation::run(){
             if(val.first == "__BOOL__") push(cenv::calc_unit("__DECI__", !(bool)val.second));
             else throw epperr::Epperr("TypeError", "Type uses unsupported symbol '!'", ins[i].line, ins[i].column);
         }
+        else if(ins[i].instr == "=") {
+            isassigned = true;
+            auto value = pop();
+            auto name = ins[i].para; // get the name of the identifier
+            if(sset.findInAllScope(name)==false) throw epperr::Epperr("NameError", "Cannot found an identifier named '" + name + "'", ins[i].line, ins[i].column);
+            auto instance = sset.getTargetVar(name);
+            if(pcidx==true){
+                // is a arrelt
+                auto index = pop().second;
+                printf("e");
+            }
+            else{
+                // whole identifier
+                if(instance.second.isArray()==true){
+                    if(instance.second.getType()=="__INT__"){
+                        if(value.first!="__INT__") throw epperr::Epperr("TypeError", "The type of assignment required is 'Integer'", ins[i].line, ins[i].column);
+                        std::vector<int> newl;
+                        newl.push_back(value.second);
+                        for(int i = 1; i < instance.second.len; i++)
+                            newl.push_back(pop().second);
+
+                        std::vector<int>::reverse_iterator riter;
+                        std::vector<int> newll;
+                        for (riter = newl.rbegin();riter != newl.rend(); riter++) {
+                            newll.push_back(*riter);
+                        }
+                        sset.assignValue(name, var::Value(true, false, newll));
+                    }
+                    else if(instance.second.getType()=="__DECI__"){
+                        if(value.first!="__DECI__") throw epperr::Epperr("TypeError", "The type of assignment required is 'Decimal'", ins[i].line, ins[i].column);
+                        std::vector<float> newl;
+                        newl.push_back(value.second);
+                        for(int i = 1; i < instance.second.len; i++)
+                            newl.push_back(pop().second);
+
+                        std::vector<float>::reverse_iterator riter;
+                        std::vector<float> newll;
+                        for (riter = newl.rbegin();riter != newl.rend(); riter++) {
+                            newll.push_back(*riter);
+                        }
+                        sset.assignValue(name, var::Value(true, false, newll));
+                    }
+                    else if(instance.second.getType()=="__BOOL__"){
+                        if(value.first!="__BOOL__") throw epperr::Epperr("TypeError", "The type of assignment required is 'Boolean'", ins[i].line, ins[i].column);
+                        std::vector<bool> newl;
+                        newl.push_back(value.second);
+                        for(int i = 1; i < instance.second.len; i++)
+                            newl.push_back(pop().second);
+
+                        std::vector<bool>::reverse_iterator riter;
+                        std::vector<bool> newll;
+                        for (riter = newl.rbegin();riter != newl.rend(); riter++) {
+                            newll.push_back(*riter);
+                        }
+                        sset.assignValue(name, var::Value(true, false, newll));
+                    }
+                    else if(instance.second.getType()=="__STRING__"){
+                        if(value.first!="__STRING__") throw epperr::Epperr("TypeError", "The type of assignment required is 'String'", ins[i].line, ins[i].column);
+                        std::vector<std::string> newl;
+                        newl.push_back(constpool[value.second]);
+                        for(int i = 1; i < instance.second.len; i++)
+                            newl.push_back(constpool[pop().second]);
+
+                        std::vector<std::string>::reverse_iterator riter;
+                        std::vector<std::string> newll;
+                        for (riter = newl.rbegin();riter != newl.rend(); riter++) {
+                            newll.push_back(*riter);
+                        }
+                        sset.assignValue(name, var::Value(true, false, newll, false));
+                    }
+                    else if(instance.second.getType()=="__CHAR__"){
+                        if(value.first!="__CHAR__") throw epperr::Epperr("TypeError", "The type of assignment required is 'Char'", ins[i].line, ins[i].column);
+                        std::vector<std::string> newl;
+                        newl.push_back(constpool[value.second]);
+                        for(int i = 1; i < instance.second.len; i++)
+                            newl.push_back(constpool[pop().second]);
+
+                        std::vector<std::string>::reverse_iterator riter;
+                        std::vector<std::string> newll;
+                        for (riter = newl.rbegin();riter != newl.rend(); riter++) {
+                            newll.push_back(*riter);
+                        }
+                        sset.assignValue(name, var::Value(true, false, newll, true));
+                    }
+                }
+                else{
+                    if(instance.second.getType()=="__INT__"){
+                        if(value.first!="__INT__") throw epperr::Epperr("TypeError", "The type of assignment required is 'Integer'", ins[i].line, ins[i].column);
+                        sset.assignValue(name, var::Value(false, false, (int)value.second));
+                    }
+                    else if(instance.second.getType()=="__DECI__"){
+                        if(value.first!="__DECI__") throw epperr::Epperr("TypeError", "The type of assignment required is 'Decimal'", ins[i].line, ins[i].column);
+                        sset.assignValue(name, var::Value(false, false, (float)value.second));
+                    }
+                    else if(instance.second.getType()=="__BOOL__"){
+                        if(value.first!="__BOOL__") throw epperr::Epperr("TypeError", "The type of assignment required is 'Boolean'", ins[i].line, ins[i].column);
+                        sset.assignValue(name, var::Value(false, false, (bool)value.second));
+                    }
+                    else if(instance.second.getType()=="__STRING__"){
+                        if(value.first!="__STRING__") throw epperr::Epperr("TypeError", "The type of assignment required is 'String'", ins[i].line, ins[i].column);
+                        sset.assignValue(name, var::Value(false, false, constpool[(int)value.second]));
+                    }
+                    else if(instance.second.getType()=="__CHAR__"){
+                        if(value.first!="__CHAR__") throw epperr::Epperr("TypeError", "The type of assignment required is 'Char'", ins[i].line, ins[i].column);
+                        sset.assignValue(name, var::Value(false, false, constpool[(int)value.second]));
+                    }
+                }
+            }
+        }
     }
-    if(is_array){
+    if(is_array && isassigned == false){
         std::string firstType;
         for(int i = 0; i < env.size(); i++){
             if(i==0) firstType = env[i].first;
@@ -463,5 +586,6 @@ void cenv::Calculation::run(){
             result.push_back(env[i]);
         }
     }
-    else result.push_back(pop());
+    else if(is_array==false && isassigned == false) result.push_back(pop());
+    else if(isassigned == true) result.push_back(cenv::calc_unit("__NULL__", 0));
 }

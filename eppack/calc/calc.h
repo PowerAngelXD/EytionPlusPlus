@@ -11,6 +11,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <sstream>
 #include "../error/epperr.h"
 #include "../var/var.h"
 
@@ -41,10 +42,12 @@ namespace cenv{
         std::vector<calc_ins> ins;
         std::vector<calc_unit> env;
         std::vector<std::string> constpool;
+        std::vector<std::string> symbolpool; // symbol pool
         std::vector<calc_unit> result;
 
         void push(calc_unit cu);
         calc_unit pop();
+        calc_unit get();
         void run();
         bool isArray();
     };

@@ -50,7 +50,7 @@ void cvisitor::visitor::visitChar(epplex::Token* token){
     ins.push_back({"__PUSH__", cenv::calc_unit("__CHAR__", constpool.size()-1), "__NULL__", token->line, token->column});
 }
 void cvisitor::visitor::visitSiad(east::SelfIaDExprNode* node){
-    visitIden(node->iden);
+    visitIden(node->iden, false);
     if(node->op->content == "++"){
         if(node->isFront)
             ins.push_back({"__SIADADD_FRONT__", cenv::calc_unit("__NULL__", 0.0), node->iden->idens[0]->content, node->iden->idens[0]->line, node->iden->idens[0]->column});
@@ -123,19 +123,51 @@ void cvisitor::visitor::visitLen(east::LenExprNode* node){
     else if(node->expr->listexpr != nullptr) visitListExpr(node->expr->listexpr);
     ins.push_back({"__LEN__", cenv::calc_unit("__NULL__", 0.0), "__NULL__", node->mark->line, node->mark->column});
 }
-void cvisitor::visitor::visitIden(east::IdentifierNode* node){
+void cvisitor::visitor::visitIden(east::IdentifierNode* node, bool justiden){
     if(node->getIdenType() == "__ARRE__"){
-        visitAddExpr(node->arrindex);
-        ins.push_back({"__ARRE_POP__", cenv::calc_unit("__NULL__", 0.0), node->idens[0]->content, node->idens[0]->line, node->idens[0]->column});
+        visitIndexOp(node->indexops[0]);
+        for(int i = 1; i<node->indexops.size(); i++){
+            visitIndexOp(node->indexops[i]);
+        }
+        if(justiden == true)
+            ins.push_back({"__PUSHI__", cenv::calc_unit("__NULL__", 0.0), node->idens[0]->content, node->idens[0]->line, node->idens[0]->column});
+        else
+            ins.push_back({"__ARRE_POP__", cenv::calc_unit("__NULL__", 0.0), node->idens[0]->content, node->idens[0]->line, node->idens[0]->column});
     }
     else
-        ins.push_back({"__POP__", cenv::calc_unit("__NULL__", 0.0), node->idens[0]->content, node->idens[0]->line, node->idens[0]->column});// TODO: After updating the scope, it needs to be adapted to the scope
+        if(justiden == true)
+            ins.push_back({"__PUSHI__", cenv::calc_unit("__NULL__", 0.0), node->idens[0]->content, node->idens[0]->line, node->idens[0]->column});
+        else
+            ins.push_back({"__POP__", cenv::calc_unit("__NULL__", 0.0), node->idens[0]->content, node->idens[0]->line, node->idens[0]->column});
 }
 void cvisitor::visitor::visitAddOp(east::AddOpNode* node){
     ins.push_back({node->op->content, cenv::calc_unit(node->op->content, 0.0), "__NULL__", node->op->line, node->op->column});
 }
+void cvisitor::visitor::visitEquOp(east::EquOpNode* node){
+    ins.push_back({node->op->content, cenv::calc_unit(node->op->content, 0.0), "__NULL__", node->op->line, node->op->column});
+}
+void cvisitor::visitor::visitIndexOp(east::IndexOpNode* node){
+    if(node->spliter == nullptr){
+        visitAddExpr(node->begin);
+        ins.push_back({"__GEIDX__", cenv::calc_unit("__NULL__", 0.0), "__NULL__", node->left->line, node->left->column});
+    }
+    else{
+        visitAddExpr(node->end);
+        visitAddExpr(node->begin);
+        ins.push_back({"__GEIDX__", cenv::calc_unit("__NULL__", 0.0), "__SEP__", node->left->line, node->left->column});
+    }
+}
 void cvisitor::visitor::visitMulOp(east::MulOpNode* node){
     ins.push_back({node->op->content, cenv::calc_unit(node->op->content, 0.0), "__NULL__", node->op->line, node->op->column});
+}
+void cvisitor::visitor::visitAssignExpr(east::AssignExprNode* node){
+    visitIden(node->iden, true);
+
+    if(node->val->addexpr!=nullptr) visitAddExpr(node->val->addexpr);
+    else if(node->val->boolexpr!=nullptr) visitBoolExpr(node->val->boolexpr);
+    else if(node->val->listexpr!=nullptr) visitListExpr(node->val->listexpr);
+
+    ins.push_back({"=", cenv::calc_unit("=", 0.0), node->iden->idens[0]->content, node->iden->idens[0]->line, node->iden->idens[0]->column});
 }
 void cvisitor::visitor::visitPrimExpr(east::PrimExprNode* node){
     if(node->number != nullptr) visitNumber(node->number);
@@ -149,7 +181,7 @@ void cvisitor::visitor::visitPrimExpr(east::PrimExprNode* node){
     }
     else if(node->str != nullptr) visitString(node->str);
     else if(node->ch != nullptr) visitChar(node->ch);
-    else if(node->iden != nullptr) visitIden(node->iden);
+    else if(node->iden != nullptr) visitIden(node->iden, false);
     else if(node->siad != nullptr) visitSiad(node->siad);
     else if(node->addexpr != nullptr) visitAddExpr(node->addexpr);
     else if(node->bif != nullptr){
