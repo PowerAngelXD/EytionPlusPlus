@@ -1,4 +1,4 @@
-# Eytion++ ***警告: 当前版本为极不稳定版本，会有很多bug请不要直接使用此版本***
+# Eytion++
 # (说明)作者因学业问题，本项目暂时停更至6.20日，中途会有小更新，敬请期待
 ![](eppp.png)
 [![https://img.shields.io/badge/EppVersion-v0.2.7|Dev-red](https://img.shields.io/badge/EppVersion-v0.2.7|Dev-red)]()
@@ -34,28 +34,28 @@ out "hello world!";
 ```go
 var a="hello ";
 var b="world";
-out a+b;
+println(a+b);
 a="helloworld!";
-out a;
+println(a);
 var c:string = "yes"; #You can also write that
 var i:integer = 1;
 var c:char = "h";
 var o:boolean = true;
 var d:decimal = 1.2;
-out c;
+println(c);
 ```
 > Constant
 ```go
 const c="constant";
-out c;
+println(c);
 c="hello" # will error
 ```
 > List
 ```go
 var a=[1,2,3,4];
-out a[0];
+println(a[0]);
 a[1] = 45;
-out a[1];
+println(a[1]);
 ```
 > Delete
 ```go
@@ -68,12 +68,12 @@ delete b;
 ```go
 var a=input();
 if (a=="hello")
-    out "hello! my friend!";
+    println("hello! my friend!");
 elif (a=="good bye"){
-    out "good bye!!!";
+    println("good bye!!!");
 }
 else{
-    out "well done!";
+    println("well done!");
 }
 ```
 > Repeat
@@ -81,7 +81,7 @@ else{
 var a=["a","cb","fgh","err"];
 var index = 0;
 repeat(len(a)){
-    out a[index];
+    println(a[index]);
     index=index+1;
 }
 ```
@@ -90,7 +90,7 @@ repeat(len(a)){
 var a=[1,6,2,5];
 var index = 0;
 while(index < len(a)){
-    out str(a[index]) + "\n";
+    println(str(a[index]) + "\n");
     index = ++index;
 }
 ```
@@ -98,7 +98,7 @@ while(index < len(a)){
 ```go
 var str_list = ["hello!", "Eytion", "plusplus"];
 for_each(var s: str_list){
-    out "content: " + s + "\n";
+    println("content: " + s + "\n");
 }
 ```
 > For
@@ -116,7 +116,7 @@ var index = 0;
 var in = input();
 while(index < len(a)){
     if(index == 2 && in == "yes") break;
-    out str(a[index]) + "\n";
+    println(str(a[index]) + "\n");
     index=index+1;
 }
 ```
