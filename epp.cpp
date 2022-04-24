@@ -140,12 +140,9 @@ inline void epp_cli(){
                 if(file.fail()) throw "The specified file could not be found";
                 else{
                     epplex::Lexer lexer(file);
-                    //std::cout<<ss.str()<<std::endl;
                     auto tokens = lexer.getTokenGroup();
-                    //for(auto token:tokens){std::cout<<token.format()<<std::endl;}
                     east::astParser ast(tokens);
                     east::StatNode* node = ast.gen_statNode();
-                    //std::cout<<node->to_string()<<std::endl;
                     p.stat = *node;
                     p.parse();
                     std::cout<<std::endl;
