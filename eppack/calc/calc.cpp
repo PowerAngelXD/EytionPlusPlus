@@ -503,7 +503,7 @@ void cenv::Calculation::run(){
                         if(value.first!="__INT__") throw epperr::Epperr("TypeError", "The type of assignment required is 'Integer'", ins[i].line, ins[i].column);
                         std::vector<int> newl;
                         newl.push_back(value.second);
-                        for(int i = 1; i < instance.second.len; i++)
+                        for(int i = 1; i < this->len-1; i++)
                             newl.push_back(pop().second);
 
                         std::vector<int>::reverse_iterator riter;
@@ -517,7 +517,7 @@ void cenv::Calculation::run(){
                         if(value.first!="__DECI__") throw epperr::Epperr("TypeError", "The type of assignment required is 'Decimal'", ins[i].line, ins[i].column);
                         std::vector<float> newl;
                         newl.push_back(value.second);
-                        for(int i = 1; i < instance.second.len; i++)
+                        for(int i = 1; i < this->len-1; i++)
                             newl.push_back(pop().second);
 
                         std::vector<float>::reverse_iterator riter;
@@ -531,7 +531,7 @@ void cenv::Calculation::run(){
                         if(value.first!="__BOOL__") throw epperr::Epperr("TypeError", "The type of assignment required is 'Boolean'", ins[i].line, ins[i].column);
                         std::vector<bool> newl;
                         newl.push_back(value.second);
-                        for(int i = 1; i < instance.second.len; i++)
+                        for(int i = 1; i < this->len-1; i++)
                             newl.push_back(pop().second);
 
                         std::vector<bool>::reverse_iterator riter;
@@ -545,7 +545,7 @@ void cenv::Calculation::run(){
                         if(value.first!="__STRING__") throw epperr::Epperr("TypeError", "The type of assignment required is 'String'", ins[i].line, ins[i].column);
                         std::vector<std::string> newl;
                         newl.push_back(constpool[value.second]);
-                        for(int i = 1; i < instance.second.len; i++)
+                        for(int i = 1; i < this->len-1; i++)
                             newl.push_back(constpool[pop().second]);
 
                         std::vector<std::string>::reverse_iterator riter;
@@ -559,7 +559,7 @@ void cenv::Calculation::run(){
                         if(value.first!="__CHAR__") throw epperr::Epperr("TypeError", "The type of assignment required is 'Char'", ins[i].line, ins[i].column);
                         std::vector<std::string> newl;
                         newl.push_back(constpool[value.second]);
-                        for(int i = 1; i < instance.second.len; i++)
+                        for(int i = 1; i < this->len-1; i++)
                             newl.push_back(constpool[pop().second]);
 
                         std::vector<std::string>::reverse_iterator riter;
