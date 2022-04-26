@@ -368,9 +368,25 @@ void var::Scope::deleteVar(std::string name){
     this->identifier_table.erase(this->identifier_table.begin() + this->findI(name));
     this->vars.erase(this->vars.begin() + this->findI(name));
 }
-void var::Scope::assign(std::string name, var::Value value){
-    vars.erase(vars.begin() + findI(name));
-    vars.push_back(std::pair<std::string ,var::Value>(name, value));
+void var::Scope::assign(std::string name, var::Value value, int pos){
+    var::Value &instance = vars[this->findI(name)].second;
+    std::string type = vars[this->findI(name)].second.getType();
+    if(value.isArray() == true){
+        vars.erase(vars.begin() + findI(name));
+        vars.push_back(std::pair<std::string ,var::Value>(name, value));
+    }
+    else{
+        if(type == "__INT__")
+            (instance.isArray()==true)?instance.arr_setVal(value.getValueOfInt(), pos):instance.set_val(value.getValueOfInt());
+        else if(type == "__DECI__")
+            (instance.isArray()==true)?instance.arr_setVal(value.getValueOfDecimal(), pos):instance.set_val(value.getValueOfDecimal());
+        else if(type == "__BOOL__")
+            (instance.isArray()==true)?instance.arr_setVal(value.getValueOfBool(), pos):instance.set_val(value.getValueOfBool());
+        else if(type == "__CHAR__")
+            (instance.isArray()==true)?instance.arr_setVal(value.getValueOfChar(), pos, true):instance.set_val(value.getValueOfChar(), true);
+        else if(type == "__STRING__")
+            (instance.isArray()==true)?instance.arr_setVal(value.getValueOfString(), pos, false):instance.set_val(value.getValueOfString(), false);
+    }
 }
 
 var::UserScope::UserScope(std::string name_, east::StatNode stat_): var::Scope(name_), stat(stat_){}
@@ -437,8 +453,8 @@ int var::ScopeSet::findInUScopeI(std::string name){
 var::Scope::varUnit var::ScopeSet::getTargetVar(std::string name){
     return this->scope_pool[this->findInAllScopeI(name)].vars[this->scope_pool[this->findInAllScopeI(name)].findI(name)];
 }
-void var::ScopeSet::assignValue(std::string target, var::Value val){
-    this->scope_pool[this->findInAllScopeI(target)].assign(target, val);
+void var::ScopeSet::assignValue(std::string target, var::Value val, int pos){
+    this->scope_pool[this->findInAllScopeI(target)].assign(target, val, pos);
 }
 void var::ScopeSet::createVariable(std::string name, var::Value val){
     this->scope_pool[getDeep()].new_var(name, val);
