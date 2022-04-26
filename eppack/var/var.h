@@ -121,7 +121,7 @@ namespace var{
          * */
         bool find(std::string target);
         int findI(std::string target);
-        void assign(std::string name, var::Value value);
+        void assign(std::string name, var::Value value, int pos=0);
         void deleteVar(std::string name);
     };
 
@@ -194,7 +194,7 @@ namespace var{
          * @param target target name
          * @param val value
          */
-        void assignValue(std::string target, var::Value val);
+        void assignValue(std::string target, var::Value val, int pos=0);
 
         /**
          * @brief Create a variable

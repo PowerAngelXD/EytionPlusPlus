@@ -472,12 +472,29 @@ void cenv::Calculation::run(){
             isassigned = true;
             auto value = pop();
             auto name = ins[i].para; // get the name of the identifier
-            if(sset.findInAllScope(name)==false) throw epperr::Epperr("NameError", "Cannot found an identifier named '" + name + "'", ins[i].line, ins[i].column);
+            if(sset.findInAllScope(name)==false) // Determine whether this variable exists
+                throw epperr::Epperr("NameError", "Cannot found an identifier named '" + name + "'", ins[i].line, ins[i].column);
+            else if(sset.getTargetVar(name).second.isConst()==true) // Judge whether the identifier points to a constant
+                throw epperr::Epperr("ConstantError", "A constant cannot be reassigned", ins[i].line, ins[i].column);
             auto instance = sset.getTargetVar(name);
             if(pcidx==true){
                 // is a arrelt
+                env_top --; // delete the IDEN command
                 auto index = pop().second;
-                printf("e");
+                if(sset.getTargetVar(name).second.isArray()==false)
+                    throw epperr::Epperr("SyntaxError", "The index operator must be a list", ins[i].line, ins[i].column);
+                else if(index >= sset.getTargetVar(name).second.len)
+                    throw epperr::Epperr("ListError", "Index value exceeds list length", ins[i].line, ins[i].column);
+                if(instance.second.getType() == "__INT__")
+                    sset.assignValue(name, var::Value(false, false, (int)value.second), index);
+                else if(instance.second.getType() == "__DECI__")
+                    sset.assignValue(name, var::Value(false, false, (float)value.second), index);
+                else if(instance.second.getType() == "__BOOL__")
+                    sset.assignValue(name, var::Value(false, false, (bool)value.second), index);
+                else if(instance.second.getType() == "__STRING__")
+                    sset.assignValue(name, var::Value(false, false, constpool[(int)value.second], false), index);
+                else if(instance.second.getType() == "__CHAR__")
+                    sset.assignValue(name, var::Value(false, false, constpool[(float)value.second], true), index);
             }
             else{
                 // whole identifier
