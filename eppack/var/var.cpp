@@ -31,6 +31,7 @@ var::Value::Value(bool is_arr, bool is_con, bool val) : is_array(is_arr), is_con
 }
 var::Value::Value(bool is_arr, bool is_con, efunc::Efunction val) : is_array(is_arr), is_const(is_con) {
     type = "__FUNC__";
+    is_func = true;
     func_val.push_back(val);
 }
 var::Value::Value(bool is_arr, bool is_con, var::UserScope val) : is_array(is_arr), is_const(is_con) {
@@ -68,6 +69,7 @@ var::Value::Value(bool is_arr, bool is_con, std::vector<bool> val) : is_array(is
 }
 var::Value::Value(bool is_arr, bool is_con, std::vector<efunc::Efunction> val) : is_array(is_arr), is_const(is_con), func_val(val) {
     len = val.size();
+    is_func = true;
     type = "__FUNC__";
 }
 var::Value::Value(bool is_arr, bool is_con, std::vector<UserScope> val) : is_array(is_arr), is_const(is_con), us_val(val) {
