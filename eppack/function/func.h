@@ -13,11 +13,9 @@
 namespace efunc{
     class Efunction{
     public:
-        std::string name = "__FUNC__";
         std::string ret_type = "__NULL__";
-        std::vector<std::string> nor_para;
-        std::vector<std::string> norp_type;
-        std::vector<east::ValExprNode> act_para;
-        east::BlockStmtNode body;
+        std::vector<east::FuncDefineExprNode::Para*> nor_para;
+        std::vector<east::ValExprNode*> act_para;
+        east::BlockStmtNode* body;
     };
 }
