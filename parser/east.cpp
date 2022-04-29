@@ -161,6 +161,7 @@ east::FuncCallExprNode* east::astParser::gen_fcallExprNode(){
         east::FuncCallExprNode* node = new east::FuncCallExprNode;
         node->func_name = gen_identifierNode();token();
         if(east::ValExprNode::is(*this)) node->act_paras.push_back(gen_valExprNode());
+        bool begin = false;
         while(true){
             if(peek()->content != ",") break;
             token();
@@ -359,8 +360,19 @@ east::ListExprNode* east::astParser::gen_listExprNode(){
 }
 east::FuncDefineExprNode* east::astParser::gen_fdefExprNode(){
     if(east::FuncDefineExprNode::is(*this)){
-        //TODO： 对函数的完善
-        return nullptr;
+        east::FuncDefineExprNode* node = new east::FuncDefineExprNode;
+        node->mark = token();
+        if(peek()->content == "(") node->left = token();
+        else throw epperr::Epperr("SyntaxError", "Expect '('!", tg[pos].line, tg[pos].column);
+        while(true){
+            if(peek()->type != "__IDENTIFIER__") break;
+            node->paras.push_back(new east::FuncDefineExprNode::Para(token(), token(), token()));
+            if(peek()->content == ",") node->dots.push_back(token());
+        }
+        if(peek()->content == ")") node->right = token();
+        else throw epperr::Epperr("SyntaxError", "Expect ')'!", tg[pos].line, tg[pos].column);
+        if(east::BlockStmtNode::is(*this)) node->body = gen_blockStmtNode();
+        return node;
     }
     else throw epperr::Epperr("SyntaxError", "Unknown type of the expr!", tg[pos].line, tg[pos].column);
 }
@@ -971,6 +983,7 @@ bool east::BifInstanceNode::is(astParser ap){
 std::string east::FuncDefineExprNode::Para::to_string(){
     return "para_node: {" + this->name->simply_format() + ", " + this->type->simply_format() + "}";
 }
+east::FuncDefineExprNode::Para::Para(epplex::Token* _name, epplex::Token* _mh, epplex::Token* _type): name(_name), mh(_mh), type(_type) {}
 
 std::string east::FuncDefineExprNode::to_string(){
     std::string ret = "func_define_expr: {" + mark->simply_format() + ",[";
@@ -1039,6 +1052,7 @@ bool east::InputExprNode::is(east::astParser ap){
 //
 
 //stmt node
+east::StmtNode::StmtNode(BlockStmtNode* stmt) : blockstmt(stmt) { }
 std::string east::StmtNode::to_string(){
     if(outstmt != nullptr) return "stmt_node: {" + this->outstmt->to_string() + "}";
     else if(vorcstmt != nullptr) return "stmt_node: {" + this->vorcstmt->to_string() + "}";

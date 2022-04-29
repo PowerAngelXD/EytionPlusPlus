@@ -266,6 +266,7 @@ namespace east{
             epplex::Token* mh;
             epplex::Token* type;
             std::string to_string();
+            Para(epplex::Token* _name, epplex::Token* _mh, epplex::Token* _type);
         };
         epplex::Token* mark;
         epplex::Token* left;
@@ -283,7 +284,7 @@ namespace east{
     public:
         IdentifierNode* func_name;
         std::vector<ValExprNode*> act_paras;
-        std::string tag = "__CALC_STMT__";
+        std::string tag = "__CALC__";
 
         std::string to_string();
         static bool is(astParser ap);
@@ -585,6 +586,8 @@ namespace east{
 
         std::string tag = "__OTHER__";
 
+        StmtNode(BlockStmtNode* stmt);
+        StmtNode()=default;
         std::string to_string();
         static bool is(astParser ap);
     };
