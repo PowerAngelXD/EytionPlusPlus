@@ -1,11 +1,62 @@
 #include "parser.h"
 
+//FunctionParser
+cenv::Calculation parser::funcParser::call(Parser p, east::FuncCallExprNode* node){
+    //test: var foo=func(s:string, age:integer){println(s+"is"+str(age));};
+    cenv::Calculation calc;
+    auto iden = node->func_name->idens[0];
+    auto name = node->func_name->idens[0]->content;
+    if(p.sset.getTargetVar(name).second.isFunc() == false) throw epperr::Epperr("TypeError", "This identifier is not a callable object", iden->line, iden->column);
+    auto funcObj = p.sset.getTargetVar(name).second.getValueOfFunc();
+    if(p.sset.findInAllScope(name) == false)
+        throw epperr::Epperr("NameError", "No function with name '" + name + "'", iden->line, iden->column);
+    else {
+        parser::Parser _p;
+        _p.sset = p.sset;
+        _p.sset.next();
+        _p.sset.newScope("__epp_FuncTemp_scope__");
+        _p.stat = *p.sset.getTargetVar(name).second.getValueOfFunc().body->body;
+        //para
+        for(int i = 0; i < funcObj.nor_para.size(); i++){
+            cenv::Calculation _calc = parser::getCalc(*node->act_paras[i], _p.sset);
+            if(getTypestring(funcObj.nor_para[i]->type->content) == _calc.result[0].first){
+                if(_calc.result[0].first == "__STRING__")
+                    _p.sset.createVariable(funcObj.nor_para[i]->name->content, var::Value(false, false, _calc.constpool[_calc.result[0].second], false));
+                else if(_calc.result[0].first == "__CHAR__")
+                    _p.sset.createVariable(funcObj.nor_para[i]->name->content, var::Value(false, false, _calc.constpool[_calc.result[0].second], true));
+                else if(_calc.result[0].first == "__INT__")
+                    _p.sset.createVariable(funcObj.nor_para[i]->name->content, var::Value(false, false, (int)_calc.result[0].second));
+                else if(_calc.result[0].first == "__DECI__")
+                    _p.sset.createVariable(funcObj.nor_para[i]->name->content, var::Value(false, false, (float)_calc.result[0].second));
+                else if(_calc.result[0].first == "__BOOL__")
+                    _p.sset.createVariable(funcObj.nor_para[i]->name->content, var::Value(false, false, (bool)_calc.result[0].second));
+            }
+        }
+        //
+        _p.parse();
+        _p.sset.remove();
+    }
+    return calc;
+}
+
+//Parser/BifParser
+std::string parser::getTypestring(std::string type){
+    std::string ret;
+    if(type == "integer") ret = "__INT__";
+    else if(type == "decimal") ret = "__DECI__";
+    else if(type == "boolean") ret = "__BOOL__";
+    else if(type == "string") ret = "__STRING__";
+    else if(type == "char") ret = "__CHAR__";
+    else throw epperr::EppClierr("parser::getTypestring ERROR: cannot transformation");
+    return ret;
+}
+
 cenv::Calculation parser::getCalc(east::ValExprNode node, var::ScopeSet sset) {
     cenv::Calculation calc(sset);
     cvisitor::visitor v;
     if(node.addexpr != nullptr){
-        if(node.addexpr->muls[0]->prims[0]->bif != nullptr){
-            if(node.addexpr->muls[0]->prims[0]->bif->bifi != nullptr){
+        if(node.addexpr->muls[0]->prims[0]->bif != nullptr){ // Check if it is a BIF
+            if(node.addexpr->muls[0]->prims[0]->bif->bifi != nullptr){ // Check if it is a BIF_INSTANCE
                 parser::BifParser bif(node.addexpr->muls[0]->prims[0]->bif->bifi, sset);
                 if(bif.bif->mark->content == "system"){
                     calc = bif.bif_Sytem();
@@ -30,6 +81,14 @@ cenv::Calculation parser::getCalc(east::ValExprNode node, var::ScopeSet sset) {
     return calc;
 }
 
+efunc::Efunction parser::getCalc(east::FuncDefineExprNode node, var::ScopeSet sset){
+    efunc::Efunction func;
+    for(auto unit: node.paras)
+        func.nor_para.push_back(unit);
+    func.body = node.body;
+    return func;
+}
+
 cenv::Calculation parser::getCalc(east::AssignExprNode node, var::ScopeSet sset){
     cenv::Calculation calc(sset);
     cvisitor::visitor v;
@@ -51,7 +110,7 @@ cenv::Calculation parser::getCalc(east::BoolExprNode node, var::ScopeSet sset) {
 }
 
 
-//-------------------//
+//-------------------//BIF
 
 parser::BifParser::BifParser(east::BifInstanceNode* bif, var::ScopeSet sset): bif(bif), _sset(sset) {}
 
@@ -69,13 +128,15 @@ cenv::Calculation parser::BifParser::bif_Sytem(){
                 _sset = calc.sset;
                 system(calc.constpool[(int)calc.result[0].second].c_str());
                 calc.result.clear();
-                calc.result.push_back(cenv::calc_unit("__INT__", 0.0));
+                calc.result.push_back(cenv::calc_unit("__NULL__", 0.0));
                 return calc;
             }
             else throw epperr::Epperr("SyntaxError", "There are no overloaded functions that meet the requirements: 'system(cmd: string)'", bif->mark->line, bif->mark->column);
         }
     }
 }
+
+//------------------//PARSER
 
 void parser::Parser::parse_OutStmt(east::OutStmtNode* stmt){
     cenv::Calculation calc = getCalc(*stmt->content, this->sset);
@@ -112,6 +173,9 @@ void parser::Parser::parse_ExprStmt(east::ExprStmtNode* stmt){
         cenv::Calculation calc = getCalc(*stmt->assign, sset);
         this->sset = calc.sset;
     }
+    else if(stmt->expr->addexpr->muls[0]->prims[0]->fcall != nullptr){
+        parser::funcParser::call(*this, stmt->expr->addexpr->muls[0]->prims[0]->fcall);
+    }
     else{
         cenv::Calculation calc = getCalc(*stmt->expr, sset);
         this->sset = calc.sset;
@@ -120,73 +184,85 @@ void parser::Parser::parse_ExprStmt(east::ExprStmtNode* stmt){
 
 void parser::Parser::parse_VorcStmt(east::VorcStmtNode* stmt){
     auto name = stmt->iden->content;
-    auto calc = getCalc(*stmt->value, sset);
-    //type checker
-    auto type = stmt->type;
-    if(type == nullptr);
-    else{
-        if(type->content == "integer" && calc.result[0].first == "__INT__");
-        else if(type->content == "string" && calc.result[0].first == "__STRING__");
-        else if(type->content == "decimal" && calc.result[0].first == "__DECI__");
-        else if(type->content == "boolean" && calc.result[0].first == "__BOOL__");
-        else if(type->content == "char" && calc.result[0].first == "__CHAR__");
-        else throw epperr::Epperr("TypeError", "The pre type at the time of declaration does not match the actual incoming type", type->line, type->column);
+    if(stmt->value->fdefexpr != nullptr){
+        efunc::Efunction func = getCalc(*stmt->value->fdefexpr, sset);
+        if (stmt->type == nullptr);
+        else{
+            if (stmt->type->content == "integer") func.ret_type = "__INT__";
+            else if (stmt->type->content == "string") func.ret_type = "__STRING__";
+            else if (stmt->type->content == "decimal") func.ret_type = "__DECI__";
+            else if (stmt->type->content == "boolean") func.ret_type = "__BOOL__";
+            else if (stmt->type->content == "char") func.ret_type = "__CHAR__";
+        }
+        if(stmt->mark->content == "const") sset.createVariable(stmt->iden->content, var::Value(false, true, func));
+        else sset.createVariable(stmt->iden->content, var::Value(false, false, func));
     }
-    // Check for duplicate variables / constants
-    if(sset.findInAllScope(name)) throw epperr::Epperr("NameError", "duplicate identifier '" + name + "'!", stmt->iden->line, stmt->iden->column);
-    if(stmt->mark->content == "var" || stmt->mark->content == "const"){
-    // create variable
-        if(calc.isArray()){
-            if(calc.result[0].first == "__INT__"){
+    else{
+        auto calc = getCalc(*stmt->value, sset);
+        // type checker
+        auto type = stmt->type;
+        if (type == nullptr);
+        else{
+            if (type->content == "integer" && calc.result[0].first == "__INT__");
+            else if (type->content == "string" && calc.result[0].first == "__STRING__");
+            else if (type->content == "decimal" && calc.result[0].first == "__DECI__");
+            else if (type->content == "boolean" && calc.result[0].first == "__BOOL__");
+            else if (type->content == "char" && calc.result[0].first == "__CHAR__");
+            else
+                throw epperr::Epperr("TypeError", "The pre type at the time of declaration does not match the actual incoming type", type->line, type->column);
+        }
+        // Check for duplicate variables / constants
+        if (sset.findInAllScope(name))
+            throw epperr::Epperr("NameError", "duplicate identifier '" + name + "'!", stmt->iden->line, stmt->iden->column);
+        // create variable
+        if (calc.isArray()){
+            if (calc.result[0].first == "__INT__"){
                 std::vector<int> list;
-                for(int i = 0; i < calc.result.size(); i++)
+                for (int i = 0; i < calc.result.size(); i++)
                     list.push_back(calc.result[i].second);
-                sset.createVariable(name, var::Value(true, stmt->mark->content == "const"?true:false, list));
+                sset.createVariable(name, var::Value(true, stmt->mark->content == "const" ? true : false, list));
             }
-            else if(calc.result[0].first == "__DECI__"){
+            else if (calc.result[0].first == "__DECI__"){
                 std::vector<float> list;
-                for(int i = 0; i < calc.result.size(); i++)
+                for (int i = 0; i < calc.result.size(); i++)
                     list.push_back(calc.result[i].second);
-                sset.createVariable(name, var::Value(true, stmt->mark->content == "const"?true:false, list));
+                sset.createVariable(name, var::Value(true, stmt->mark->content == "const" ? true : false, list));
             }
-            else if(calc.result[0].first == "__STRING__"){
+            else if (calc.result[0].first == "__STRING__"){
                 std::vector<std::string> list;
-                for(int i = 0; i < calc.result.size(); i++)
+                for (int i = 0; i < calc.result.size(); i++)
                     list.push_back(calc.constpool[calc.result[i].second]);
-                sset.createVariable(name, var::Value(true, stmt->mark->content == "const"?true:false, list, false));
+                sset.createVariable(name, var::Value(true, stmt->mark->content == "const" ? true : false, list, false));
             }
-            else if(calc.result[0].first == "__CHAR__"){
+            else if (calc.result[0].first == "__CHAR__"){
                 std::vector<std::string> list;
-                for(int i = 0; i < calc.result.size(); i++)
+                for (int i = 0; i < calc.result.size(); i++)
                     list.push_back(calc.constpool[calc.result[i].second]);
-                sset.createVariable(name, var::Value(true, stmt->mark->content == "const"?true:false, list, true));
+                sset.createVariable(name, var::Value(true, stmt->mark->content == "const" ? true : false, list, true));
             }
-            else if(calc.result[0].first == "__BOOL__"){
+            else if (calc.result[0].first == "__BOOL__"){
                 std::vector<bool> list;
-                for(int i = 0; i < calc.result.size(); i++)
+                for (int i = 0; i < calc.result.size(); i++)
                     list.push_back(calc.result[i].second);
-                sset.createVariable(name, var::Value(true, stmt->mark->content == "const"?true:false, list));
+                sset.createVariable(name, var::Value(true, stmt->mark->content == "const" ? true : false, list));
             }
         }
         else{
-            if(calc.result[0].first == "__STRING__")
-                sset.createVariable(name, var::Value(false, stmt->mark->content == "const"?true:false, 
-                calc.constpool[calc.result[0].second], false));
-            else if(calc.result[0].first == "__CHAR__")
-                sset.createVariable(name, var::Value(false, stmt->mark->content == "const"?true:false, 
-                calc.constpool[calc.result[0].second], false));
-            else if(calc.result[0].first == "__INT__")
-                sset.createVariable(name, var::Value(false, stmt->mark->content == "const"?true:false, 
-                (int)calc.result[0].second));
-            else if(calc.result[0].first == "__NULL__")
+            if (calc.result[0].first == "__STRING__")
+                sset.createVariable(name, var::Value(false, stmt->mark->content == "const" ? true : false,
+                                                     calc.constpool[calc.result[0].second], false));
+            else if (calc.result[0].first == "__CHAR__")
+                sset.createVariable(name, var::Value(false, stmt->mark->content == "const" ? true : false,
+                                                     calc.constpool[calc.result[0].second], false));
+            else if (calc.result[0].first == "__INT__")
+                sset.createVariable(name, var::Value(false, stmt->mark->content == "const" ? true : false,
+                                                     (int)calc.result[0].second));
+            else if (calc.result[0].first == "__NULL__")
                 sset.createVariable(name, var::Value(true));
             else
-                sset.createVariable(name, var::Value(false, stmt->mark->content == "const"?true:false, 
-                calc.result[0].second));
+                sset.createVariable(name, var::Value(false, stmt->mark->content == "const" ? true : false,
+                                                     calc.result[0].second));
         }
-    }
-    else{
-
     }
 }
 

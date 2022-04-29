@@ -17,18 +17,32 @@
 #include "../eppack/excphg/excphg.h"
 
 namespace parser{
+    class Parser;
+    std::string getTypestring(std::string type);
     cenv::Calculation getCalc(east::ValExprNode node, var::ScopeSet sset);    // Used to get the calculated value
+    efunc::Efunction getCalc(east::FuncDefineExprNode node, var::ScopeSet sset);
     cenv::Calculation getCalc(east::AssignExprNode node, var::ScopeSet sset);
     cenv::Calculation getCalc(east::BoolExprNode node, var::ScopeSet sset);   // Used to get the calculated value(just boolean)
-    class BifParser{
-        public:
-            east::BifInstanceNode* bif;
-            var::ScopeSet _sset;
-            var::ScopeSet _user_sset; // User defined sset
 
-            BifParser(east::BifInstanceNode* bif, var::ScopeSet sset);
-            cenv::Calculation bif_Sytem();
-        };
+    namespace funcParser{
+        cenv::Calculation call(Parser p, east::FuncCallExprNode* node);
+    }
+
+    /**
+     * @brief Used to parse BIF
+     */
+    class BifParser{
+    public:
+        east::BifInstanceNode* bif;
+        var::ScopeSet _sset;
+        var::ScopeSet _user_sset; // User defined sset
+        
+        BifParser(east::BifInstanceNode* bif, var::ScopeSet sset);
+        cenv::Calculation bif_Sytem();
+    };
+    /**
+     * @brief Used to parse each stmt
+     */
     class Parser{
         int _if_control = -1;
     public:
