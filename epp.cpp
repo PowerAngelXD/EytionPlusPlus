@@ -23,10 +23,6 @@
 #endif
 //#define EPP_DEBUG
 
-// global define
-parser::Parser p;
-configloader::Loader loader("resource/config/common.ecfg");
-
 #ifdef _WIN32
 void getAllFile(std::string path, std::vector<std::string>& files){
     long hFile = 0;
@@ -47,10 +43,12 @@ int main(){
 #else
 inline void epp_cli(){
 #endif
+    parser::Parser p;
+    configloader::Loader loader("resource/config/common.ecfg");
     int code = 10;
     std::string cmd;
     char work_path[256];
-    std::wcout<<L"Eytion++ [ Build Time:"<<__DATE__<<" "<<__TIME__<<"]\nCopyright (c) PowerAngelXd\nNow version: 0.2.9\nyou can type 'help' to get 'Eytion++Cli & Eytion++Grammar' help document\n"<<std::endl;
+    std::wcout<<L"Eytion++ [ Build Time:"<<__DATE__<<" "<<__TIME__<<"]\nCopyright (c) PowerAngelXd\nEytion PlusPlus version: dev-0.2.9\nyou can type 'help' to get 'Eytion++Cli & Eytion++Grammar' help document\n"<<std::endl;
     while(true){
         if(code == 0) break;
         try{
@@ -263,7 +261,7 @@ inline void epp_cli(){
 int main(int argc, char *argv[]){
     std::string cmd;
     if(argc >= 2){
-        if(strcmp(argv[1], "-v")==0 || strcmp(argv[1], "-version")==0) std::cout<<"version => dev-0.2.9"<<std::endl;
+        if(strcmp(argv[1], "-v")==0 || strcmp(argv[1], "-version")==0) std::cout<<"EytionPlusPlus version => dev-0.2.9\nCli version => V1.0"<<std::endl;
         else if(strcmp(argv[1], "-r")==0 || strcmp(argv[1], "-run")==0){
             std::ifstream file(argv[2]);
             std::size_t index = ((std::string)argv[2]).find(".epp", ((std::string)argv[2]).size() - ((std::string)".epp").size()); // file suffix check
@@ -277,6 +275,7 @@ int main(int argc, char *argv[]){
                 east::astParser ast(tokens);
                 east::StatNode* node = ast.gen_statNode();
                 //std::cout<<node->to_string()<<std::endl;
+                parser::Parser p;
                 p.stat = *node;
                 p.parse();
                 std::cout<<std::endl;
@@ -294,8 +293,7 @@ int main(int argc, char *argv[]){
         }
     }
     else{
-        std::cout<<"If you want to run EytionCli you can type './e++ -cli'"<<std::endl;
-        std::cout<<"If you want to run the \".epp\" file, you can type \"./e++ -r (filename)\""<<std::endl;
+        epp_cli();
     }
     end:
     return 0;
