@@ -11,7 +11,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include "../../parser/east.h"
+#include "../../parser/parser.h"
 #include "calc.h"
 
 namespace cvisitor{
