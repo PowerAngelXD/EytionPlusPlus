@@ -2,7 +2,7 @@
 
 //var
 var::Value::Value(bool is_null){
-    this->nullval = 0;
+    this->is_null = is_null;
     this->type = "__NULL__";
 }
 var::Value::Value(bool is_arr, bool is_con) : is_array(is_arr), is_const(is_con) {}
@@ -86,6 +86,9 @@ bool var::Value::isArray(){
 }
 bool var::Value::isConst(){
     return is_const;
+}
+bool var::Value::isNull(){
+    return is_null;
 }
 bool var::Value::isFunc(){
     return is_func;
@@ -373,7 +376,7 @@ void var::Scope::deleteVar(std::string name){
 void var::Scope::assign(std::string name, var::Value value, int pos){
     var::Value &instance = vars[this->findI(name)].second;
     std::string type = vars[this->findI(name)].second.getType();
-    if(value.isArray() == true){
+    if(value.isArray() == true || instance.isNull()==true){
         vars.erase(vars.begin() + findI(name));
         vars.push_back(std::pair<std::string ,var::Value>(name, value));
     }
