@@ -16,8 +16,12 @@ cenv::Calculation parser::funcParser::call(Parser p, east::FuncCallExprNode* nod
         p.sset.newScope("__epp_FuncTemp_scope__");
         p.stat = *p.sset.getTargetVar(name).second.getValueOfFunc().body->body;
         //para
-        for(int i = 0; i < funcObj.nor_para.size(); i++){
+        for(int i = 0; i < node->act_paras.size(); i++){
             cenv::Calculation _calc = parser::getCalc(*node->act_paras[i], p.sset);
+            // para checker
+            if(getTypestring(funcObj.nor_para[i]->type->content) != _calc.result[0].first)
+                throw epperr::Epperr("TypeError", "This identifier is not a callable object", iden->line, iden->column);
+
             if(getTypestring(funcObj.nor_para[i]->type->content) == _calc.result[0].first){
                 if(_calc.result[0].first == "__STRING__"){
                     p.sset.createVariable(funcObj.nor_para[i]->name->content, var::Value(false, false, _calc.constpool[_calc.result[0].second], false));
@@ -289,7 +293,7 @@ void parser::Parser::parse_ForStmt(east::ForStmtNode* stmt){
             this->sset.newScope("__epp_ForTemp_scope__");
             stc_p.sset = this->sset;
             stc_p.parse();
-            this->sset.remove(); stc_p.sset.remove();
+            this->sset.remove(); stc_p.sset.remove(); 
         }
         //后置语句
         east::StatNode stat;
@@ -361,7 +365,7 @@ void parser::Parser::parse(){
                     this->sset.newScope("__epp_ifTemp_scope__");
                     stc_p.sset = this->sset;
                     stc_p.parse();
-                    this->sset.remove();
+                    this->sset.remove(); stc_p.sset.remove();
                 }
                 sset = stc_p.sset;
                 _if_control = 1;
@@ -463,7 +467,7 @@ void parser::Parser::parse(){
                     this->sset.newScope("__epp_elifTemp_scope__");
                     stc_p.sset = this->sset;
                     stc_p.parse();
-                    this->sset.remove();
+                    this->sset.remove(); stc_p.sset.remove();
                 }
                 sset = stc_p.sset;
                 _if_control = 1;
@@ -491,7 +495,7 @@ void parser::Parser::parse(){
                     this->sset.newScope("__epp_elifTemp_scope__");
                     stc_p.sset = this->sset;
                     stc_p.parse();
-                    this->sset.remove();
+                    this->sset.remove(); stc_p.sset.remove();
                 }
                 sset = stc_p.sset;
             }
