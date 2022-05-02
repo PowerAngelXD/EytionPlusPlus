@@ -267,6 +267,7 @@ namespace east{
             epplex::Token* type;
             std::string to_string();
             Para(epplex::Token* _name, epplex::Token* _mh, epplex::Token* _type);
+            Para()=default;
         };
         epplex::Token* mark;
         epplex::Token* left;

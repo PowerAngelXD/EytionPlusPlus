@@ -366,8 +366,12 @@ east::FuncDefineExprNode* east::astParser::gen_fdefExprNode(){
         else throw epperr::Epperr("SyntaxError", "Expect '('!", tg[pos].line, tg[pos].column);
         while(true){
             if(peek()->type != "__IDENTIFIER__") break;
-            node->paras.push_back(new east::FuncDefineExprNode::Para(token(), token(), token()));
+            node->paras.push_back(new east::FuncDefineExprNode::Para(token(),token(),token()));
             if(peek()->content == ",") node->dots.push_back(token());
+        }
+        for(int i = 0; i<node->paras.size(); i++){
+            if(node->paras[i]->type->content == "integer" || node->paras[i]->type->content == "string" || node->paras[i]->type->content == "boolean" || node->paras[i]->type->content == "decimal" || node->paras[i]->type->content == "char");
+            else throw epperr::Epperr("SyntaxError", "Expect type specifier !", tg[pos].line, tg[pos].column);
         }
         if(peek()->content == ")") node->right = token();
         else throw epperr::Epperr("SyntaxError", "Expect ')'!", tg[pos].line, tg[pos].column);

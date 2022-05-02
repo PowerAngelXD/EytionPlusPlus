@@ -10,31 +10,32 @@ cenv::Calculation parser::funcParser::call(Parser p, east::FuncCallExprNode* nod
     auto funcObj = p.sset.getTargetVar(name).second.getValueOfFunc();
     if(p.sset.findInAllScope(name) == false)
         throw epperr::Epperr("NameError", "No function with name '" + name + "'", iden->line, iden->column);
+
     else {
-        parser::Parser _p;
-        _p.sset = p.sset;
-        _p.sset.next();
-        _p.sset.newScope("__epp_FuncTemp_scope__");
-        _p.stat = *p.sset.getTargetVar(name).second.getValueOfFunc().body->body;
+        p.sset.next();
+        p.sset.newScope("__epp_FuncTemp_scope__");
+        p.stat = *p.sset.getTargetVar(name).second.getValueOfFunc().body->body;
         //para
         for(int i = 0; i < funcObj.nor_para.size(); i++){
-            cenv::Calculation _calc = parser::getCalc(*node->act_paras[i], _p.sset);
+            cenv::Calculation _calc = parser::getCalc(*node->act_paras[i], p.sset);
             if(getTypestring(funcObj.nor_para[i]->type->content) == _calc.result[0].first){
-                if(_calc.result[0].first == "__STRING__")
-                    _p.sset.createVariable(funcObj.nor_para[i]->name->content, var::Value(false, false, _calc.constpool[_calc.result[0].second], false));
+                if(_calc.result[0].first == "__STRING__"){
+                    p.sset.createVariable(funcObj.nor_para[i]->name->content, var::Value(false, false, _calc.constpool[_calc.result[0].second], false));
+                }
                 else if(_calc.result[0].first == "__CHAR__")
-                    _p.sset.createVariable(funcObj.nor_para[i]->name->content, var::Value(false, false, _calc.constpool[_calc.result[0].second], true));
+                    p.sset.createVariable(funcObj.nor_para[i]->name->content, var::Value(false, false, _calc.constpool[_calc.result[0].second], true));
                 else if(_calc.result[0].first == "__INT__")
-                    _p.sset.createVariable(funcObj.nor_para[i]->name->content, var::Value(false, false, (int)_calc.result[0].second));
+                    p.sset.createVariable(funcObj.nor_para[i]->name->content, var::Value(false, false, (int)_calc.result[0].second));
                 else if(_calc.result[0].first == "__DECI__")
-                    _p.sset.createVariable(funcObj.nor_para[i]->name->content, var::Value(false, false, (float)_calc.result[0].second));
+                    p.sset.createVariable(funcObj.nor_para[i]->name->content, var::Value(false, false, (float)_calc.result[0].second));
                 else if(_calc.result[0].first == "__BOOL__")
-                    _p.sset.createVariable(funcObj.nor_para[i]->name->content, var::Value(false, false, (bool)_calc.result[0].second));
+                    p.sset.createVariable(funcObj.nor_para[i]->name->content, var::Value(false, false, (bool)_calc.result[0].second));
             }
         }
         //
-        _p.parse();
-        _p.sset.remove();
+        p.parse();
+        
+        p.sset.remove();
     }
     return calc;
 }
@@ -375,7 +376,7 @@ void parser::Parser::parse(){
             try{
                 while(calc.result[0].first != "__STRING__" && calc.result[0].second > 0){
                     parser::Parser stc_p;
-                    sset.remove();
+                    //sset.remove();
                     if(stat.stmts[index]->whilestmt->stc != nullptr){
                         east::StatNode _stat;
                         _stat.stmts.push_back(stat.stmts[index]->whilestmt->stc);
@@ -390,7 +391,7 @@ void parser::Parser::parse(){
                         this->sset.newScope("__epp_whileTemp_scope__");
                         stc_p.sset = this->sset;
                         stc_p.parse();
-                        this->sset.remove();
+                        this->sset.remove(); stc_p.sset.remove();
                     }
                     sset = stc_p.sset;
                     calc = getCalc(*stat.stmts[index]->whilestmt->cond, sset);
