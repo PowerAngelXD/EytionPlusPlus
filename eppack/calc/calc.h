@@ -17,7 +17,7 @@
 
 namespace cenv{
     typedef std::string calc_type; // __INT__ __DECI__ __STRING__ __CHAR__ __BOOL__ __NULL__
-    typedef std::string calc_instr; // __PUSH__ __PRINT__ __PUSHA__ __TPOF__ __INPUT__ __ARRE_POP__ __LEN__ __TYT__ __SADIADD/SUB_FRONT__ __SAIDADD/SUB__
+    typedef std::string calc_instr; // __PUSH__ __PRINT__ __PUSHA__ __TPOF__ __INPUT__ __ARRE_envPop__ __LEN__ __TYT__ __SADIADD/SUB_FRONT__ __SAIDADD/SUB__ __PUSHI__
     typedef std::pair<calc_type, float> calc_unit;
 
     struct calc_ins{
@@ -46,8 +46,8 @@ namespace cenv{
         std::vector<calc_unit> result;
 
         void push(calc_unit cu);
-        calc_unit pop();
-        calc_unit get();
+        calc_unit envPop();
+        calc_unit envGet();
         void run();
         bool isArray();
     };

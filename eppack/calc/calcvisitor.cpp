@@ -49,6 +49,17 @@ void cvisitor::visitor::visitChar(epplex::Token* token){
     constpool.push_back(ch_s);
     ins.push_back({"__PUSH__", cenv::calc_unit("__CHAR__", constpool.size()-1), "__NULL__", token->line, token->column});
 }
+void cvisitor::visitor::visitBifInsExpr(east::BifInstanceNode* node){
+    ins.push_back({"__PARA_END_FLAG__", cenv::calc_unit("__PARA_END_FLAG__", 0.0), "__NULL__", node->mark->line, node->mark->column});
+    for(int i=0; i < node->paras.size(); i++){
+        if(node->paras[i]->addexpr != nullptr) visitAddExpr(node->paras[i]->addexpr);
+        else if(node->paras[i]->boolexpr != nullptr) visitBoolExpr(node->paras[i]->boolexpr);
+        else if(node->paras[i]->listexpr != nullptr) visitListExpr(node->paras[i]->listexpr);
+    }
+    ins.push_back({"__BIFI__", cenv::calc_unit("__NULL__", 0.0), node->mark->content, node->mark->line, node->mark->column});
+}
+void cvisitor::visitor::visitFuncCallExpr(east::FuncCallExprNode* node){
+}
 void cvisitor::visitor::visitSiad(east::SelfIaDExprNode* node){
     visitIden(node->iden, false);
     if(node->op->content == "++"){
@@ -184,12 +195,14 @@ void cvisitor::visitor::visitPrimExpr(east::PrimExprNode* node){
     else if(node->iden != nullptr) visitIden(node->iden, false);
     else if(node->siad != nullptr) visitSiad(node->siad);
     else if(node->addexpr != nullptr) visitAddExpr(node->addexpr);
+    else if(node->fcall != nullptr) visitFuncCallExpr(node->fcall);
     else if(node->bif != nullptr){
         if(node->bif->typef != nullptr) visitTpof(node->bif->typef);
         else if(node->bif->input != nullptr) visitInput(node->bif->input);
         else if(node->bif->len != nullptr) visitLen(node->bif->len);
         else if(node->bif->tyt != nullptr) visitTypeTo(node->bif->tyt);
         else if(node->bif->print != nullptr) visitPrintoLn(node->bif->print);
+        else if(node->bif->bifi != nullptr) visitBifInsExpr(node->bif->bifi);
     }
 }
 void cvisitor::visitor::visitMulExpr(east::MulExprNode* node){

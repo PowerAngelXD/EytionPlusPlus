@@ -46,5 +46,7 @@ namespace cvisitor{
         void visitMulExpr(east::MulExprNode* node);
         void visitAddExpr(east::AddExprNode* node);
         void visitListExpr(east::ListExprNode* node);
+        void visitBifInsExpr(east::BifInstanceNode* node);
+        void visitFuncCallExpr(east::FuncCallExprNode* node);
     };
 }
