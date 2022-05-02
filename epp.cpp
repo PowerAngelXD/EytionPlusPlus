@@ -141,8 +141,13 @@ inline void epp_cli(){
                     auto tokens = lexer.getTokenGroup();
                     east::astParser ast(tokens);
                     east::StatNode* node = ast.gen_statNode();
+                    std::ofstream afile("debug/ast/ast.edebug");
+                    afile<<node->to_string()<<std::endl;
+                    afile.close();
                     p.stat = *node;
                     p.parse();
+                    parser::Parser _p; // 避免污染环境，故清空
+                    p = _p;
                     std::cout<<std::endl;
                     code = 1;
                 }
@@ -259,6 +264,7 @@ inline void epp_cli(){
 
 #ifndef EPP_DEBUG
 int main(int argc, char *argv[]){
+    configloader::Loader loader("resource/config/common.ecfg");
     std::string cmd;
     if(argc >= 2){
         if(strcmp(argv[1], "-v")==0 || strcmp(argv[1], "-version")==0) std::cout<<"EytionPlusPlus version => dev-0.2.9\nCli version => V1.0"<<std::endl;
@@ -268,17 +274,34 @@ int main(int argc, char *argv[]){
             if(index == std::string::npos) {std::cout<<"error:  The file must be in \".epp\" format"<<std::endl; goto end;}
             if(file.fail()) {std::cout<<"error:  The specified file could not be found"<<std::endl; goto end;}
             else{
-                epplex::Lexer lexer(file);
-                //std::cout<<ss.str()<<std::endl;
-                auto tokens = lexer.getTokenGroup();
-                //for(auto token:tokens){std::cout<<token.format()<<std::endl;}
-                east::astParser ast(tokens);
-                east::StatNode* node = ast.gen_statNode();
-                //std::cout<<node->to_string()<<std::endl;
-                parser::Parser p;
-                p.stat = *node;
-                p.parse();
-                std::cout<<std::endl;
+                try{
+                    epplex::Lexer lexer(file);
+                    //std::cout<<ss.str()<<std::endl;
+                    auto tokens = lexer.getTokenGroup();
+                    //for(auto token:tokens){std::cout<<token.format()<<std::endl;}
+                    east::astParser ast(tokens);
+                    east::StatNode* node = ast.gen_statNode();
+                    std::ofstream afile("debug/ast/ast.edebug");
+                    afile<<node->to_string()<<std::endl;
+                    afile.close();
+                    std::cout<<node->to_string()<<std::endl;
+                    parser::Parser p;
+                    p.stat = *node;
+                    p.parse();
+                    std::cout<<std::endl;
+                }
+                catch(char const* e){
+                    std::cout<<"Eytion++ Error:  "<<e<<std::endl;
+                }
+                catch(std::string e){
+                    std::cout<<"Eytion++ Error:  "<<e<<std::endl;
+                }
+                catch(epperr::Epperr eppe){
+                    std::cout<<eppe.what()<<std::endl;
+                }
+                catch(epperr::EppClierr eppce){
+                    std::cout<<eppce.what()<<std::endl;
+                }
             }
         }
         else if(strcmp(argv[1], "-cli") == 0) epp_cli();
