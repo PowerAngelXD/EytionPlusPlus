@@ -353,6 +353,18 @@ namespace east{
         static bool is(astParser ap);
     };
 
+    class ReturnStmtNode{
+    public:
+        epplex::Token* mark;
+        ValExprNode* value;
+        epplex::Token* end;
+
+        std::string tag = "__OTHER__";
+
+        std::string to_string();
+        static bool is(astParser ap);
+    };
+
     class OutStmtNode{
         // out "hello";
     public:
@@ -584,6 +596,7 @@ namespace east{
         AreaStmtNode* areastmt = nullptr;
         ForStmtNode* forstmt = nullptr;
         ExprStmtNode* exprstmt = nullptr;
+        ReturnStmtNode* returnstmt = nullptr;
 
         std::string tag = "__OTHER__";
 
@@ -654,6 +667,7 @@ namespace east{
 
         StmtNode* gen_stmtNode();
         StatNode* gen_statNode();
+        ReturnStmtNode*  gen_retStmtNode();
         OutStmtNode* gen_outStmtNode();
         VorcStmtNode* gen_vorcStmtNode();
         DeleteStmtNode* gen_delStmtNode();

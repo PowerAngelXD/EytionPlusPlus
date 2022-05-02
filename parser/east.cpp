@@ -409,6 +409,7 @@ east::StmtNode* east::astParser::gen_stmtNode(){
         else if(east::ForEachStmtNode::is(*this)) node->foreachstmt = gen_foreachStmtNode();
         else if(east::ForStmtNode::is(*this)) node->forstmt = gen_forStmtNode();
         else if(east::AreaStmtNode::is(*this)) node->areastmt = gen_areaStmtNode();
+        else if(east::ReturnStmtNode::is(*this)) node->returnstmt = gen_retStmtNode();
         return node;
     }
     else throw epperr::Epperr("SyntaxError", "Unknown type of the stmt!", tg[pos].line, tg[pos].column);
@@ -426,6 +427,17 @@ east::ExprStmtNode* east::astParser::gen_exprStmtNode(){
         return node;
     }
     else throw epperr::Epperr("SyntaxError", "It is not a proper Expression statement format", tg[pos].line, tg[pos].column);
+}
+east::ReturnStmtNode*  east::astParser::gen_retStmtNode(){
+    if(east::ReturnStmtNode::is(*this)){
+        east::ReturnStmtNode* node = new east::ReturnStmtNode;
+        node->mark = token();
+        if(east::ValExprNode::is(*this)) node->value = gen_valExprNode();
+        else throw epperr::Epperr("SyntaxError", "Expect ';'", tg[pos].line, tg[pos].column);
+        if(peek()->content == ";") node->end = token();
+        else throw epperr::Epperr("SyntaxError", "Expect ';'", tg[pos].line, tg[pos].column);
+        return node;
+    }
 }
 east::OutStmtNode* east::astParser::gen_outStmtNode(){
     if(east::OutStmtNode::is(*this)){
@@ -1072,13 +1084,14 @@ std::string east::StmtNode::to_string(){
     else if(areastmt != nullptr) return "stmt_node: {" + this->areastmt->to_string() + "}";
     else if(forstmt != nullptr) return "stmt_node: {" + this->forstmt->to_string() + "}";
     else if(exprstmt != nullptr) return "stmt_node: {" + this->exprstmt->to_string() + "}";
+    else if(returnstmt != nullptr) return "stmt_node: {" + this->returnstmt->to_string() + "}";
     else return "__NULL__";
 }
 bool east::StmtNode::is(east::astParser ap){
     return east::OutStmtNode::is(ap) || east::VorcStmtNode::is(ap) || east::DeleteStmtNode::is(ap)
             || east::BlockStmtNode::is(ap) || east::IfStmtNode::is(ap) || east::RepeatStmtNode::is(ap) || east::WhileStmtNode::is(ap)
             || east::BreakStmtNode::is(ap) || east::ElseStmtNode::is(ap) || east::ElseifStmtNode::is(ap) || east::ForEachStmtNode::is(ap)
-            || east::AreaStmtNode::is(ap) || east::ExprStmtNode::is(ap) || east::ForStmtNode::is(ap);
+            || east::AreaStmtNode::is(ap) || east::ExprStmtNode::is(ap) || east::ForStmtNode::is(ap) || east::ReturnStmtNode::is(ap);
 }
 //
 
@@ -1236,5 +1249,14 @@ std::string east::ForStmtNode::to_string(){
 }
 bool east::ForStmtNode::is(east::astParser ap){
     return ap.peek()->content == "for";
+}
+//
+
+//return stmt node
+std::string east::ReturnStmtNode::to_string(){
+    return "return_stmt: {" + this->value->to_string() + "}";
+}
+bool east::ReturnStmtNode::is(astParser ap){
+    return ap.peek()->content == "return";
 }
 //
