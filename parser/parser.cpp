@@ -37,14 +37,12 @@ cenv::Calculation parser::funcParser::call(Parser p, east::FuncCallExprNode* nod
             }
         }
         //
-        p.parse();
-        
+        calc = p.parse();
         p.sset.remove();
     }
     return calc;
 }
 
-//Parser/BifParser
 std::string parser::getTypestring(std::string type){
     std::string ret;
     if(type == "integer") ret = "__INT__";
@@ -59,22 +57,8 @@ std::string parser::getTypestring(std::string type){
 cenv::Calculation parser::getCalc(east::ValExprNode node, var::ScopeSet sset) {
     cenv::Calculation calc(sset);
     cvisitor::visitor v;
-    if(node.addexpr != nullptr){
-        if(node.addexpr->muls[0]->prims[0]->bif != nullptr){ // Check if it is a BIF
-            if(node.addexpr->muls[0]->prims[0]->bif->bifi != nullptr){ // Check if it is a BIF_INSTANCE
-                parser::BifParser bif(node.addexpr->muls[0]->prims[0]->bif->bifi, sset);
-                if(bif.bif->mark->content == "system"){
-                    calc = bif.bif_Sytem();
-                }
-                sset = bif._sset;
-                goto end;
-            }
-            else
-                v.visitAddExpr(node.addexpr);
-        }
-        else
-            v.visitAddExpr(node.addexpr);
-    }
+    if(node.addexpr != nullptr)
+        v.visitAddExpr(node.addexpr);
     else if(node.boolexpr != nullptr)
         v.visitBoolExpr(node.boolexpr);
     else if(node.listexpr != nullptr)
@@ -115,32 +99,6 @@ cenv::Calculation parser::getCalc(east::BoolExprNode node, var::ScopeSet sset) {
 }
 
 
-//-------------------//BIF
-
-parser::BifParser::BifParser(east::BifInstanceNode* bif, var::ScopeSet sset): bif(bif), _sset(sset) {}
-
-cenv::Calculation parser::BifParser::bif_Sytem(){
-    if(bif->paras.empty() == true) throw epperr::Epperr("SyntaxError", "Too few parameters", bif->mark->line, bif->mark->column);
-    else{
-        if(bif->paras.size() > 1) throw epperr::Epperr("SyntaxError", "Too many parameters", bif->mark->line, bif->mark->column);
-        else{
-            if(bif->paras[0]->addexpr!=nullptr, bif->paras[0]->addexpr->muls[0]->prims[0]->str != nullptr){
-                cenv::Calculation calc(_sset);
-                cvisitor::visitor v;
-                v.visitAddExpr(bif->paras[0]->addexpr);
-                calc.ins = v.ins; calc.constpool = v.constpool;
-                calc.run();
-                _sset = calc.sset;
-                system(calc.constpool[(int)calc.result[0].second].c_str());
-                calc.result.clear();
-                calc.result.push_back(cenv::calc_unit("__NULL__", 0.0));
-                return calc;
-            }
-            else throw epperr::Epperr("SyntaxError", "There are no overloaded functions that meet the requirements: 'system(cmd: string)'", bif->mark->line, bif->mark->column);
-        }
-    }
-}
-
 //------------------//PARSER
 
 void parser::Parser::parse_OutStmt(east::OutStmtNode* stmt){
@@ -172,7 +130,6 @@ void parser::Parser::parse_OutStmt(east::OutStmtNode* stmt){
             std::cout << calc.result[0].second;
     }
 }
-
 void parser::Parser::parse_ExprStmt(east::ExprStmtNode* stmt){
     if(stmt->assign != nullptr){
         cenv::Calculation calc = getCalc(*stmt->assign, sset);
@@ -186,7 +143,6 @@ void parser::Parser::parse_ExprStmt(east::ExprStmtNode* stmt){
         this->sset = calc.sset;
     }
 }
-
 void parser::Parser::parse_VorcStmt(east::VorcStmtNode* stmt){
     auto name = stmt->iden->content;
     if(stmt->value->fdefexpr != nullptr){
@@ -270,7 +226,6 @@ void parser::Parser::parse_VorcStmt(east::VorcStmtNode* stmt){
         }
     }
 }
-
 void parser::Parser::parse_ForStmt(east::ForStmtNode* stmt){
     auto name = stmt->iden->idens[0]->content;
     if(stmt->var_mark != nullptr)
@@ -317,7 +272,6 @@ void parser::Parser::parse_ForStmt(east::ForStmtNode* stmt){
     }
     //sset.deleteVariable(name); // 删除for中的变量
 }
-
 void parser::Parser::parse_DeleteStmt(east::DeleteStmtNode* stmt){
     auto name = stmt->iden->idens[0]->content;
     if(!sset.findInAllScope(name)) throw epperr::Epperr("NameError", "Could not find a designator named '" + name + "'",
@@ -325,28 +279,72 @@ void parser::Parser::parse_DeleteStmt(east::DeleteStmtNode* stmt){
                                                         stmt->iden->idens[0]->column);
     sset.deleteVariable(name);
 }
-
-void parser::Parser::parse(){
-    for(int index = 0; index < stat.stmts.size(); index++){
-        if(stat.stmts[index]->outstmt != nullptr){
-            parse_OutStmt(stat.stmts[index]->outstmt);
+void parser::Parser::parse_BlockStmt(east::BlockStmtNode* stmt){
+    if(stmt->body == nullptr) return;
+    Parser subp;
+    subp.stat = *stmt->body;
+    this->sset.next();
+    this->sset.newScope("__epp_temp_scope__");
+    subp.sset = this->sset;
+    subp.parse();
+    this->sset.remove();
+}
+void parser::Parser::parse_IfStmt(east::IfStmtNode* stmt){
+    cenv::Calculation calc = getCalc(*stmt->cond, sset);
+    if (calc.result[0].first != "__STRING__" && calc.result[0].second > 0){
+        parser::Parser stc_p;
+        if (stmt->stc != nullptr){
+            east::StatNode _stat;
+            _stat.stmts.push_back(stmt->stc);
+            stc_p.stat = _stat;
+            stc_p.sset = sset;
+            stc_p.parse();
         }
-        else if(stat.stmts[index]->vorcstmt != nullptr){
-            parse_VorcStmt(stat.stmts[index]->vorcstmt);
-        }
-        else if(stat.stmts[index]->deletestmt != nullptr){
-            parse_DeleteStmt(stat.stmts[index]->deletestmt);
-        }
-        else if(stat.stmts[index]->blockstmt != nullptr){
-            if(stat.stmts[index]->blockstmt->body == nullptr) continue;
-            Parser subp;
-            subp.stat = *stat.stmts[index]->blockstmt->body;
+        else{
+            if (stmt->body->body == nullptr) return;
+            stc_p.stat = *stmt->body->body;
             this->sset.next();
-            this->sset.newScope("__epp_temp_scope__");
-            subp.sset = this->sset;
-            subp.parse();
+            this->sset.newScope("__epp_ifTemp_scope__");
+            stc_p.sset = this->sset;
+            stc_p.parse();
             this->sset.remove();
+            stc_p.sset.remove();
         }
+        sset = stc_p.sset;
+        _if_control = 1;
+    }
+    else{
+        _if_control = 0;
+        return;
+    }
+}
+void parser::Parser::parse_ElseIfStmt(east::ElseifStmtNode* stmt){
+
+}
+void parser::Parser::parse_ElseStmt(east::ElseStmtNode* stmt){
+
+}
+void parser::Parser::parse_BreakStmt(east::BreakStmtNode* stmt){
+
+}
+void parser::Parser::parse_WhileStmt(east::WhileStmtNode* stmt){
+
+}
+void parser::Parser::parse_RepeatStmt(east::RepeatStmtNode* stmt){
+
+}
+void parser::Parser::parse_ForEachStmt(east::ForEachStmtNode* stmt){
+
+}
+
+cenv::Calculation parser::Parser::parse(){
+    cenv::Calculation ret; // 返回值
+    bool isReturn = false;
+    for(int index = 0; index < stat.stmts.size(); index++){
+        if(stat.stmts[index]->outstmt != nullptr) parse_OutStmt(stat.stmts[index]->outstmt);
+        else if(stat.stmts[index]->vorcstmt != nullptr) parse_VorcStmt(stat.stmts[index]->vorcstmt);
+        else if(stat.stmts[index]->deletestmt != nullptr) parse_DeleteStmt(stat.stmts[index]->deletestmt);
+        else if(stat.stmts[index]->blockstmt != nullptr) parse_BlockStmt(stat.stmts[index]->blockstmt);
         else if(stat.stmts[index]->ifstmt != nullptr){
             cenv::Calculation calc = getCalc(*stat.stmts[index]->ifstmt->cond, sset);
             if(calc.result[0].first != "__STRING__" && calc.result[0].second > 0){
@@ -572,5 +570,11 @@ void parser::Parser::parse(){
         else if(stat.stmts[index]->exprstmt != nullptr){
             parse_ExprStmt(stat.stmts[index]->exprstmt);
         }
+        else if(stat.stmts[index]->returnstmt != nullptr) {
+            isReturn = true;
+            ret = getCalc(*stat.stmts[index]->returnstmt->value, sset);
+        }
+
+        if(isReturn) return ret;
     }
 }

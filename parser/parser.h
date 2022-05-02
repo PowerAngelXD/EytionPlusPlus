@@ -29,18 +29,6 @@ namespace parser{
     }
 
     /**
-     * @brief Used to parse BIF
-     */
-    class BifParser{
-    public:
-        east::BifInstanceNode* bif;
-        var::ScopeSet _sset;
-        var::ScopeSet _user_sset; // User defined sset
-        
-        BifParser(east::BifInstanceNode* bif, var::ScopeSet sset);
-        cenv::Calculation bif_Sytem();
-    };
-    /**
      * @brief Used to parse each stmt
      */
     class Parser{
@@ -50,10 +38,10 @@ namespace parser{
         var::ScopeSet sset;
         var::ScopeSet user_sset; // User defined sset
 
-        void parse_OutStmt(east::OutStmtNode* stmt);
-        void parse_VorcStmt(east::VorcStmtNode* stmt);
-        void parse_ExprStmt(east::ExprStmtNode* stmt);
-        void parse_DeleteStmt(east::DeleteStmtNode* stmt);
+        void parse_OutStmt(east::OutStmtNode* stmt);      // Migration complete
+        void parse_VorcStmt(east::VorcStmtNode* stmt);      // Migration complete
+        void parse_ExprStmt(east::ExprStmtNode* stmt);      // Migration complete
+        void parse_DeleteStmt(east::DeleteStmtNode* stmt);      // Migration complete
         void parse_BlockStmt(east::BlockStmtNode* stmt);
         void parse_IfStmt(east::IfStmtNode* stmt);
         void parse_ElseIfStmt(east::ElseifStmtNode* stmt);
@@ -62,8 +50,8 @@ namespace parser{
         void parse_WhileStmt(east::WhileStmtNode* stmt);
         void parse_RepeatStmt(east::RepeatStmtNode* stmt);
         void parse_ForEachStmt(east::ForEachStmtNode* stmt);
-        void parse_ForStmt(east::ForStmtNode* stmt);
+        void parse_ForStmt(east::ForStmtNode* stmt);     // Migration complete
 
-        void parse();
+        cenv::Calculation parse();
     };
 }
