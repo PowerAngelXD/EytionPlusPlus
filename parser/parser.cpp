@@ -289,7 +289,7 @@ void parser::Parser::parse_ForStmt(east::ForStmtNode* stmt){
             this->sset.newScope("__epp_ForTemp_scope__");
             stc_p.sset = this->sset;
             stc_p.parse();
-            this->sset.remove();
+            this->sset.remove(); stc_p.sset.remove();
         }
         //后置语句
         east::StatNode stat;
@@ -428,7 +428,7 @@ void parser::Parser::parse(){
                         this->sset.newScope("__epp_repeatTemp_scope__");
                         stc_p.sset = this->sset;
                         stc_p.parse();
-                        this->sset.remove();
+                        this->sset.remove(); stc_p.sset.remove();
                     }
                     sset = stc_p.sset;
                 }
@@ -550,7 +550,7 @@ void parser::Parser::parse(){
                             sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.constpool[(int)calc.result[i-1].second], true);
                         stc_p.sset = this->sset;
                         stc_p.parse();
-                        this->sset.remove();
+                        this->sset.remove(); stc_p.sset.remove();
                     }
                     sset = stc_p.sset;
                 }
