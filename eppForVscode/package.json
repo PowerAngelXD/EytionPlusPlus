@@ -4,7 +4,7 @@
     "icon": "icon/epp.png",
     "displayName": "Epp",
     "description": "Eytion plus plus language extension",
-    "version": "2.7.0",
+    "version": "2.7.5",
     "engines": {
         "vscode": "^1.63.0"
     },
