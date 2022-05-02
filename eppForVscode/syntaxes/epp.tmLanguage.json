@@ -16,7 +16,7 @@
         "keywords": {
             "patterns": [{
                 "name": "keyword.control.epp",
-                "match": "\\b(if|while|var|out|elif|else|const|func|typeof|delete|act|area|repeat|break|for_each|defer|for|pack|use|as|null|integer|boolean|char|decimal)\\b"
+                "match": "\\b(if|while|var|out|elif|else|const|func|typeof|delete|act|area|repeat|break|for_each|defer|for|pack|use|as|null|integer|boolean|char|decimal|return)\\b"
             }]
         },
         "string": {
