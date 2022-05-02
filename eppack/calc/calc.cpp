@@ -218,8 +218,11 @@ void cenv::Calculation::run(){
                 if(is_array){
                     is_array = false;
                     for(int i = 0; i < len;i++) {
-                        if (env[i].first == "__INT__" || env[i].first == "__DECI__")
-                            std::cout << env[i].second;
+                        if (env[i].first == "__INT__")
+                            std::cout << (long)env[i].second;
+                        else if(content.first == "__DECI__"){
+                        std::cout<<env[i].second;
+                    }
                         else if (env[i].first == "__BOOL__"){
                             if (env[i].second == 0)
                                 std::cout << "true";
@@ -232,7 +235,10 @@ void cenv::Calculation::run(){
                     }
                 }
                 else{
-                    if(content.first == "__INT__" || content.first == "__DECI__"){
+                    if(content.first == "__INT__" ){
+                        std::cout<<(long)content.second;
+                    }
+                    else if(content.first == "__DECI__"){
                         std::cout<<content.second;
                     }
                     else if(content.first == "__BOOL__"){
@@ -585,11 +591,18 @@ void cenv::Calculation::run(){
                     }
                     else if(instance.second.getType()=="__STRING__"){
                         if(value.first!="__STRING__") throw epperr::Epperr("TypeError", "The type of assignment required is 'String'", ins[i].line, ins[i].column);
-                        sset.assignValue(name, var::Value(false, false, constpool[(int)value.second]));
+                        sset.assignValue(name, var::Value(false, false, constpool[(int)value.second], false));
                     }
                     else if(instance.second.getType()=="__CHAR__"){
                         if(value.first!="__CHAR__") throw epperr::Epperr("TypeError", "The type of assignment required is 'Char'", ins[i].line, ins[i].column);
-                        sset.assignValue(name, var::Value(false, false, constpool[(int)value.second]));
+                        sset.assignValue(name, var::Value(false, false, constpool[(int)value.second], true));
+                    }
+                    else if(instance.second.isNull()==true){
+                        if(value.first=="__STRING__") sset.assignValue(name, var::Value(false, false, constpool[(int)value.second], false));
+                        else if(value.first=="__CHAR__") sset.assignValue(name, var::Value(false, false, constpool[(int)value.second], true));
+                        else if(value.first=="__INT__") sset.assignValue(name, var::Value(false, false, (int)value.second));
+                        else if(value.first=="__DECI__") sset.assignValue(name, var::Value(false, false, (float)value.second));
+                        else if(value.first=="__BOOL__") sset.assignValue(name, var::Value(false, false, (bool)value.second));
                     }
                 }
             }
