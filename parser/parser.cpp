@@ -319,22 +319,208 @@ void parser::Parser::parse_IfStmt(east::IfStmtNode* stmt){
     }
 }
 void parser::Parser::parse_ElseIfStmt(east::ElseifStmtNode* stmt){
-
+    cenv::Calculation calc = getCalc(*stmt->cond, sset);
+    if (_if_control == -1)
+        throw epperr::Epperr("SyntaxError", "Cannot use else statement without else-if statement",
+                             stmt->mark->line,
+                             stmt->mark->column);
+    if ((_if_control == 0) && (calc.result[0].first != "__STRING__" && calc.result[0].second > 0)){
+        parser::Parser stc_p;
+        if (stmt->stc != nullptr){
+            east::StatNode _stat;
+            _stat.stmts.push_back(stmt->stc);
+            stc_p.stat = _stat;
+            stc_p.sset = sset;
+            stc_p.parse();
+        }
+        else{
+            if (stmt->body->body == nullptr) return;
+            stc_p.stat = *stmt->body->body;
+            this->sset.next();
+            this->sset.newScope("__epp_elifTemp_scope__");
+            stc_p.sset = this->sset;
+            stc_p.parse();
+            this->sset.remove();
+            stc_p.sset.remove();
+        }
+        sset = stc_p.sset;
+        _if_control = 1;
+    }
+    else
+        ;
 }
 void parser::Parser::parse_ElseStmt(east::ElseStmtNode* stmt){
-
+    if (_if_control == -1)
+        throw epperr::Epperr("SyntaxError", "Cannot use else statement without if statement",
+                             stmt->mark->line,
+                             stmt->mark->column);
+    if (_if_control == 0){
+        parser::Parser stc_p;
+        if (stmt->stc != nullptr){
+            east::StatNode _stat;
+            _stat.stmts.push_back(stmt->stc);
+            stc_p.stat = _stat;
+            stc_p.sset = sset;
+            stc_p.parse();
+        }
+        else{
+            if (stmt->body->body == nullptr) return;
+            stc_p.stat = *stmt->body->body;
+            this->sset.next();
+            this->sset.newScope("__epp_elifTemp_scope__");
+            stc_p.sset = this->sset;
+            stc_p.parse();
+            this->sset.remove();
+            stc_p.sset.remove();
+        }
+        sset = stc_p.sset;
+    }
+    else
+        _if_control = -1;
 }
 void parser::Parser::parse_BreakStmt(east::BreakStmtNode* stmt){
-
+    throw epperr::Epperr("SyntaxError", "You cannot use the 'break' statement outside the loop body", stmt->mark->line, stmt->mark->column);
 }
 void parser::Parser::parse_WhileStmt(east::WhileStmtNode* stmt){
-
+    cenv::Calculation calc = getCalc(*stmt->cond, sset);
+    try{
+        while (calc.result[0].first != "__STRING__" && calc.result[0].second > 0){
+            parser::Parser stc_p;
+            // sset.remove();
+            if (stmt->stc != nullptr){
+                east::StatNode _stat;
+                _stat.stmts.push_back(stmt->stc);
+                stc_p.stat = _stat;
+                stc_p.sset = sset;
+                stc_p.parse();
+            }
+            else{
+                if (stmt->body->body == nullptr)
+                    continue;
+                stc_p.stat = *stmt->body->body;
+                this->sset.next();
+                this->sset.newScope("__epp_whileTemp_scope__");
+                stc_p.sset = this->sset;
+                stc_p.parse();
+                this->sset.remove();
+                stc_p.sset.remove();
+            }
+            sset = stc_p.sset;
+            calc = getCalc(*stmt->cond, sset);
+            if (calc.result[0].second == 0)
+                break;
+        }
+    }
+    catch (excphandling::Excp e){
+        std::cout << e.excpTitle << "\n"
+                  << e.excpContent << std::endl;
+    }
+    catch (...){}
 }
 void parser::Parser::parse_RepeatStmt(east::RepeatStmtNode* stmt){
-
+    cenv::Calculation calc = getCalc(*stmt->cond, sset);
+    if (calc.result[0].first != "__INT__" || calc.isArray())
+        throw epperr::Epperr("TypeError", "The condition of the repeat statement must be an integer",
+                             stmt->mark->line,
+                             stmt->mark->column);
+    try{
+        int i = 1;
+        while (i <= (int)calc.result[0].second){
+            i += 1;
+            parser::Parser stc_p;
+            if (stmt->stc != nullptr){
+                east::StatNode _stat;
+                _stat.stmts.push_back(stmt->stc);
+                stc_p.stat = _stat;
+                stc_p.sset = sset;
+                stc_p.parse();
+            }
+            else{
+                if (stmt->body->body == nullptr)
+                    continue;
+                stc_p.stat = *stmt->body->body;
+                this->sset.next();
+                this->sset.newScope("__epp_repeatTemp_scope__");
+                stc_p.sset = this->sset;
+                stc_p.parse();
+                this->sset.remove();
+                stc_p.sset.remove();
+            }
+            sset = stc_p.sset;
+        }
+    }
+    catch (excphandling::Excp e){
+        std::cout << e.excpTitle << "\n"
+                  << e.excpContent << std::endl;
+    }
+    catch (...){
+    }
 }
 void parser::Parser::parse_ForEachStmt(east::ForEachStmtNode* stmt){
-
+    std::vector<cenv::calc_unit> list;
+    auto name = stmt->iden->content;
+    cenv::Calculation calc = getCalc(*stmt->ariden, sset);
+    if (calc.isArray());
+    else if (!calc.isArray())
+        throw epperr::Epperr("TypeError", "Cannot traverse an object that is not an array",
+                             stmt->ariden->addexpr->muls[0]->prims[0]->iden->idens[0]->line,
+                             stmt->ariden->addexpr->muls[0]->prims[0]->iden->idens[0]->column);
+    else
+        list = calc.result;
+    try{
+        int i = 0;
+        while (i < calc.result.size()){
+            i += 1;
+            parser::Parser stc_p;
+            if (stmt->stc != nullptr){
+                east::StatNode _stat;
+                _stat.stmts.push_back(stmt->stc);
+                this->sset.scope_pool[this->sset.getDeep()].new_var(name, var::Value(false, false, calc.result[0].first));
+                if (calc.result[0].first == "__INT__")
+                    sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val((int)calc.result[i - 1].second);
+                else if (calc.result[0].first == "__DECI__")
+                    sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.result[i - 1].second);
+                else if (calc.result[0].first == "__BOOL__")
+                    sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val((bool)calc.result[i - 1].second);
+                else if (calc.result[0].first == "__STRING__")
+                    sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.constpool[(int)calc.result[i - 1].second], false);
+                else if (calc.result[0].first == "__CHAR__")
+                    sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.constpool[(int)calc.result[i - 1].second], true);
+                stc_p.stat = _stat;
+                stc_p.sset = sset;
+                stc_p.parse();
+            }
+            else{
+                if (stmt->body->body == nullptr)
+                    continue;
+                stc_p.stat = *stmt->body->body;
+                this->sset.next();
+                this->sset.newScope("__epp_foreachTemp_scope__");
+                this->sset.scope_pool[this->sset.getDeep()].new_var(name, var::Value(false, false, calc.result[0].first));
+                if (calc.result[0].first == "__INT__")
+                    sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val((int)calc.result[i - 1].second);
+                else if (calc.result[0].first == "__DECI__")
+                    sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.result[i - 1].second);
+                else if (calc.result[0].first == "__BOOL__")
+                    sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val((bool)calc.result[i - 1].second);
+                else if (calc.result[0].first == "__STRING__")
+                    sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.constpool[(int)calc.result[i - 1].second], false);
+                else if (calc.result[0].first == "__CHAR__")
+                    sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.constpool[(int)calc.result[i - 1].second], true);
+                stc_p.sset = this->sset;
+                stc_p.parse();
+                this->sset.remove();
+                stc_p.sset.remove();
+            }
+            sset = stc_p.sset;
+        }
+    }
+    catch (excphandling::Excp e){
+        std::cout << e.excpTitle << "\n"
+                  << e.excpContent << std::endl;
+    }
+    catch (...){
+    }
 }
 
 cenv::Calculation parser::Parser::parse(){
@@ -345,231 +531,15 @@ cenv::Calculation parser::Parser::parse(){
         else if(stat.stmts[index]->vorcstmt != nullptr) parse_VorcStmt(stat.stmts[index]->vorcstmt);
         else if(stat.stmts[index]->deletestmt != nullptr) parse_DeleteStmt(stat.stmts[index]->deletestmt);
         else if(stat.stmts[index]->blockstmt != nullptr) parse_BlockStmt(stat.stmts[index]->blockstmt);
-        else if(stat.stmts[index]->ifstmt != nullptr){
-            cenv::Calculation calc = getCalc(*stat.stmts[index]->ifstmt->cond, sset);
-            if(calc.result[0].first != "__STRING__" && calc.result[0].second > 0){
-                parser::Parser stc_p;
-                if(stat.stmts[index]->ifstmt->stc != nullptr){
-                    east::StatNode _stat;
-                    _stat.stmts.push_back(stat.stmts[index]->ifstmt->stc);
-                    stc_p.stat = _stat;
-                    stc_p.sset = sset;
-                    stc_p.parse();
-                }
-                else{
-                    if(stat.stmts[index]->ifstmt->body->body == nullptr) continue;
-                    stc_p.stat = *stat.stmts[index]->ifstmt->body->body;
-                    this->sset.next();
-                    this->sset.newScope("__epp_ifTemp_scope__");
-                    stc_p.sset = this->sset;
-                    stc_p.parse();
-                    this->sset.remove(); stc_p.sset.remove();
-                }
-                sset = stc_p.sset;
-                _if_control = 1;
-            }
-            else {
-                _if_control = 0;
-                continue;
-            }
-        }
-        else if(stat.stmts[index]->whilestmt != nullptr){
-            cenv::Calculation calc = getCalc(*stat.stmts[index]->whilestmt->cond, sset);
-            try{
-                while(calc.result[0].first != "__STRING__" && calc.result[0].second > 0){
-                    parser::Parser stc_p;
-                    //sset.remove();
-                    if(stat.stmts[index]->whilestmt->stc != nullptr){
-                        east::StatNode _stat;
-                        _stat.stmts.push_back(stat.stmts[index]->whilestmt->stc);
-                        stc_p.stat = _stat;
-                        stc_p.sset = sset;
-                        stc_p.parse();
-                    }
-                    else{
-                        if(stat.stmts[index]->whilestmt->body->body == nullptr) continue;
-                        stc_p.stat = *stat.stmts[index]->whilestmt->body->body;
-                        this->sset.next();
-                        this->sset.newScope("__epp_whileTemp_scope__");
-                        stc_p.sset = this->sset;
-                        stc_p.parse();
-                        this->sset.remove(); stc_p.sset.remove();
-                    }
-                    sset = stc_p.sset;
-                    calc = getCalc(*stat.stmts[index]->whilestmt->cond, sset);
-                    if(calc.result[0].second == 0) break;
-                }
-            }
-            catch(excphandling::Excp e){
-                std::cout<<e.excpTitle<<"\n"<<e.excpContent<<std::endl;
-            }
-            catch(...){}
-        }
-        else if(stat.stmts[index]->reptstmt != nullptr){
-            cenv::Calculation calc = getCalc(*stat.stmts[index]->reptstmt->cond, sset);
-            if(calc.result[0].first != "__INT__" || calc.isArray())
-                throw epperr::Epperr("TypeError", "The condition of the repeat statement must be an integer",
-                                     stat.stmts[index]->reptstmt->mark->line,
-                                     stat.stmts[index]->reptstmt->mark->column);
-            try{
-                int i=1;
-                while(i<=(int)calc.result[0].second){
-                    i+=1;
-                    parser::Parser stc_p;
-                    if(stat.stmts[index]->reptstmt->stc != nullptr){
-                        east::StatNode _stat;
-                        _stat.stmts.push_back(stat.stmts[index]->reptstmt->stc);
-                        stc_p.stat = _stat;
-                        stc_p.sset = sset;
-                        stc_p.parse();
-                    }
-                    else{
-                        if(stat.stmts[index]->reptstmt->body->body == nullptr) continue;
-                        stc_p.stat = *stat.stmts[index]->reptstmt->body->body;
-                        this->sset.next();
-                        this->sset.newScope("__epp_repeatTemp_scope__");
-                        stc_p.sset = this->sset;
-                        stc_p.parse();
-                        this->sset.remove(); stc_p.sset.remove();
-                    }
-                    sset = stc_p.sset;
-                }
-            }
-            catch(excphandling::Excp e){
-                std::cout<<e.excpTitle<<"\n"<<e.excpContent<<std::endl;
-            }
-            catch(...){}
-        }
-        else if(stat.stmts[index]->brkstmt != nullptr){
-            throw epperr::Epperr("SyntaxError", "You cannot use the 'break' statement outside the loop body", stat.stmts[index]->brkstmt->mark->line, stat.stmts[index]->brkstmt->mark->column);
-        }
-        else if(stat.stmts[index]->elifstmt != nullptr){
-            cenv::Calculation calc = getCalc(*stat.stmts[index]->elifstmt->cond, sset);
-            if(_if_control == -1)
-                throw epperr::Epperr("SyntaxError", "Cannot use else statement without else-if statement",
-                                     stat.stmts[index]->elsestmt->mark->line,
-                                     stat.stmts[index]->elsestmt->mark->column);
-            if((_if_control == 0) && (calc.result[0].first != "__STRING__" && calc.result[0].second > 0)){
-                parser::Parser stc_p;
-                if(stat.stmts[index]->elifstmt->stc != nullptr){
-                    east::StatNode _stat;
-                    _stat.stmts.push_back(stat.stmts[index]->elifstmt->stc);
-                    stc_p.stat = _stat;
-                    stc_p.sset = sset;
-                    stc_p.parse();
-                }
-                else{
-                    if(stat.stmts[index]->elifstmt->body->body == nullptr) continue;
-                    stc_p.stat = *stat.stmts[index]->elifstmt->body->body;
-                    this->sset.next();
-                    this->sset.newScope("__epp_elifTemp_scope__");
-                    stc_p.sset = this->sset;
-                    stc_p.parse();
-                    this->sset.remove(); stc_p.sset.remove();
-                }
-                sset = stc_p.sset;
-                _if_control = 1;
-            }
-            else ;
-        }
-        else if(stat.stmts[index]->elsestmt != nullptr){
-            if(_if_control == -1)
-                throw epperr::Epperr("SyntaxError", "Cannot use else statement without if statement",
-                                     stat.stmts[index]->elsestmt->mark->line,
-                                     stat.stmts[index]->elsestmt->mark->column);
-            if(_if_control == 0){
-                parser::Parser stc_p;
-                if(stat.stmts[index]->elsestmt->stc != nullptr){
-                    east::StatNode _stat;
-                    _stat.stmts.push_back(stat.stmts[index]->elsestmt->stc);
-                    stc_p.stat = _stat;
-                    stc_p.sset = sset;
-                    stc_p.parse();
-                }
-                else{
-                    if(stat.stmts[index]->elsestmt->body->body == nullptr) continue;
-                    stc_p.stat = *stat.stmts[index]->elsestmt->body->body;
-                    this->sset.next();
-                    this->sset.newScope("__epp_elifTemp_scope__");
-                    stc_p.sset = this->sset;
-                    stc_p.parse();
-                    this->sset.remove(); stc_p.sset.remove();
-                }
-                sset = stc_p.sset;
-            }
-            else _if_control = -1;
-        }
-        else if(stat.stmts[index]->forstmt != nullptr){
-            parse_ForStmt(stat.stmts[index]->forstmt);
-        }
-        else if(stat.stmts[index]->foreachstmt != nullptr){
-            std::vector<cenv::calc_unit> list;
-            auto name = stat.stmts[index]->foreachstmt->iden->content;
-            cenv::Calculation calc = getCalc(*stat.stmts[index]->foreachstmt->ariden, sset);
-            if(calc.isArray());
-            else if(!calc.isArray()) throw epperr::Epperr("TypeError", "Cannot traverse an object that is not an array", 
-                stat.stmts[index]->foreachstmt->ariden->addexpr->muls[0]->prims[0]->iden->idens[0]->line,
-                stat.stmts[index]->foreachstmt->ariden->addexpr->muls[0]->prims[0]->iden->idens[0]->column);
-            else list = calc.result;
-            try{
-                int i = 0;
-                while (i < calc.result.size()){
-                    i += 1;
-                    parser::Parser stc_p;
-                    if (stat.stmts[index]->foreachstmt->stc != nullptr){
-                        east::StatNode _stat;
-                        _stat.stmts.push_back(stat.stmts[index]->foreachstmt->stc);
-                        this->sset.scope_pool[this->sset.getDeep()].new_var(name, var::Value(false, false, calc.result[0].first));
-                        if(calc.result[0].first == "__INT__")
-                            sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val((int)calc.result[i-1].second);
-                        else if(calc.result[0].first == "__DECI__")
-                            sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.result[i-1].second);
-                        else if(calc.result[0].first == "__BOOL__")
-                            sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val((bool)calc.result[i-1].second);
-                        else if(calc.result[0].first == "__STRING__")
-                            sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.constpool[(int)calc.result[i-1].second], false);
-                        else if(calc.result[0].first == "__CHAR__")
-                            sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.constpool[(int)calc.result[i-1].second], true);
-                        stc_p.stat = _stat;
-                        stc_p.sset = sset;
-                        stc_p.parse();
-                    }
-                    else{
-                        if(stat.stmts[index]->foreachstmt->body->body == nullptr) continue;
-                        stc_p.stat = *stat.stmts[index]->foreachstmt->body->body;
-                        this->sset.next();
-                        this->sset.newScope("__epp_foreachTemp_scope__");
-                        this->sset.scope_pool[this->sset.getDeep()].new_var(name, var::Value(false, false, calc.result[0].first));
-                        if(calc.result[0].first == "__INT__")
-                            sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val((int)calc.result[i-1].second);
-                        else if(calc.result[0].first == "__DECI__")
-                            sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.result[i-1].second);
-                        else if(calc.result[0].first == "__BOOL__")
-                            sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val((bool)calc.result[i-1].second);
-                        else if(calc.result[0].first == "__STRING__")
-                            sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.constpool[(int)calc.result[i-1].second], false);
-                        else if(calc.result[0].first == "__CHAR__")
-                            sset.scope_pool[sset.findInAllScopeI(name)].vars[sset.scope_pool[sset.findInAllScopeI(name)].findI(name)].second.set_val(calc.constpool[(int)calc.result[i-1].second], true);
-                        stc_p.sset = this->sset;
-                        stc_p.parse();
-                        this->sset.remove(); stc_p.sset.remove();
-                    }
-                    sset = stc_p.sset;
-                }
-            }
-            catch(excphandling::Excp e){
-                std::cout<<e.excpTitle<<"\n"<<e.excpContent<<std::endl;
-            }
-            catch (...){
-            }
-        }
-        else if(stat.stmts[index]->areastmt != nullptr){
-            auto users = var::UserScope(stat.stmts[index]->areastmt->iden->content, *stat.stmts[index]->areastmt->body->body);
-            
-        }
-        else if(stat.stmts[index]->exprstmt != nullptr){
-            parse_ExprStmt(stat.stmts[index]->exprstmt);
-        }
+        else if(stat.stmts[index]->ifstmt != nullptr) parse_IfStmt(stat.stmts[index]->ifstmt);
+        else if(stat.stmts[index]->whilestmt != nullptr) parse_WhileStmt(stat.stmts[index]->whilestmt);
+        else if(stat.stmts[index]->reptstmt != nullptr) parse_RepeatStmt(stat.stmts[index]->reptstmt);
+        else if(stat.stmts[index]->brkstmt != nullptr) parse_BreakStmt(stat.stmts[index]->brkstmt);
+        else if(stat.stmts[index]->elifstmt != nullptr) parse_ElseIfStmt(stat.stmts[index]->elifstmt);
+        else if(stat.stmts[index]->elsestmt != nullptr) parse_ElseStmt(stat.stmts[index]->elsestmt);
+        else if(stat.stmts[index]->forstmt != nullptr) parse_ForStmt(stat.stmts[index]->forstmt);
+        else if(stat.stmts[index]->foreachstmt != nullptr) parse_ForEachStmt(stat.stmts[index]->foreachstmt);
+        else if(stat.stmts[index]->exprstmt != nullptr) parse_ExprStmt(stat.stmts[index]->exprstmt);
         else if(stat.stmts[index]->returnstmt != nullptr) {
             isReturn = true;
             ret = getCalc(*stat.stmts[index]->returnstmt->value, sset);
