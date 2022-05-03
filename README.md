@@ -158,7 +158,7 @@ EPP配置文件的默认名称为 ***.ecfg*** 它应该在文件夹: `resource\c
 |:--:|:--:|:--:|
 |cli-exittip|用于在退出eppcli时提示您是否退出|true/false|
 |cli-nameshow|在eppcli的光标下显示单词eppcli：“eppcli”|true/false|
-|cli-workspace|显示当前工作路径 *** 只能用于Windows！ ***|true/false|
+|cli-workspace|显示当前工作路径 ***只能用于Windows！***|true/false|
 |cli-errorhighlight|是否突出显示EPP中的错误（不适用于eppcli中的错误）|true/false|
 |debug-echoast|输出正在运行的程序的抽象语法树|true/false|
 |debug-echotokeng|输出正在运行的程序的Token Group|true/false|
